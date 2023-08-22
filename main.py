@@ -13,8 +13,10 @@ class MolecularSimulation:
                  time_step=1,
                  epsilon=0.1,
                  sigma=3,
+                 atom_mass = 1,
                  displace_mc=0.5,
                  monte_carlo=False,
+                 molecular_dynamics=False,
                  ):
         
         self.number_atoms = number_atoms
@@ -26,8 +28,10 @@ class MolecularSimulation:
         self.time_step = time_step
         self.epsilon = epsilon
         self.sigma = sigma
+        self.atom_mass = atom_mass
         self.displace_mc = displace_mc
         self.monte_carlo = monte_carlo
+        self.molecular_dynamics = molecular_dynamics
 
         self.initialize_box()
         self.initialize_positions()
@@ -45,6 +49,9 @@ class MolecularSimulation:
         self.logger.info("Initialization of the system") 
         self.logger.info("----------------------------") 
         self.logger.info("The initial number of atoms is " + str(self.number_atoms)) 
+        if self.molecular_dynamics:
+            self.logger.info("Initial velocity of CoM = " + str(np.round(self.velocity_com,3).tolist()) + " (NO UNIT SO FAR)") 
+            self.logger.info("Initial kinetic energy = " + str(np.round(self.Ekin,3)) + " (NO UNIT SO FAR)") 
         self.logger.info("The system is of dimensions " + str(self.dimensions)) 
         self.logger.info("Box boundaries:") 
         self.logger.info("xlow = " + str(self.box_boundaries[0][0]) + " Å, xhigh = " + str(self.box_boundaries[0][1]) + " Å") 
@@ -55,6 +62,7 @@ class MolecularSimulation:
         self.logger.info("*** Interaction parameters ***") 
         self.logger.info("epsilon = " + str(self.epsilon) + " Kcal/mol") 
         self.logger.info("sigma = " + str(self.sigma) + " Å")
+        self.logger.info("atom mass = " + str(self.atom_mass) + " Å")
         self.logger.info("*** Monte Carlo parameters ***") 
         self.logger.info("displace_mc = " + str(self.displace_mc) + " Å")
 
@@ -80,8 +88,22 @@ class MolecularSimulation:
         """Randomly pick positions and velocities."""
 
         atoms_positions = np.zeros((self.number_atoms, self.dimensions))
-        atoms_velocities = np.zeros((self.number_atoms, self.dimensions))
-
         for dim in np.arange(self.dimensions):
             atoms_positions[:, dim] = np.random.random(self.number_atoms)*np.diff(self.box_boundaries[dim]) - np.diff(self.box_boundaries[dim])/2
-            atoms_velocities[:, dim] = np.random.random(self.number_atoms)-0.5 # todo - must be rescalled
+        self.atoms_positions = atoms_positions
+        if self.molecular_dynamics:
+            atoms_velocities = np.zeros((self.number_atoms, self.dimensions))
+            for dim in np.arange(self.dimensions):  
+                atoms_velocities[:, dim] = np.random.random(self.number_atoms)-0.5 # todo - must be rescalled
+            self.atoms_velocities = atoms_velocities
+            self.calculate_velocity_com()
+            self.calculate_kinetic_energy()
+
+    def calculate_velocity_com(self):
+        self.velocity_com = np.sum(self.atoms_velocities, axis=0)/self.number_atoms
+    
+    def calculate_kinetic_energy(self):
+        kinetic_energy = 0
+        for dim in np.arange(self.dimensions): 
+            kinetic_energy += np.sum(self.atoms_velocities[:, dim]**2)
+        self.Ekin = kinetic_energy/self.number_atoms
