@@ -1,16 +1,14 @@
-2023-08-22 13:40:43,323 Initialization of the system
-2023-08-22 13:40:43,323 ----------------------------
-2023-08-22 13:40:43,323 The initial number of atoms is 10
-2023-08-22 13:40:43,323 Initial velocity of CoM = [0.063, 0.083, 0.004] (NO UNIT SO FAR)
-2023-08-22 13:40:43,323 Initial kinetic energy = 0.239 (NO UNIT SO FAR)
-2023-08-22 13:40:43,323 The system is of dimensions 3
-2023-08-22 13:40:43,323 Box boundaries:
-2023-08-22 13:40:43,323 xlow = -5.0 Å, xhigh = 5.0 Å
-2023-08-22 13:40:43,323 ylow = -5.0 Å, yhigh = 5.0 Å
-2023-08-22 13:40:43,323 zlow = -5.0 Å, zhigh = 5.0 Å
-2023-08-22 13:40:43,323 *** Interaction parameters ***
-2023-08-22 13:40:43,323 epsilon = 0.1 Kcal/mol
-2023-08-22 13:40:43,323 sigma = 3 Å
-2023-08-22 13:40:43,323 atom mass = 1 Å
-2023-08-22 13:40:43,323 *** Monte Carlo parameters ***
-2023-08-22 13:40:43,323 displace_mc = 0.5 Å
+2023-08-22 15:32:47,564 Initialization of the system
+2023-08-22 15:32:47,564 ----------------------------
+2023-08-22 15:32:47,564 The initial number of atoms is 10
+2023-08-22 15:32:47,564 The system is of dimensions 3
+2023-08-22 15:32:47,564 Box boundaries:
+2023-08-22 15:32:47,564 xlow = -5.0 Å, xhigh = 5.0 Å
+2023-08-22 15:32:47,564 ylow = -5.0 Å, yhigh = 5.0 Å
+2023-08-22 15:32:47,564 zlow = -5.0 Å, zhigh = 5.0 Å
+2023-08-22 15:32:47,564 *** Interaction parameters ***
+2023-08-22 15:32:47,564 epsilon = 0.1 Kcal/mol
+2023-08-22 15:32:47,564 sigma = 3 Å
+2023-08-22 15:32:47,564 atom mass = 1 Å
+2023-08-22 15:32:47,564 *** Monte Carlo parameters ***
+2023-08-22 15:32:47,564 displace_mc = 0.5 Å
