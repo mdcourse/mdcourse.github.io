@@ -21,11 +21,13 @@ class MolecularSimulation:
                  sigma=3,
                  atom_mass = 1,
                  displace_mc=0.5,
-                 monte_carlo=False,
+                 monte_carlo_move=False,
+                 monte_carlo_insert=False,
                  molecular_dynamics=False,
                  seed=None,
                  thermo=10,
                  dump=10,
+                 mu = -8,
                  ):
         
         self.number_atoms = number_atoms
@@ -40,10 +42,12 @@ class MolecularSimulation:
         self.sigma = sigma # Angstrom
         self.atom_mass = atom_mass
         self.displace_mc = displace_mc
-        self.monte_carlo = monte_carlo
+        self.monte_carlo_move = monte_carlo_move
+        self.monte_carlo_insert = monte_carlo_insert
         self.molecular_dynamics = molecular_dynamics
         self.thermo = thermo
         self.dump = dump
+        self.mu = mu
         if seed is None:
             self.seed = np.random.randint(10000)
         else:
@@ -52,7 +56,9 @@ class MolecularSimulation:
 
         self.kB = 1.38e-23 # J/K
         self.Na = 6.022e23 # mol-1
+        self.h = 6.62607015e-34 # J / Hz
         self.J_to_Kcal = 0.0002389
+        self.m_to_A = 1e10
         self.beta = 1/(self.kB*self.desired_temperature*self.J_to_Kcal*self.Na)  # mol/kCal
 
     def run(self):
@@ -62,8 +68,11 @@ class MolecularSimulation:
         self.print_log()
         for step in range(self.maximum_steps):
             self.step = step
-            if self.monte_carlo:
+            if self.monte_carlo_move:
                 self.monte_carlo_displacement()
+            if self.monte_carlo_insert:
+                self.monte_carlo_insert_delete()
+            self.wrap_in_box()
             self.update_log()
             self.update_dump()
         self.close_log()
@@ -89,7 +98,7 @@ class MolecularSimulation:
     def print_log(self):
         
         # Create and configure logger 
-        logging.basicConfig(filename="log.txt", 
+        logging.basicConfig(filename="log-file.txt", 
                             format='%(message)s', 
                             filemode='w') 
 
@@ -123,9 +132,9 @@ class MolecularSimulation:
             self.logger.info("---------------------------------")
             self.logger.info("Starting the molecular simulation")
             self.logger.info("---------------------------------\n")
-            self.logger.info("step Epot")
+            self.logger.info("step n_atom Epot")
         if self.step % self.thermo == 0:
-            self.logger.info(str(self.step) + " " + str(np.round(self.Epot,2)))
+            self.logger.info(str(self.step) + " " + str(self.number_atoms) + " " + str(np.round(self.Epot,2)))
 
     def close_log(self):
         handlers = self.logger.handlers[:]
@@ -155,6 +164,7 @@ class MolecularSimulation:
             box_size[2] = np.diff(box_boundaries[2])
         self.box_boundaries = box_boundaries
         self.box_size = box_size
+        self.volume = np.prod(box_size)
 
     def initialize_positions(self):
         """Randomly pick positions and velocities."""
@@ -189,21 +199,24 @@ class MolecularSimulation:
             kinetic_energy += np.sum(self.atoms_velocities[:, dim]**2)
         self.Ekin = kinetic_energy/self.number_atoms
 
-    def calculate_r(self, position_i, positions_j):
+    def calculate_r(self, position_i, positions_j, number_atoms = None):
         """Calculate the shortest distance between position_i and atoms_positions."""
-        rij2 = np.zeros(self.number_atoms)
+        if number_atoms is None:
+            rij2 = np.zeros(self.number_atoms)
+        else:
+            rij2 = np.zeros(number_atoms)
         rij = (np.remainder(position_i - positions_j + self.box_size/2., self.box_size) - self.box_size/2.).T
         for dim in np.arange(self.dimensions):
             rij2 += np.power(rij[dim, :], 2)
         return np.sqrt(rij2)
 
-    def calculate_potential_energy(self, atoms_positions):
+    def calculate_potential_energy(self, atoms_positions, number_atoms = None):
         """Calculate potential energy assuming Lennard-Jones potential interaction.
         
         Output units are kcal/mol."""
         energy_potential = 0
         for position_i in atoms_positions:
-            r = self.calculate_r(position_i, atoms_positions)
+            r = self.calculate_r(position_i, atoms_positions, number_atoms)
             energy_potential_i = np.sum(4*self.epsilon*(np.power(self.sigma/r[r>0], 12)-np.power(self.sigma/r[r>0], 6)))
             energy_potential += energy_potential_i
         # Avoid counting potential energy twice
@@ -223,3 +236,49 @@ class MolecularSimulation:
         else:
             self.Epot = Epot
             
+    def monte_carlo_insert_delete(self):
+        Epot = self.calculate_potential_energy(self.atoms_positions)
+        trial_atoms_positions = copy.deepcopy(self.atoms_positions)
+        if np.random.random() < 0.5:
+            number_atoms = self.number_atoms + 1
+            atom_position = np.zeros((1, self.dimensions))
+            for dim in np.arange(self.dimensions):
+                atom_position[:, dim] = np.random.random(1)*np.diff(self.box_boundaries[dim]) - np.diff(self.box_boundaries[dim])/2
+            trial_atoms_positions = np.vstack([trial_atoms_positions, atom_position])
+            trial_Epot = self.calculate_potential_energy(trial_atoms_positions, number_atoms = number_atoms)
+            Lambda = self.calculate_Lambda(self.atom_mass)
+            acceptation_probability = np.min([1, self.volume/(Lambda**self.dimensions*(self.number_atoms + 1))*np.exp(self.beta*(self.mu-trial_Epot+Epot))])
+        else:
+            number_atoms = self.number_atoms - 1
+            if number_atoms > 0:
+                atom_id = np.random.randint(self.number_atoms)
+                trial_atoms_positions = np.delete(trial_atoms_positions, atom_id, axis=0)
+                trial_Epot = self.calculate_potential_energy(trial_atoms_positions, number_atoms = number_atoms)
+                Lambda = self.calculate_Lambda(self.atom_mass)
+                acceptation_probability = np.min([1, (Lambda**self.dimensions*(self.number_atoms)/self.volume)*np.exp(-self.beta*(self.mu+trial_Epot-Epot))])
+            else:
+                acceptation_probability = 0
+        if np.random.random() < acceptation_probability:
+            self.atoms_positions = trial_atoms_positions
+            self.Epot = trial_Epot
+            self.number_atoms = number_atoms
+        else:
+            self.Epot = Epot
+
+    def calculate_Lambda(self, mass):
+        m_kg = mass/self.Na*1e-3 # kg
+        Lambda = self.h/np.sqrt(2*np.pi*self.kB*m_kg*self.desired_temperature)*self.m_to_A # de Broglie wavelenght, Angstrom
+        return Lambda
+    
+    def wrap_in_box(self):
+        for dim in np.arange(self.dimensions):
+            out_ids = self.atoms_positions[:, dim] > self.box_boundaries[dim][1]
+            #self.atoms_positions[:, dim][out_ids] -= (self.atoms_positions[:, dim][out_ids] - self.box_boundaries[dim][1])
+            if np.sum(out_ids) > 0:
+                shifts = 2*(self.atoms_positions[:, dim][out_ids] - self.box_boundaries[dim][1])
+                self.atoms_positions[:, dim][out_ids] -= shifts
+            
+            out_ids = self.atoms_positions[:, dim] < self.box_boundaries[dim][0]
+            if np.sum(out_ids) > 0:
+                shifts = 2*(self.atoms_positions[:, dim][out_ids] - self.box_boundaries[dim][0])
+                self.atoms_positions[:, dim][out_ids] -= shifts
