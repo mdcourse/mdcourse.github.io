@@ -1,0 +1,13 @@
+2023-08-22 12:54:36,865 Initialization of the system
+2023-08-22 12:54:36,865 ----------------------------
+2023-08-22 12:54:36,865 The initial number of atoms is 10
+2023-08-22 12:54:36,865 The system is of dimensions 3
+2023-08-22 12:54:36,865 Box boundaries:
+2023-08-22 12:54:36,865 xlow = -5.0 Å, xhigh = 5.0 Å
+2023-08-22 12:54:36,865 ylow = -5.0 Å, yhigh = 5.0 Å
+2023-08-22 12:54:36,865 zlow = -5.0 Å, zhigh = 5.0 Å
+2023-08-22 12:54:36,865 *** Interaction parameters ***
+2023-08-22 12:54:36,865 epsilon = 0.1 Kcal/mol
+2023-08-22 12:54:36,865 sigma = 3 Å
+2023-08-22 12:54:36,865 *** Monte Carlo parameters ***
+2023-08-22 12:54:36,865 displace_mc = 0.5 Å
