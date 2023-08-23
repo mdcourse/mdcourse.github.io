@@ -204,7 +204,9 @@ class MolecularSimulation:
         if self.molecular_dynamics:
             atoms_velocities = np.zeros((self.number_atoms, self.dimensions))
             for dim in np.arange(self.dimensions):  
-                atoms_velocities[:, dim] = np.random.random(self.number_atoms)-0.5 # todo - must be rescalled
+                atoms_velocities[:, dim] = np.random.random(self.number_atoms)-0.5 # todo - must be rescaled
+
+            print(np.max(atoms_velocities))
 
             #atoms_velocities[0] = np.array([0, 0, 0.02])
             #atoms_velocities[1] = np.array([0, 0, -0.02])

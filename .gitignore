@@ -1,4 +1,5 @@
 
-log-file.txt
-*.lammpstrj
-
+**/log-file.txt
+**/*.dat
+**/*.lammpstrj
+**/*.pyc
