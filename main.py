@@ -197,10 +197,8 @@ class MolecularSimulation:
         for dim in np.arange(self.dimensions):
             atoms_positions[:, dim] = np.random.random(self.number_atoms)*np.diff(self.box_boundaries[dim]) - np.diff(self.box_boundaries[dim])/2
         
-        atoms_positions[0] = np.array([0, 0, 1])
-        atoms_positions[1] = np.array([0, 0, 5])
-
-        print(atoms_positions)
+        #atoms_positions[0] = np.array([0, 0, 1])
+        #atoms_positions[1] = np.array([0, 0, 5])
         
         self.atoms_positions = atoms_positions
         if self.molecular_dynamics:
@@ -208,15 +206,8 @@ class MolecularSimulation:
             for dim in np.arange(self.dimensions):  
                 atoms_velocities[:, dim] = np.random.random(self.number_atoms)-0.5 # todo - must be rescalled
 
-            atoms_velocities[0] = np.array([0, 0, 0.02])
-            atoms_velocities[1] = np.array([0, 0, -0.02])
-
-            print(atoms_velocities)
-
-            print("================")
-            print("================")
-            print("================")
-            print(" ")
+            #atoms_velocities[0] = np.array([0, 0, 0.02])
+            #atoms_velocities[1] = np.array([0, 0, -0.02])
 
             self.atoms_velocities = atoms_velocities
             self.previous_positions = self.atoms_positions - self.atoms_velocities*self.time_step
