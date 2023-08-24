@@ -136,6 +136,7 @@ class MolecularSimulation:
                 ekin = open("Ekin.dat", "w")
                 etot = open("Etot.dat", "w")
                 press = open("pressure.dat", "w")
+                temperature = open("temperature.dat", "w")
                 if save_vel:
                     vel = open("velocities.dat", "w")
             else:
@@ -143,16 +144,21 @@ class MolecularSimulation:
                 ekin = open("Ekin.dat", "a")
                 etot = open("Etot.dat", "a")
                 press = open("pressure.dat", "a")
+                temperature = open("temperature.dat", "a")
                 if save_vel:
                     vel = open("velocities.dat", "a")
             epot.write(str(self.step) + " " + str(self.Epot*self.e0) + "\n")
             ekin.write(str(self.step) + " " + str(self.Ekin*self.e0) + "\n")
+
             etot.write(str(self.step) + " " + str(self.Ekin*self.e0+self.Epot*self.e0) + "\n")
             pressure = np.round(self.pressure,2)*self.e0/self.d0**3 # kcal/mol/A3
             press_MPa = pressure*cst.calorie*cst.kilo/cst.Avogadro/cst.angstrom**3/cst.mega # MPa
             press.write(str(self.step) + " " + str(press_MPa) + "\n")
+            T_K = self.temperature*(self.e0/self.kB_kCal_mol_K)
+            temperature.write(str(self.step) + " " + str(T_K) + "\n")
             if save_vel:
-                for velocity in self.atoms_velocities:
+                velocities = copy.deepcopy(self.atoms_velocities)
+                for velocity in velocities:
                     velocity *= self.d0/self.t0
                     norm = np.sqrt(np.sum(velocity**2))
                     vel.write(str(norm) + "\n")
@@ -254,8 +260,8 @@ class MolecularSimulation:
         for dim in np.arange(self.dimensions):
             atoms_positions[:, dim] = np.random.random(self.number_atoms)*np.diff(self.box_boundaries[dim]) - np.diff(self.box_boundaries[dim])/2
         
-        atoms_positions[0] = np.array([0, 0, 1])
-        atoms_positions[1] = np.array([0, 0, 5])
+        #atoms_positions[0] = np.array([0, 0, 1])
+        #atoms_positions[1] = np.array([0, 0, 5])
         
         self.atoms_positions = atoms_positions
         if self.molecular_dynamics:
@@ -263,11 +269,14 @@ class MolecularSimulation:
             for dim in np.arange(self.dimensions):  
                 atoms_velocities[:, dim] = np.random.normal(size=self.number_atoms)
 
-            atoms_velocities[0] = np.array([0, 0, 0.5])
-            atoms_velocities[1] = np.array([0, 0, -0.5])
+            #atoms_velocities[0] = np.array([0, 0, 0.5])
+            #atoms_velocities[1] = np.array([0, 0, -0.5])
 
             self.atoms_velocities = atoms_velocities * np.sqrt(self.desired_temperature/self.atom_mass/self.dimensions) # doto verif
-            self.previous_positions = self.atoms_positions - self.atoms_velocities*self.time_step
+            
+            self.atoms_accelerations = self.evaluate_LJ_force()/self.atom_mass
+            
+            #self.previous_positions = self.atoms_positions - self.atoms_velocities*self.time_step
             self.calculate_velocity_com()
             self.calculate_kinetic_energy()
             self.calculate_temperature()
@@ -284,7 +293,7 @@ class MolecularSimulation:
         self.velocity_com = np.sum(self.atoms_velocities, axis=0)/self.number_atoms
     
     def calculate_kinetic_energy(self):
-        self.Ekin = np.sum(self.atom_mass*np.sum(self.atoms_velocities**2, axis=1)/2)/self.number_atoms
+        self.Ekin = np.sum(self.atom_mass*np.sum(self.atoms_velocities**2, axis=1)/2)
 
     def calculate_r(self, position_i, positions_j, number_atoms = None):
         """Calculate the shortest distance between position_i and atoms_positions."""
@@ -322,14 +331,31 @@ class MolecularSimulation:
         else:
             self.Epot = Epot
 
-    def molecular_dynamics_displacement(self):
-
+    def _molecular_dynamics_displacement(self):
+        print("here")
         force = self.evaluate_LJ_force()
         atoms_positions = 2*self.atoms_positions-self.previous_positions + self.time_step**2*force/self.atom_mass # todo check periodic boundary condition issues        
         self.previous_positions = self.atoms_positions
         self.atoms_positions = atoms_positions
-        self.atoms_velocities = (self.atoms_positions - self.previous_positions)/2/self.time_step
-            
+        self.atoms_velocities = (self.atoms_positions - self.previous_positions)/self.time_step
+        self.apply_berendsen_thermostat()    
+
+    def __molecular_dynamics_displacement(self):
+        print("here")
+        self.atoms_positions = self.atoms_positions + self.atoms_velocities*self.time_step + self.atoms_accelerations*self.time_step**2/2  
+        atoms_accelerations_Dt = self.evaluate_LJ_force()/self.atom_mass
+        self.atoms_velocities = self.atoms_velocities + atoms_accelerations_Dt*self.time_step/2 + self.atoms_accelerations*self.time_step/2   
+        self.atoms_accelerations = atoms_accelerations_Dt
+        #self.apply_berendsen_thermostat()    
+
+    def molecular_dynamics_displacement(self):
+
+        atoms_velocity_Dt2 = self.atoms_velocities + self.atoms_accelerations*self.time_step**2/2
+        self.atoms_positions = self.atoms_positions + atoms_velocity_Dt2*self.time_step
+        self.atoms_accelerations = self.evaluate_LJ_force()/self.atom_mass
+        self.atoms_velocities = atoms_velocity_Dt2 + self.atoms_accelerations*self.time_step/2
+        self.apply_berendsen_thermostat()
+
     def monte_carlo_insert_delete(self):
         Epot = self.calculate_potential_energy(self.atoms_positions)
         trial_atoms_positions = copy.deepcopy(self.atoms_positions)
@@ -369,13 +395,13 @@ class MolecularSimulation:
             out_ids = self.atoms_positions[:, dim] > self.box_boundaries[dim][1]
             if np.sum(out_ids) > 0:
                 self.atoms_positions[:, dim][out_ids] -= self.box_size[dim]
-                if self.molecular_dynamics:
-                    self.previous_positions[:, dim][out_ids] -= self.box_size[dim]
+                #if self.molecular_dynamics:
+                #    self.previous_positions[:, dim][out_ids] -= self.box_size[dim]
             out_ids = self.atoms_positions[:, dim] < self.box_boundaries[dim][0]
             if np.sum(out_ids) > 0:
                 self.atoms_positions[:, dim][out_ids] += self.box_size[dim]
-                if self.molecular_dynamics:
-                    self.previous_positions[:, dim][out_ids] += self.box_size[dim]
+                #if self.molecular_dynamics:
+                #    self.previous_positions[:, dim][out_ids] += self.box_size[dim]
 
     def calculate_pressure(self):
         "Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smith 2002)"
@@ -398,3 +424,10 @@ class MolecularSimulation:
                 forces[Ni] += dU_dr*rij_xyz/rij
                 forces[Nj] -= dU_dr*rij_xyz/rij
         return forces
+
+    def apply_berendsen_thermostat(self):
+        self.calculate_temperature()
+        scale = np.sqrt(1+self.time_step*((self.desired_temperature/self.temperature)-1)/(100*self.time_step))
+        #print("scale", scale, np.round(self.desired_temperature,2), np.round(self.temperature,2))
+        self.atoms_velocities *= scale
+        self.calculate_temperature()
