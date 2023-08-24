@@ -122,6 +122,8 @@ class MolecularSimulation:
             f.close()
 
     def update_data_files(self, save_vel=True):
+        if self.molecular_dynamics is False:
+            save_vel = False
         if self.step % self.dump == 0:
             if self.step==0:
                 epot = open("Epot.dat", "w")
