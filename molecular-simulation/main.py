@@ -260,8 +260,8 @@ class MolecularSimulation:
         for dim in np.arange(self.dimensions):
             atoms_positions[:, dim] = np.random.random(self.number_atoms)*np.diff(self.box_boundaries[dim]) - np.diff(self.box_boundaries[dim])/2
         
-        atoms_positions[0] = np.array([0, 0, 1])
-        atoms_positions[1] = np.array([0, 0, 5])
+        #atoms_positions[0] = np.array([0, 0, 1])
+        #atoms_positions[1] = np.array([0, 0, 5])
         
         self.atoms_positions = atoms_positions
         if self.molecular_dynamics:
@@ -269,8 +269,8 @@ class MolecularSimulation:
             for dim in np.arange(self.dimensions):  
                 atoms_velocities[:, dim] = np.random.normal(size=self.number_atoms)
 
-            atoms_velocities[0] = np.array([0, 0, 0.5])
-            atoms_velocities[1] = np.array([0, 0, -0.5])
+            #atoms_velocities[0] = np.array([0, 0, 0.5])
+            #atoms_velocities[1] = np.array([0, 0, -0.5])
 
             self.atoms_velocities = atoms_velocities * np.sqrt(self.desired_temperature/self.atom_mass/self.dimensions) # doto verif
             
@@ -349,7 +349,6 @@ class MolecularSimulation:
         #self.apply_berendsen_thermostat()    
 
     def molecular_dynamics_displacement(self):
-
         atoms_velocity_Dt2 = self.atoms_velocities + self.atoms_accelerations*self.time_step/2
         self.atoms_positions = self.atoms_positions + atoms_velocity_Dt2*self.time_step
         self.atoms_accelerations = self.evaluate_LJ_force()/self.atom_mass
@@ -428,11 +427,14 @@ class MolecularSimulation:
     def apply_berendsen_thermostat(self):
         self.calculate_temperature()
 
-        print("temperature", self.temperature)
+        print("temperature", self.temperature, self.desired_temperature)
 
         scale = np.sqrt(1+self.time_step*((self.desired_temperature/self.temperature)-1)/(100*self.time_step))
         #print("scale", scale, np.round(self.desired_temperature,2), np.round(self.temperature,2))
         self.atoms_velocities *= scale
         self.calculate_temperature()
 
-        print("temperature", self.temperature)
+        print(scale)
+
+        print("temperature", self.temperature, self.desired_temperature)
+        print()
