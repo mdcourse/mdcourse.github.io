@@ -3,18 +3,24 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to learn-ms-with-python's documentation!
-================================================
+Learn molecular simulations with Python
+=======================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-
-
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Chapters
+    :hidden:
+
+    chapters/chapter1
+    chapters/chapter2
+    chapters/chapter3
