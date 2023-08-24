@@ -20,7 +20,7 @@ class MolecularSimulation:
                  desired_temperature=300,
                  time_step=1,
                  epsilon=0.1,
-                 sigma=3,
+                 sigma=1,
                  atom_mass = 1,
                  displace_mc=0.5,
                  monte_carlo_move=False,
@@ -59,7 +59,7 @@ class MolecularSimulation:
         self.beta = 1/(cst.Boltzmann*self.desired_temperature/cst.calorie/cst.kilo*cst.Avogadro)  # mol/kCal
 
     def non_dimensionalize(self):
-        """Non-dimensionalize all input"""
+        """Non-dimensionalize all input value"""
         self.d0 = self.sigma # todo : deal with different sigma
         self.m0 = self.atom_mass # todo : deal with different mass
         self.e0 = self.epsilon # todo : deal with different epsilon
@@ -68,7 +68,7 @@ class MolecularSimulation:
         e0_J = self.e0*cst.calorie*cst.kilo/cst.Avogadro
         t0_s = np.sqrt(self.m0_kg*d0_m**2/e0_J)
         self.t0 = t0_s/cst.femto
-        kB_kCal_mol_K = cst.Boltzmann*cst.Avogadro/cst.calorie/cst.kilo
+        self.kB_kCal_mol_K = cst.Boltzmann*cst.Avogadro/cst.calorie/cst.kilo
 
         self.Lx /= self.d0
         if self.Ly is not None:
@@ -76,7 +76,7 @@ class MolecularSimulation:
         if self.Lz is not None:
             self.Lz /= self.d0
         self.time_step /= self.t0
-        self.desired_temperature /= self.e0/kB_kCal_mol_K
+        self.desired_temperature /= self.e0/self.kB_kCal_mol_K
         self.epsilon /= self.e0
         self.sigma /= self.d0
         self.atom_mass /= self.m0
@@ -88,8 +88,10 @@ class MolecularSimulation:
         self.non_dimensionalize()
         self.initialize_box()
         self.initialize_positions()
-        self.print_log()
-        for step in range(self.maximum_steps):
+        self.step = 0
+        self.initialize_log()
+        self.update_outputs()
+        for step in range(1, self.maximum_steps):
             self.step = step
             if self.monte_carlo_move:
                 self.monte_carlo_displacement()
@@ -98,10 +100,13 @@ class MolecularSimulation:
             if self.molecular_dynamics:
                 self.molecular_dynamics_displacement()
             self.wrap_in_box()
-            self.update_log()
-            self.update_data_files()
-            self.update_dump()
+            self.update_outputs()
         self.close_log()
+
+    def update_outputs(self):
+        self.update_log()   
+        self.update_dump()
+        self.update_data_files()
 
     def update_dump(self, filename="dump.lammpstrj"):
         if self.step % self.dump == 0:
@@ -158,7 +163,7 @@ class MolecularSimulation:
             if save_vel:
                 vel.close()
 
-    def print_log(self):
+    def initialize_log(self):
         
         # Create and configure logger 
         logging.basicConfig(filename="log-file.txt", 
@@ -195,20 +200,22 @@ class MolecularSimulation:
             self.logger.info("---------------------------------")
             self.logger.info("Starting the molecular simulation")
             self.logger.info("---------------------------------\n")
-            self.logger.info("step n-atoms Epot Ekin press")
+            self.logger.info("step n-atoms Epot Ekin press T")
         if self.step % self.thermo == 0:
             self.calculate_pressure()
             if (self.monte_carlo_move is False) & (self.monte_carlo_insert is False):
                 self.Epot = self.calculate_potential_energy(self.atoms_positions)
             if self.molecular_dynamics:
                 self.calculate_kinetic_energy()
+                self.calculate_temperature()
             else:
                 self.Ekin = 0
             Epot = np.round(self.Epot,2)*self.e0
             Ekin = np.round(self.Ekin,2)*self.e0
             press = np.round(self.pressure,2)*self.e0/self.d0**3 # kcal/mol/A3
             press_MPa = press*cst.calorie*cst.kilo/cst.Avogadro/cst.angstrom**3/cst.mega # MPa
-            self.logger.info(str(self.step) + " " + str(self.number_atoms) + " " + str(Epot) + " " + str(Ekin)+ " " + str(press_MPa))
+            T_K = self.temperature*(self.e0/self.kB_kCal_mol_K)
+            self.logger.info(str(self.step) + " " + str(self.number_atoms) + " " + str(Epot) + " " + str(Ekin)+ " " + str(press_MPa) + " " + str(T_K))
 
     def close_log(self):
         handlers = self.logger.handlers[:]
@@ -247,19 +254,19 @@ class MolecularSimulation:
         for dim in np.arange(self.dimensions):
             atoms_positions[:, dim] = np.random.random(self.number_atoms)*np.diff(self.box_boundaries[dim]) - np.diff(self.box_boundaries[dim])/2
         
-        #atoms_positions[0] = np.array([0, 0, 1/3])
-        #atoms_positions[1] = np.array([0, 0, 5/3])
+        atoms_positions[0] = np.array([0, 0, 1])
+        atoms_positions[1] = np.array([0, 0, 5])
         
         self.atoms_positions = atoms_positions
         if self.molecular_dynamics:
             atoms_velocities = np.zeros((self.number_atoms, self.dimensions))
             for dim in np.arange(self.dimensions):  
-                atoms_velocities[:, dim] = np.random.random(self.number_atoms)-0.5
+                atoms_velocities[:, dim] = np.random.normal(size=self.number_atoms)
 
-            #atoms_velocities[0] = np.array([0, 0, 0.02])
-            #atoms_velocities[1] = np.array([0, 0, -0.02])
+            atoms_velocities[0] = np.array([0, 0, 0.5])
+            atoms_velocities[1] = np.array([0, 0, -0.5])
 
-            self.atoms_velocities = atoms_velocities
+            self.atoms_velocities = atoms_velocities * np.sqrt(self.desired_temperature/self.atom_mass/self.dimensions) # doto verif
             self.previous_positions = self.atoms_positions - self.atoms_velocities*self.time_step
             self.calculate_velocity_com()
             self.calculate_kinetic_energy()
@@ -271,13 +278,13 @@ class MolecularSimulation:
 
     def calculate_temperature(self):
         """Equation 4.2.2 in Frenkel-Smith 2002"""
-        self.temperature = np.sum(self.atom_mass*np.linalg.norm(self.atoms_velocities, axis=1)**2)/self.number_atoms/cst.Boltzmann # todo adjust
+        self.temperature = np.sum(self.atom_mass*np.linalg.norm(self.atoms_velocities, axis=1)**2)/self.number_atoms
 
     def calculate_velocity_com(self):
         self.velocity_com = np.sum(self.atoms_velocities, axis=0)/self.number_atoms
     
     def calculate_kinetic_energy(self):
-        self.Ekin = np.sum(self.atoms_velocities**2)/self.number_atoms/2
+        self.Ekin = np.sum(self.atom_mass*np.sum(self.atoms_velocities**2, axis=1)/2)/self.number_atoms
 
     def calculate_r(self, position_i, positions_j, number_atoms = None):
         """Calculate the shortest distance between position_i and atoms_positions."""
@@ -297,11 +304,9 @@ class MolecularSimulation:
         energy_potential = 0
         for position_i in atoms_positions:
             r = self.calculate_r(position_i, atoms_positions, number_atoms)
-
             energy_potential_i = np.sum(4*(1/np.power(r[r>0], 12)-1/np.power(r[r>0], 6)))
             energy_potential += energy_potential_i
-        # Avoid counting potential energy twice
-        energy_potential /= 2
+        energy_potential /= 2 # Avoid counting potential energy twice
         return energy_potential
     
     def monte_carlo_displacement(self):
