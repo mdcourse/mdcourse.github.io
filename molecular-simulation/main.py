@@ -127,17 +127,22 @@ class MolecularSimulation:
                 epot = open("Epot.dat", "w")
                 ekin = open("Ekin.dat", "w")
                 etot = open("Etot.dat", "w")
+                press = open("pressure.dat", "w")
                 if save_vel:
                     vel = open("velocities.dat", "w")
             else:
                 epot = open("Epot.dat", "a")
                 ekin = open("Ekin.dat", "a")
                 etot = open("Etot.dat", "a")
+                press = open("pressure.dat", "a")
                 if save_vel:
                     vel = open("velocities.dat", "a")
             epot.write(str(self.step) + " " + str(self.Epot*self.e0) + "\n")
             ekin.write(str(self.step) + " " + str(self.Ekin*self.e0) + "\n")
             etot.write(str(self.step) + " " + str(self.Ekin*self.e0+self.Epot*self.e0) + "\n")
+            pressure = np.round(self.pressure,2)*self.e0/self.d0**3 # kcal/mol/A3
+            press_MPa = pressure*cst.calorie*cst.kilo/cst.Avogadro/cst.angstrom**3/cst.mega # MPa
+            press.write(str(self.step) + " " + str(press_MPa) + "\n")
             if save_vel:
                 for velocity in self.atoms_velocities:
                     velocity *= self.d0/self.t0
@@ -146,6 +151,7 @@ class MolecularSimulation:
             epot.close()
             ekin.close()
             etot.close()
+            press.close()
             if save_vel:
                 vel.close()
 
@@ -195,7 +201,11 @@ class MolecularSimulation:
                 self.calculate_kinetic_energy()
             else:
                 self.Ekin = 0
-            self.logger.info(str(self.step) + " " + str(self.number_atoms) + " " + str(np.round(self.Epot,2)) + " " + str(np.round(self.Ekin,2))+ " " + str(np.round(self.pressure,2)))
+            Epot = np.round(self.Epot,2)*self.e0
+            Ekin = np.round(self.Ekin,2)*self.e0
+            press = np.round(self.pressure,2)*self.e0/self.d0**3 # kcal/mol/A3
+            press_MPa = press*cst.calorie*cst.kilo/cst.Avogadro/cst.angstrom**3/cst.mega # MPa
+            self.logger.info(str(self.step) + " " + str(self.number_atoms) + " " + str(Epot) + " " + str(Ekin)+ " " + str(press_MPa))
 
     def close_log(self):
         handlers = self.logger.handlers[:]
@@ -361,10 +371,9 @@ class MolecularSimulation:
 
     def calculate_pressure(self):
         "Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smith 2002)"
-        V_m = self.volume*cst.angstrom**3
-        p_ideal = self.number_atoms*cst.Boltzmann*self.desired_temperature/V_m
-        p_non_ideal = 1/(V_m*self.dimensions)*np.sum(self.atoms_positions*cst.angstrom*self.evaluate_LJ_force()/cst.calorie/cst.kilo/cst.Avogadro/cst.angstrom)
-        self.pressure = (p_ideal+p_non_ideal)/cst.mega
+        p_ideal = self.number_atoms*self.desired_temperature/self.volume
+        p_non_ideal = 1/(self.volume*self.dimensions)*np.sum(self.atoms_positions*self.evaluate_LJ_force())
+        self.pressure = (p_ideal+p_non_ideal)
 
     def evaluate_LJ_force(self):
         """Evaluate force based on LJ potential derivative.
