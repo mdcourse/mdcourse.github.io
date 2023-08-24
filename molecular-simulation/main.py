@@ -59,6 +59,7 @@ class MolecularSimulation:
         self.beta = 1/(cst.Boltzmann*self.desired_temperature/cst.calorie/cst.kilo*cst.Avogadro)  # mol/kCal
 
     def non_dimensionalize(self):
+        """Non-dimensionalize all input"""
         self.d0 = self.sigma # todo : deal with different sigma
         self.m0 = self.atom_mass # todo : deal with different mass
         self.e0 = self.epsilon # todo : deal with different epsilon

@@ -24,3 +24,12 @@ Indices and tables
     chapters/chapter1
     chapters/chapter2
     chapters/chapter3
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Annexes
+    :hidden:
+
+    annexes/annexe1
+    annexes/annexe2
+    annexes/annexe3
