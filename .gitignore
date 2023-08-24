@@ -3,3 +3,5 @@
 **/*.dat
 **/*.lammpstrj
 **/*.pyc
+
+docs/build
