@@ -5,3 +5,5 @@
 **/*.pyc
 
 docs/build
+
+**/log.*

@@ -121,10 +121,12 @@ class MolecularSimulation:
             f.write("ITEM: BOX BOUNDS pp pp pp\n")
             for dim in np.arange(self.dimensions):
                 f.write(str(self.box_boundaries[dim][0]*self.d0) + " " + str(self.box_boundaries[dim][1]*self.d0) + "\n")
-            f.write("ITEM: ATOMS id type x y z\n")
-            for cpt, xyz in enumerate(self.atoms_positions):
+            f.write("ITEM: ATOMS id type x y z vx vy vz\n")
+            cpt = 1
+            for xyz, vxyz in zip(self.atoms_positions, self.atoms_velocities):
                 #f.write(str(cpt+1) + " 1 " +str(xyz[0])+" "+str(xyz[1])+" "+str(xyz[2])+"\n") 
-                f.write(str(cpt+1) + " " + str(1) + " " +str(xyz[0]*self.d0)+" "+str(xyz[1]*self.d0)+" "+str(xyz[2]*self.d0)+"\n") 
+                f.write(str(cpt) + " " + str(1) + " " +str(xyz[0]*self.d0)+" "+str(xyz[1]*self.d0)+" "+str(xyz[2]*self.d0) + " " +str(vxyz[0]*self.d0/self.t0)+" "+str(vxyz[1]*self.d0/self.t0)+" "+str(vxyz[2]*self.d0/self.t0)+"\n") 
+                cpt += 1
             f.close()
 
     def update_data_files(self, save_vel=True):
