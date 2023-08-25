@@ -43,6 +43,7 @@ class MolecularSimulation:
         self.dimensions = dimensions
         self.time_step = time_step
         self.desired_temperature = desired_temperature
+        self.temperature = self.desired_temperature
         self.epsilon = epsilon # kcal/mol
         self.sigma = sigma # Angstrom
         self.atom_mass = atom_mass
@@ -63,10 +64,13 @@ class MolecularSimulation:
         np.random.seed(self.seed)
         self.step = 0
 
-        self.beta = 1/(cst.Boltzmann*self.desired_temperature/cst.calorie/cst.kilo*cst.Avogadro)  # mol/kCal
+        self.atoms_positions = np.zeros((self.number_atoms, self.dimensions))
+        self.atoms_velocities = np.zeros((self.number_atoms, self.dimensions))
+        self.atoms_accelerations = np.zeros((self.number_atoms, self.dimensions))
 
     def non_dimensionalize(self):
         """Non-dimensionalize all input value"""
+
         self.d0 = self.sigma # todo : deal with different sigma
         self.m0 = self.atom_mass # todo : deal with different mass
         self.e0 = self.epsilon # todo : deal with different epsilon
@@ -89,9 +93,10 @@ class MolecularSimulation:
         self.atom_mass /= self.m0
         self.displace_mc /= self.d0
         self.mu /= self.e0
-        self.beta *= self.e0
         self.tau /= self.t0
         self.LJ_cut_off /= self.d0
+
+        self.beta =  1/self.desired_temperature
 
     def run(self):
         self.non_dimensionalize()
@@ -110,7 +115,6 @@ class MolecularSimulation:
                 self.molecular_dynamics_displacement()
             self.wrap_in_box()
             self.update_outputs()
-
         self.close_log()
 
     def update_outputs(self):
@@ -134,7 +138,10 @@ class MolecularSimulation:
             f.write("ITEM: ATOMS id type x y z vx vy vz\n")
             cpt = 1
             atoms_positions = copy.deepcopy(self.atoms_positions)
-            atoms_velocities = copy.deepcopy(self.atoms_velocities)
+            if self.molecular_dynamics:
+                atoms_velocities = copy.deepcopy(self.atoms_velocities)
+            else:
+                atoms_velocities = np.zeros((self.number_atoms, self.dimensions))
             for xyz, vxyz in zip(atoms_positions, atoms_velocities):
                 #f.write(str(cpt+1) + " 1 " +str(xyz[0])+" "+str(xyz[1])+" "+str(xyz[2])+"\n") 
                 f.write(str(cpt) + " " + str(1) + " " +str(xyz[0]*self.d0)+" "+str(xyz[1]*self.d0)+" "+str(xyz[2]*self.d0) + " " +str(vxyz[0]*self.d0/self.t0)+" "+str(vxyz[1]*self.d0/self.t0)+" "+str(vxyz[2]*self.d0/self.t0)+"\n") 
@@ -149,12 +156,14 @@ class MolecularSimulation:
                 etot = open("Etot.dat", "w")
                 press = open("pressure.dat", "w")
                 temperature = open("temperature.dat", "w")
+                density = open("density.dat", "w")
             else:
                 epot = open("Epot.dat", "a")
                 ekin = open("Ekin.dat", "a")
                 etot = open("Etot.dat", "a")
                 press = open("pressure.dat", "a")
                 temperature = open("temperature.dat", "a")
+                density = open("density.dat", "a")
             epot.write(str(self.step) + " " + str(self.Epot*self.e0) + "\n")
             ekin.write(str(self.step) + " " + str(self.Ekin*self.e0) + "\n")
             etot.write(str(self.step) + " " + str(self.Ekin*self.e0+self.Epot*self.e0) + "\n")
@@ -164,10 +173,12 @@ class MolecularSimulation:
             press.write(str(self.step) + " " + str(press_atm) + "\n")
             T_K = self.temperature*(self.e0/self.kB_kCal_mol_K)
             temperature.write(str(self.step) + " " + str(T_K) + "\n")
+            density.write(str(self.step) + " " + str(self.number_atoms/self.volume) + "\n")
             epot.close()
             ekin.close()
             etot.close()
             press.close()
+            density.close()
 
     def initialize_log(self):
         
@@ -208,16 +219,12 @@ class MolecularSimulation:
             self.logger.info("---------------------------------\n")
             self.logger.info("step n-atoms Epot Ekin press T")
         if self.step % self.thermo == 0:
-            #self.calculate_pressure()
-            if (self.monte_carlo_move is False) & (self.monte_carlo_insert is False):
-                self.Epot = self.calculate_potential_energy(self.atoms_positions)
-            #if self.molecular_dynamics:
-            #    self.calculate_kinetic_energy()
-            #    self.calculate_temperature()
-            else:
-                self.Ekin = 0
+            self.Epot = self.calculate_potential_energy(self.atoms_positions)
             Epot = np.round(self.Epot,2)*self.e0
-            Ekin = np.round(self.Ekin,2)*self.e0
+            if self.molecular_dynamics:
+                Ekin = np.round(self.Ekin,2)*self.e0
+            else:
+                Ekin = 0
             press = np.round(self.pressure,2)*self.e0/self.d0**3 # kcal/mol/A3
             press_MPa = press*cst.calorie*cst.kilo/cst.Avogadro/cst.angstrom**3/cst.mega # MPa
             T_K = self.temperature*(self.e0/self.kB_kCal_mol_K)
@@ -265,6 +272,7 @@ class MolecularSimulation:
             atoms_positions[1] = np.array([0, 0, 5])
         
         self.atoms_positions = atoms_positions
+
         if self.molecular_dynamics:
             atoms_velocities = np.zeros((self.number_atoms, self.dimensions))
             for dim in np.arange(self.dimensions):  
@@ -273,19 +281,17 @@ class MolecularSimulation:
             if self.debug:
                 atoms_velocities[0] = np.array([0, 0, 0.5])
                 atoms_velocities[1] = np.array([0, 0, -0.5])
-
-            self.atoms_velocities = atoms_velocities * np.sqrt(self.desired_temperature/self.atom_mass/self.dimensions) # doto verif
-            
             self.atoms_accelerations = self.evaluate_LJ_force()/self.atom_mass
-            
-            #self.previous_positions = self.atoms_positions - self.atoms_velocities*self.time_step
-            self.calculate_velocity_com()
-            self.calculate_kinetic_energy()
-            self.calculate_temperature()
-            
-            # to rescale temperature (attention units)
-            # self.atoms_velocities = self.atoms_velocities*(self.desired_temperature/self.temperature)**0.5
-            # self.calculate_temperature()
+            self.atoms_velocities = atoms_velocities * np.sqrt(self.desired_temperature/self.atom_mass/self.dimensions) # doto verif
+        
+        #self.previous_positions = self.atoms_positions - self.atoms_velocities*self.time_step
+        self.calculate_velocity_com()
+        self.calculate_kinetic_energy()
+        self.calculate_temperature()
+    
+        # to rescale temperature (attention units)
+        # self.atoms_velocities = self.atoms_velocities*(self.desired_temperature/self.temperature)**0.5
+        # self.calculate_temperature()
 
     def calculate_temperature(self):
         # from LAMMPS documentation
@@ -311,9 +317,7 @@ class MolecularSimulation:
         return np.sqrt(rij2)
 
     def calculate_potential_energy(self, atoms_positions, number_atoms = None):
-        """Calculate potential energy assuming Lennard-Jones potential interaction.
-        
-        Output units are kcal/mol."""
+        """Calculate potential energy assuming Lennard-Jones potential interaction."""
         energy_potential = 0
         for position_i in atoms_positions:
             r = self.calculate_r(position_i, atoms_positions, number_atoms)
@@ -351,6 +355,7 @@ class MolecularSimulation:
     def monte_carlo_insert_delete(self):
         Epot = self.calculate_potential_energy(self.atoms_positions)
         trial_atoms_positions = copy.deepcopy(self.atoms_positions)
+        
         if np.random.random() < 0.5:
             number_atoms = self.number_atoms + 1
             atom_position = np.zeros((1, self.dimensions))
@@ -378,8 +383,9 @@ class MolecularSimulation:
             self.Epot = Epot
 
     def calculate_Lambda(self, mass):
-        m_kg = mass/cst.Avogadro*cst.milli # kg
-        Lambda = cst.h/np.sqrt(2*np.pi*cst.Boltzmann*m_kg*self.desired_temperature)/cst.angstrom # de Broglie wavelenght, Angstrom
+        m_kg = mass/cst.Avogadro*cst.milli*self.m0 # kg
+        T_K = self.desired_temperature*self.e0/self.kB_kCal_mol_K
+        Lambda = cst.h/np.sqrt(2*np.pi*cst.Boltzmann*m_kg*T_K)/cst.angstrom # de Broglie wavelenght, Angstrom
         return Lambda/self.d0
     
     def wrap_in_box(self):
@@ -398,7 +404,7 @@ class MolecularSimulation:
     def calculate_pressure(self):
         "Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smith 2002)"
         Ndof = self.dimensions*self.number_atoms-self.dimensions
-        N = Ndof / self.dimensions
+        N = Ndof / self.dimensions            
         p_ideal = N*self.temperature/self.volume
         p_non_ideal = 1/(self.volume*self.dimensions)*np.sum(self.atoms_positions*self.evaluate_LJ_force())
         self.pressure = (p_ideal+p_non_ideal)

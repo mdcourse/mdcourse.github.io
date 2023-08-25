@@ -1,0 +1,34 @@
+variable dump equal 500
+variable thermo equal 500
+variable maximum_steps equal 200000
+
+# main parameters
+units real
+dimension 3
+atom_style atomic
+pair_style lj/cut 10
+boundary p p p
+
+#read_data twoparticle.data
+region myreg block -10 10 -10 10 -10 10
+create_box 1 myreg
+create_atoms 1 random 25 14141 myreg
+
+mass 1 1
+pair_coeff 1 1 0.1 1.0
+neigh_modify every 1
+
+
+timestep 0.1
+fix mygcmc all gcmc 1 1 0 1 29494 300 -2 0.01
+
+thermo ${thermo}
+dump mydmp all custom ${dump} dump.lammpstrj id type x y z vx vy vz
+
+variable atom atom "type==1"
+group atom dynamic all var atom
+variable n_atom equal count(atom)
+variable density equal v_n_atom/vol
+fix myat1 all ave/time ${dump} 1 ${dump} v_density v_n_atom file density.dat
+
+run ${maximum_steps}
