@@ -30,6 +30,9 @@ class MolecularSimulation:
                  thermo=10,
                  dump=10,
                  mu = -0.2,
+                 tau = 100,
+                 LJ_cut_off = 10,
+                 debug=False,
                  ):
         
         self.number_atoms = number_atoms
@@ -50,6 +53,9 @@ class MolecularSimulation:
         self.thermo = thermo
         self.dump = dump
         self.mu = mu
+        self.tau = tau
+        self.LJ_cut_off = LJ_cut_off
+        self.debug = debug
         if seed is None:
             self.seed = np.random.randint(10000)
         else:
@@ -83,14 +89,18 @@ class MolecularSimulation:
         self.displace_mc /= self.d0
         self.mu /= self.e0
         self.beta *= self.e0
+        self.tau /= self.t0
+        self.LJ_cut_off /= self.d0
 
     def run(self):
         self.non_dimensionalize()
         self.initialize_box()
         self.initialize_positions()
         self.step = 0
+        self.calculate_pressure()
         self.initialize_log()
-        self.update_outputs()
+        #self.update_outputs()
+        self.update_dump()
         for step in range(1, self.maximum_steps):
             self.step = step
             if self.monte_carlo_move:
@@ -100,7 +110,11 @@ class MolecularSimulation:
             if self.molecular_dynamics:
                 self.molecular_dynamics_displacement()
             self.wrap_in_box()
-            self.update_outputs()
+            #self.update_outputs()
+            self.update_dump()
+
+            print(self.atoms_positions)
+
         self.close_log()
 
     def update_outputs(self):
@@ -129,9 +143,7 @@ class MolecularSimulation:
                 cpt += 1
             f.close()
 
-    def update_data_files(self, save_vel=True):
-        if self.molecular_dynamics is False:
-            save_vel = False
+    def update_data_files(self):
         if self.step % self.dump == 0:
             if self.step==0:
                 epot = open("Epot.dat", "w")
@@ -139,37 +151,25 @@ class MolecularSimulation:
                 etot = open("Etot.dat", "w")
                 press = open("pressure.dat", "w")
                 temperature = open("temperature.dat", "w")
-                if save_vel:
-                    vel = open("velocities.dat", "w")
             else:
                 epot = open("Epot.dat", "a")
                 ekin = open("Ekin.dat", "a")
                 etot = open("Etot.dat", "a")
                 press = open("pressure.dat", "a")
                 temperature = open("temperature.dat", "a")
-                if save_vel:
-                    vel = open("velocities.dat", "a")
             epot.write(str(self.step) + " " + str(self.Epot*self.e0) + "\n")
             ekin.write(str(self.step) + " " + str(self.Ekin*self.e0) + "\n")
-
             etot.write(str(self.step) + " " + str(self.Ekin*self.e0+self.Epot*self.e0) + "\n")
-            pressure = np.round(self.pressure,2)*self.e0/self.d0**3 # kcal/mol/A3
-            press_MPa = pressure*cst.calorie*cst.kilo/cst.Avogadro/cst.angstrom**3/cst.mega # MPa
-            press.write(str(self.step) + " " + str(press_MPa) + "\n")
+            #self.calculate_pressure()
+            pressure = self.pressure*self.e0/self.d0**3 # kcal/mol/A3
+            press_atm = pressure*cst.calorie*cst.kilo/cst.Avogadro/cst.angstrom**3/cst.atm # atm
+            press.write(str(self.step) + " " + str(press_atm) + "\n")
             T_K = self.temperature*(self.e0/self.kB_kCal_mol_K)
             temperature.write(str(self.step) + " " + str(T_K) + "\n")
-            if save_vel:
-                velocities = copy.deepcopy(self.atoms_velocities)
-                for velocity in velocities:
-                    velocity *= self.d0/self.t0
-                    norm = np.sqrt(np.sum(velocity**2))
-                    vel.write(str(norm) + "\n")
             epot.close()
             ekin.close()
             etot.close()
             press.close()
-            if save_vel:
-                vel.close()
 
     def initialize_log(self):
         
@@ -210,12 +210,12 @@ class MolecularSimulation:
             self.logger.info("---------------------------------\n")
             self.logger.info("step n-atoms Epot Ekin press T")
         if self.step % self.thermo == 0:
-            self.calculate_pressure()
+            #self.calculate_pressure()
             if (self.monte_carlo_move is False) & (self.monte_carlo_insert is False):
                 self.Epot = self.calculate_potential_energy(self.atoms_positions)
-            if self.molecular_dynamics:
-                self.calculate_kinetic_energy()
-                self.calculate_temperature()
+            #if self.molecular_dynamics:
+            #    self.calculate_kinetic_energy()
+            #    self.calculate_temperature()
             else:
                 self.Ekin = 0
             Epot = np.round(self.Epot,2)*self.e0
@@ -262,8 +262,9 @@ class MolecularSimulation:
         for dim in np.arange(self.dimensions):
             atoms_positions[:, dim] = np.random.random(self.number_atoms)*np.diff(self.box_boundaries[dim]) - np.diff(self.box_boundaries[dim])/2
         
-        #atoms_positions[0] = np.array([0, 0, 1])
-        #atoms_positions[1] = np.array([0, 0, 5])
+        if self.debug:
+            atoms_positions[0] = np.array([0, 0, 1])
+            atoms_positions[1] = np.array([0, 0, 5])
         
         self.atoms_positions = atoms_positions
         if self.molecular_dynamics:
@@ -271,8 +272,9 @@ class MolecularSimulation:
             for dim in np.arange(self.dimensions):  
                 atoms_velocities[:, dim] = np.random.normal(size=self.number_atoms)
 
-            #atoms_velocities[0] = np.array([0, 0, 0.5])
-            #atoms_velocities[1] = np.array([0, 0, -0.5])
+            if self.debug:
+                atoms_velocities[0] = np.array([0, 0, 0.5])
+                atoms_velocities[1] = np.array([0, 0, -0.5])
 
             self.atoms_velocities = atoms_velocities * np.sqrt(self.desired_temperature/self.atom_mass/self.dimensions) # doto verif
             
@@ -288,8 +290,9 @@ class MolecularSimulation:
             # self.calculate_temperature()
 
     def calculate_temperature(self):
-        """Equation 4.2.2 in Frenkel-Smith 2002"""
-        self.temperature = np.sum(self.atom_mass*np.linalg.norm(self.atoms_velocities, axis=1)**2)/self.number_atoms
+        # from LAMMPS documentation
+        Ndof = self.dimensions*self.number_atoms-self.dimensions
+        self.temperature = 2*self.Ekin/Ndof
 
     def calculate_velocity_com(self):
         self.velocity_com = np.sum(self.atoms_velocities, axis=0)/self.number_atoms
@@ -331,24 +334,7 @@ class MolecularSimulation:
             self.atoms_positions = trial_atoms_positions
             self.Epot = trial_Epot
         else:
-            self.Epot = Epot
-
-    def _molecular_dynamics_displacement(self):
-        print("here")
-        force = self.evaluate_LJ_force()
-        atoms_positions = 2*self.atoms_positions-self.previous_positions + self.time_step**2*force/self.atom_mass # todo check periodic boundary condition issues        
-        self.previous_positions = self.atoms_positions
-        self.atoms_positions = atoms_positions
-        self.atoms_velocities = (self.atoms_positions - self.previous_positions)/self.time_step
-        self.apply_berendsen_thermostat()    
-
-    def __molecular_dynamics_displacement(self):
-        print("here")
-        self.atoms_positions = self.atoms_positions + self.atoms_velocities*self.time_step + self.atoms_accelerations*self.time_step**2/2  
-        atoms_accelerations_Dt = self.evaluate_LJ_force()/self.atom_mass
-        self.atoms_velocities = self.atoms_velocities + atoms_accelerations_Dt*self.time_step/2 + self.atoms_accelerations*self.time_step/2   
-        self.atoms_accelerations = atoms_accelerations_Dt
-        #self.apply_berendsen_thermostat()    
+            self.Epot = Epot 
 
     def molecular_dynamics_displacement(self):
         atoms_velocity_Dt2 = self.atoms_velocities + self.atoms_accelerations*self.time_step/2
@@ -406,14 +392,15 @@ class MolecularSimulation:
 
     def calculate_pressure(self):
         "Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smith 2002)"
-        p_ideal = self.number_atoms*self.desired_temperature/self.volume
+        self.calculate_temperature()
+        Ndof = self.dimensions*self.number_atoms-self.dimensions
+        N = Ndof / self.dimensions
+        p_ideal = N*self.temperature/self.volume
         p_non_ideal = 1/(self.volume*self.dimensions)*np.sum(self.atoms_positions*self.evaluate_LJ_force())
         self.pressure = (p_ideal+p_non_ideal)
 
     def evaluate_LJ_force(self):
-        """Evaluate force based on LJ potential derivative.
-        
-        Output has unit of kcal/mol/Angstrom"""
+        """Evaluate force based on LJ potential derivative."""
         forces = np.zeros((self.number_atoms,3))
         for Ni in range(self.number_atoms-1):
             position_i = self.atoms_positions[Ni]
@@ -421,22 +408,31 @@ class MolecularSimulation:
                 position_j = self.atoms_positions[Nj]
                 rij_xyz = (np.remainder(position_i - position_j + self.box_size/2., self.box_size) - self.box_size/2.).T
                 rij = np.sqrt(np.sum(rij_xyz**2))
-                dU_dr = 48/rij*(1/rij**12-0.5/rij**6)
-                forces[Ni] += dU_dr*rij_xyz/rij
-                forces[Nj] -= dU_dr*rij_xyz/rij
+                if rij < self.LJ_cut_off:
+                    dU_dr = 48/rij*(1/rij**12-0.5/rij**6)
+                    forces[Ni] += dU_dr*rij_xyz/rij
+                    forces[Nj] -= dU_dr*rij_xyz/rij
         return forces
 
     def apply_berendsen_thermostat(self):
+        """Rescale velocities based on Berendsten thermostat"""
         self.calculate_temperature()
-
-        print("temperature", self.temperature, self.desired_temperature)
-
-        scale = np.sqrt(1+self.time_step*((self.desired_temperature/self.temperature)-1)/(100*self.time_step))
-        #print("scale", scale, np.round(self.desired_temperature,2), np.round(self.temperature,2))
+        scale = np.sqrt(1+self.time_step*((self.desired_temperature/self.temperature)-1)/self.tau)
         self.atoms_velocities *= scale
-        self.calculate_temperature()
 
-        print(scale)
+    #def _molecular_dynamics_displacement(self):
+    #    print("here")
+    #    force = self.evaluate_LJ_force()
+    #    atoms_positions = 2*self.atoms_positions-self.previous_positions + self.time_step**2*force/self.atom_mass # todo check periodic boundary condition issues        
+    #    self.previous_positions = self.atoms_positions
+    #    self.atoms_positions = atoms_positions
+    #    self.atoms_velocities = (self.atoms_positions - self.previous_positions)/self.time_step
+    #    self.apply_berendsen_thermostat()    
 
-        print("temperature", self.temperature, self.desired_temperature)
-        print()
+    #def __molecular_dynamics_displacement(self):
+    #    print("here")
+    #    self.atoms_positions = self.atoms_positions + self.atoms_velocities*self.time_step + self.atoms_accelerations*self.time_step**2/2  
+    #    atoms_accelerations_Dt = self.evaluate_LJ_force()/self.atom_mass
+    #    self.atoms_velocities = self.atoms_velocities + atoms_accelerations_Dt*self.time_step/2 + self.atoms_accelerations*self.time_step/2   
+    #    self.atoms_accelerations = atoms_accelerations_Dt
+    #    #self.apply_berendsen_thermostat()   

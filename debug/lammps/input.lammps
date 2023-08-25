@@ -1,0 +1,39 @@
+variable dump equal 100
+variable thermo equal 100
+variable maximum_steps equal 20000
+
+# main parameters
+units real
+dimension 3
+atom_style atomic
+pair_style lj/cut 10
+boundary p p p
+
+read_data twoparticle.data
+#region myreg block -6 6 -6 6 -6 6
+#create_box 1 myreg
+#create_atoms 1 random 25 14141 myreg
+
+mass 1 1
+pair_coeff 1 1 0.1 1.0
+neigh_modify every 1
+
+#velocity all create 300 4928459
+fix mynve all nve
+fix myber all temp/berendsen 300 300 100
+timestep 0.1
+
+thermo ${thermo}
+dump mydmp all custom ${dump} dump.lammpstrj id type x y z vx vy vz
+
+variable Epot equal pe
+variable Ekin equal ke
+variable Etot equal v_Epot+v_Ekin
+variable pressure equal press
+variable temperature equal temp
+fix myat1 all ave/time ${dump} 1 ${dump} v_Epot file Epot.dat
+fix myat2 all ave/time ${dump} 1 ${dump} v_Ekin file Ekin.dat
+fix myat3 all ave/time ${dump} 1 ${dump} v_Etot file Etot.dat
+fix myat4 all ave/time ${dump} 1 ${dump} v_pressure file pressure.dat
+fix myat5 all ave/time ${dump} 1 ${dump} v_temperature file temperature.dat
+run ${maximum_steps}
