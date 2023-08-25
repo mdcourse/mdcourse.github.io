@@ -61,6 +61,7 @@ class MolecularSimulation:
         else:
             self.seed = seed
         np.random.seed(self.seed)
+        self.step = 0
 
         self.beta = 1/(cst.Boltzmann*self.desired_temperature/cst.calorie/cst.kilo*cst.Avogadro)  # mol/kCal
 
@@ -96,11 +97,9 @@ class MolecularSimulation:
         self.non_dimensionalize()
         self.initialize_box()
         self.initialize_positions()
-        self.step = 0
         self.calculate_pressure()
         self.initialize_log()
-        #self.update_outputs()
-        self.update_dump()
+        self.update_outputs()
         for step in range(1, self.maximum_steps):
             self.step = step
             if self.monte_carlo_move:
@@ -110,10 +109,7 @@ class MolecularSimulation:
             if self.molecular_dynamics:
                 self.molecular_dynamics_displacement()
             self.wrap_in_box()
-            #self.update_outputs()
-            self.update_dump()
-
-            print(self.atoms_positions)
+            self.update_outputs()
 
         self.close_log()
 
@@ -137,7 +133,9 @@ class MolecularSimulation:
                 f.write(str(self.box_boundaries[dim][0]*self.d0) + " " + str(self.box_boundaries[dim][1]*self.d0) + "\n")
             f.write("ITEM: ATOMS id type x y z vx vy vz\n")
             cpt = 1
-            for xyz, vxyz in zip(self.atoms_positions, self.atoms_velocities):
+            atoms_positions = copy.deepcopy(self.atoms_positions)
+            atoms_velocities = copy.deepcopy(self.atoms_velocities)
+            for xyz, vxyz in zip(atoms_positions, atoms_velocities):
                 #f.write(str(cpt+1) + " 1 " +str(xyz[0])+" "+str(xyz[1])+" "+str(xyz[2])+"\n") 
                 f.write(str(cpt) + " " + str(1) + " " +str(xyz[0]*self.d0)+" "+str(xyz[1]*self.d0)+" "+str(xyz[2]*self.d0) + " " +str(vxyz[0]*self.d0/self.t0)+" "+str(vxyz[1]*self.d0/self.t0)+" "+str(vxyz[2]*self.d0/self.t0)+"\n") 
                 cpt += 1
@@ -160,7 +158,7 @@ class MolecularSimulation:
             epot.write(str(self.step) + " " + str(self.Epot*self.e0) + "\n")
             ekin.write(str(self.step) + " " + str(self.Ekin*self.e0) + "\n")
             etot.write(str(self.step) + " " + str(self.Ekin*self.e0+self.Epot*self.e0) + "\n")
-            #self.calculate_pressure()
+            self.calculate_pressure()
             pressure = self.pressure*self.e0/self.d0**3 # kcal/mol/A3
             press_atm = pressure*cst.calorie*cst.kilo/cst.Avogadro/cst.angstrom**3/cst.atm # atm
             press.write(str(self.step) + " " + str(press_atm) + "\n")
@@ -291,6 +289,7 @@ class MolecularSimulation:
 
     def calculate_temperature(self):
         # from LAMMPS documentation
+        self.calculate_kinetic_energy()
         Ndof = self.dimensions*self.number_atoms-self.dimensions
         self.temperature = 2*self.Ekin/Ndof
 
@@ -340,6 +339,12 @@ class MolecularSimulation:
         atoms_velocity_Dt2 = self.atoms_velocities + self.atoms_accelerations*self.time_step/2
         self.atoms_positions = self.atoms_positions + atoms_velocity_Dt2*self.time_step
         self.atoms_accelerations = self.evaluate_LJ_force()/self.atom_mass
+
+        #if np.max(self.atoms_accelerations) > 1e3:
+        #    print("********************")
+        #    print("warning", self.atoms_positions.T[2], self.evaluate_LJ_force().T[2], self.box_size)
+        #    print("********************")
+
         self.atoms_velocities = atoms_velocity_Dt2 + self.atoms_accelerations*self.time_step/2
         self.apply_berendsen_thermostat()
 
@@ -392,7 +397,6 @@ class MolecularSimulation:
 
     def calculate_pressure(self):
         "Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smith 2002)"
-        self.calculate_temperature()
         Ndof = self.dimensions*self.number_atoms-self.dimensions
         N = Ndof / self.dimensions
         p_ideal = N*self.temperature/self.volume
@@ -412,6 +416,14 @@ class MolecularSimulation:
                     dU_dr = 48/rij*(1/rij**12-0.5/rij**6)
                     forces[Ni] += dU_dr*rij_xyz/rij
                     forces[Nj] -= dU_dr*rij_xyz/rij
+
+                #if self.step==0:
+                #    temp = open("temp.dat", "w")
+                #else:
+                #    temp = open("temp.dat", "a")
+                #temp.write(str(rij) + " " + str(forces[Ni][2]) + "\n")
+                #temp.close()
+
         return forces
 
     def apply_berendsen_thermostat(self):
@@ -419,6 +431,7 @@ class MolecularSimulation:
         self.calculate_temperature()
         scale = np.sqrt(1+self.time_step*((self.desired_temperature/self.temperature)-1)/self.tau)
         self.atoms_velocities *= scale
+        self.calculate_temperature()
 
     #def _molecular_dynamics_displacement(self):
     #    print("here")
