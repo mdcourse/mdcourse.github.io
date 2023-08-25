@@ -18,19 +18,20 @@ class MolecularSimulation:
                  Ly = None,
                  Lz = None,
                  desired_temperature=300,
+                 desired_pressure=None,
                  time_step=0.1,
                  epsilon=0.1,
                  sigma=1,
                  atom_mass = 1,
-                 displace_mc=0.5,
-                 monte_carlo_move=False,
-                 monte_carlo_insert=False,
+                 displace=None,
+                 monte_carlo=False,
                  molecular_dynamics=False,
                  seed=None,
                  thermo=10,
                  dump=10,
-                 mu = -0.2,
-                 tau = 100,
+                 mu = None,
+                 tau_temp = 100,
+                 tau_press = 1000,
                  LJ_cut_off = 10,
                  debug=False,
                  ):
@@ -43,18 +44,19 @@ class MolecularSimulation:
         self.dimensions = dimensions
         self.time_step = time_step
         self.desired_temperature = desired_temperature
+        self.desired_pressure= desired_pressure
         self.temperature = self.desired_temperature
         self.epsilon = epsilon # kcal/mol
         self.sigma = sigma # Angstrom
         self.atom_mass = atom_mass
-        self.displace_mc = displace_mc
-        self.monte_carlo_move = monte_carlo_move
-        self.monte_carlo_insert = monte_carlo_insert
+        self.displace = displace
+        self.monte_carlo = monte_carlo
         self.molecular_dynamics = molecular_dynamics
         self.thermo = thermo
         self.dump = dump
         self.mu = mu
-        self.tau = tau
+        self.tau_temp = tau_temp
+        self.tau_press = tau_press
         self.LJ_cut_off = LJ_cut_off
         self.debug = debug
         if seed is None:
@@ -67,6 +69,9 @@ class MolecularSimulation:
         self.atoms_positions = np.zeros((self.number_atoms, self.dimensions))
         self.atoms_velocities = np.zeros((self.number_atoms, self.dimensions))
         self.atoms_accelerations = np.zeros((self.number_atoms, self.dimensions))
+
+        if (self.monte_carlo is None) & (self.mu is None) & (self.displace is None):
+            print("Warning: wrong Monte Carlo parameters. Pick either mu or displace")
 
     def non_dimensionalize(self):
         """Non-dimensionalize all input value"""
@@ -91,11 +96,17 @@ class MolecularSimulation:
         self.epsilon /= self.e0
         self.sigma /= self.d0
         self.atom_mass /= self.m0
-        self.displace_mc /= self.d0
-        self.mu /= self.e0
-        self.tau /= self.t0
+        if self.displace_mc is not None:
+            self.displace_mc /= self.d0
+        if self.mu is not None:
+            self.mu /= self.e0
+        self.tau_temp /= self.t0
+        self.tau_press /= self.t0
         self.LJ_cut_off /= self.d0
 
+        if self.desired_pressure is not None:
+            self.desired_pressure *= cst.atm*cst.angstrom**3*cst.Avogadro/cst.calorie/cst.kilo/self.e0*self.d0**3
+    
         self.beta =  1/self.desired_temperature
 
     def run(self):
@@ -157,6 +168,7 @@ class MolecularSimulation:
                 press = open("pressure.dat", "w")
                 temperature = open("temperature.dat", "w")
                 density = open("density.dat", "w")
+                volume = open("volume.dat", "w")
             else:
                 epot = open("Epot.dat", "a")
                 ekin = open("Ekin.dat", "a")
@@ -164,6 +176,7 @@ class MolecularSimulation:
                 press = open("pressure.dat", "a")
                 temperature = open("temperature.dat", "a")
                 density = open("density.dat", "a")
+                volume = open("volume.dat", "a")
             epot.write(str(self.step) + " " + str(self.Epot*self.e0) + "\n")
             ekin.write(str(self.step) + " " + str(self.Ekin*self.e0) + "\n")
             etot.write(str(self.step) + " " + str(self.Ekin*self.e0+self.Epot*self.e0) + "\n")
@@ -174,11 +187,13 @@ class MolecularSimulation:
             T_K = self.temperature*(self.e0/self.kB_kCal_mol_K)
             temperature.write(str(self.step) + " " + str(T_K) + "\n")
             density.write(str(self.step) + " " + str(self.number_atoms/self.volume) + "\n")
+            volume.write(str(self.step) + " " + str(self.volume) + "\n")
             epot.close()
             ekin.close()
             etot.close()
             press.close()
             density.close()
+            volume.close()
 
     def initialize_log(self):
         
@@ -343,19 +358,14 @@ class MolecularSimulation:
         atoms_velocity_Dt2 = self.atoms_velocities + self.atoms_accelerations*self.time_step/2
         self.atoms_positions = self.atoms_positions + atoms_velocity_Dt2*self.time_step
         self.atoms_accelerations = self.evaluate_LJ_force()/self.atom_mass
-
-        #if np.max(self.atoms_accelerations) > 1e3:
-        #    print("********************")
-        #    print("warning", self.atoms_positions.T[2], self.evaluate_LJ_force().T[2], self.box_size)
-        #    print("********************")
-
         self.atoms_velocities = atoms_velocity_Dt2 + self.atoms_accelerations*self.time_step/2
         self.apply_berendsen_thermostat()
+        if self.desired_pressure is not None:
+            self.apply_berendsen_barostat()
 
     def monte_carlo_insert_delete(self):
         Epot = self.calculate_potential_energy(self.atoms_positions)
         trial_atoms_positions = copy.deepcopy(self.atoms_positions)
-        
         if np.random.random() < 0.5:
             number_atoms = self.number_atoms + 1
             atom_position = np.zeros((1, self.dimensions))
@@ -393,13 +403,9 @@ class MolecularSimulation:
             out_ids = self.atoms_positions[:, dim] > self.box_boundaries[dim][1]
             if np.sum(out_ids) > 0:
                 self.atoms_positions[:, dim][out_ids] -= self.box_size[dim]
-                #if self.molecular_dynamics:
-                #    self.previous_positions[:, dim][out_ids] -= self.box_size[dim]
             out_ids = self.atoms_positions[:, dim] < self.box_boundaries[dim][0]
             if np.sum(out_ids) > 0:
                 self.atoms_positions[:, dim][out_ids] += self.box_size[dim]
-                #if self.molecular_dynamics:
-                #    self.previous_positions[:, dim][out_ids] += self.box_size[dim]
 
     def calculate_pressure(self):
         "Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smith 2002)"
@@ -422,22 +428,25 @@ class MolecularSimulation:
                     dU_dr = 48/rij*(1/rij**12-0.5/rij**6)
                     forces[Ni] += dU_dr*rij_xyz/rij
                     forces[Nj] -= dU_dr*rij_xyz/rij
-
-                #if self.step==0:
-                #    temp = open("temp.dat", "w")
-                #else:
-                #    temp = open("temp.dat", "a")
-                #temp.write(str(rij) + " " + str(forces[Ni][2]) + "\n")
-                #temp.close()
-
         return forces
 
     def apply_berendsen_thermostat(self):
         """Rescale velocities based on Berendsten thermostat"""
         self.calculate_temperature()
-        scale = np.sqrt(1+self.time_step*((self.desired_temperature/self.temperature)-1)/self.tau)
+        scale = np.sqrt(1+self.time_step*((self.desired_temperature/self.temperature)-1)/self.tau_temp)
         self.atoms_velocities *= scale
         self.calculate_temperature()
+
+    def apply_berendsen_barostat(self):
+        """Rescale box size based on Berendsten barostat"""
+        self.calculate_pressure()
+        scale = np.sqrt(1+self.time_step*((self.pressure/self.desired_pressure)-1)/self.tau_press)
+        self.volume *= scale
+        self.box_boundaries *= scale
+        self.box_size *= scale
+        self.atoms_positions *= scale
+        self.calculate_pressure()
+
 
     #def _molecular_dynamics_displacement(self):
     #    print("here")

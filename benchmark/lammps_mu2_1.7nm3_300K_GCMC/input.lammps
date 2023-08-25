@@ -1,6 +1,6 @@
 variable dump equal 500
 variable thermo equal 500
-variable maximum_steps equal 200000
+variable maximum_steps equal 2000000
 
 # main parameters
 units real
@@ -29,6 +29,6 @@ variable atom atom "type==1"
 group atom dynamic all var atom
 variable n_atom equal count(atom)
 variable density equal v_n_atom/vol
-fix myat1 all ave/time ${dump} 1 ${dump} v_density v_n_atom file density.dat
+fix myat1 all ave/time ${dump} 1 ${dump} v_density file density.dat
 
 run ${maximum_steps}
