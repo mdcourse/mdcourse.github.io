@@ -20,6 +20,8 @@ class InitializeSimulation:
                  seed=None,
                  desired_temperature=300,
                  desired_pressure=1,
+                 provided_positions=None,
+                 provided_velocities=None,
                  *args,
                  **kwargs,
                  ):
@@ -35,6 +37,8 @@ class InitializeSimulation:
         self.seed = seed
         self.desired_temperature = desired_temperature
         self.desired_pressure = desired_pressure
+        self.provided_positions = provided_positions
+        self.provided_velocities = provided_velocities
 
         if self.seed is not None:
             np.random.seed(self.seed)
@@ -93,16 +97,22 @@ class InitializeSimulation:
     def populate_box(self):
         """Place atoms at random positions within the box."""
         atoms_positions = np.zeros((self.number_atoms, self.dimensions))
-        for dim in np.arange(self.dimensions):
-            atoms_positions[:, dim] = np.random.random(self.number_atoms)*np.diff(self.box_boundaries[dim]) - np.diff(self.box_boundaries[dim])/2    
+        if self.provided_positions is not None:
+            atoms_positions = self.provided_positions/self.reference_distance
+        else:
+            for dim in np.arange(self.dimensions):
+                atoms_positions[:, dim] = np.random.random(self.number_atoms)*np.diff(self.box_boundaries[dim]) - np.diff(self.box_boundaries[dim])/2    
         self.atoms_positions = atoms_positions
 
     def give_velocity(self):
         """Give velocity to atoms so that the initial temperature is the desired one."""
         atoms_velocities = np.zeros((self.number_atoms, self.dimensions))
-        for dim in np.arange(self.dimensions):  
-            atoms_velocities[:, dim] = np.random.normal(size=self.number_atoms)
-        atoms_velocities *= np.sqrt(self.desired_temperature/self.atom_mass/self.dimensions)
+        if self.provided_velocities is not None:
+            atoms_velocities = self.provided_velocities/self.reference_distance*self.reference_time
+        else:
+            for dim in np.arange(self.dimensions):  
+                atoms_velocities[:, dim] = np.random.normal(size=self.number_atoms)
+            atoms_velocities *= np.sqrt(self.desired_temperature/self.atom_mass/self.dimensions)
         self.atoms_velocities = atoms_velocities
 
     def wrap_in_box(self):
@@ -261,8 +271,22 @@ class Utilities:
         volume = np.prod(np.diff(self.box_boundaries))
         self.calculate_temperature()
         p_ideal = (Ndof/self.dimensions)*self.temperature/volume
-        p_non_ideal = 1/(volume*self.dimensions)*np.sum(self.atoms_positions*self.evaluate_LJ_force())
+        p_non_ideal = 1/(volume*self.dimensions)*np.sum(self.evaluate_LJ_matrix()*self.evaluate_rij_matrix())
         self.pressure = (p_ideal+p_non_ideal)
+
+    def evaluate_rij_matrix(self):
+        """Evaluate vector rij between particles."""
+        rij = np.zeros((self.number_atoms,self.number_atoms,3))
+        for Ni in range(self.number_atoms-1):
+            position_i = self.atoms_positions[Ni]
+            for Nj in np.arange(Ni+1,self.number_atoms):
+                position_j = self.atoms_positions[Nj]
+                box_size = np.diff(self.box_boundaries).reshape(3)
+                rij_xyz = (np.remainder(position_i - position_j + box_size/2., box_size) - box_size/2.).T
+                r = np.sqrt(np.sum(rij_xyz**2))
+                if r < self.cut_off:
+                    rij[Ni][Nj] = rij_xyz
+        return rij
 
     def calculate_r(self, position_i, positions_j, number_atoms = None):
         """Calculate the shortest distance between position_i and atoms_positions."""
@@ -302,6 +326,20 @@ class Utilities:
                     forces[Nj] -= dU_dr*rij_xyz/rij
         return forces
     
+    def evaluate_LJ_matrix(self):
+        """Evaluate force based on LJ potential derivative."""
+        forces = np.zeros((self.number_atoms,self.number_atoms,3))
+        for Ni in range(self.number_atoms-1):
+            position_i = self.atoms_positions[Ni]
+            for Nj in np.arange(Ni+1,self.number_atoms):
+                position_j = self.atoms_positions[Nj]
+                box_size = np.diff(self.box_boundaries).reshape(3)
+                rij_xyz = (np.remainder(position_i - position_j + box_size/2., box_size) - box_size/2.).T
+                rij = np.sqrt(np.sum(rij_xyz**2))
+                if rij < self.cut_off:
+                    dU_dr = 48/rij*(1/rij**12-0.5/rij**6)
+                    forces[Ni][Nj] += dU_dr*rij_xyz/rij
+        return forces
 
 class MolecularDynamics(InitializeSimulation, Utilities, Outputs):
     def __init__(self,
@@ -346,13 +384,9 @@ class MolecularDynamics(InitializeSimulation, Utilities, Outputs):
         self.atoms_positions = self.atoms_positions + atoms_velocity_Dt2*self.time_step
         self.atoms_accelerations = self.evaluate_LJ_force()/self.atom_mass
         self.atoms_velocities = atoms_velocity_Dt2 + self.atoms_accelerations*self.time_step/2
-        if self.tau_temp is not None:
-            self.apply_berendsen_thermostat()
-        if self.tau_press is not None:
-            self.apply_berendsen_barostat()
 
     def apply_berendsen_thermostat(self):
-        """Rescale velocities based on Berendsten thermostat."""
+        """Rescale velocities based on Berendsen thermostat."""
         self.calculate_temperature()
         scale = np.sqrt(1+self.time_step*((self.desired_temperature/self.temperature)-1)/self.tau_temp)
         self.atoms_velocities *= scale

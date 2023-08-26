@@ -12,7 +12,7 @@ boundary p p p
 #read_data twoparticle.data
 region myreg block -6 6 -6 6 -6 6
 create_box 1 myreg
-create_atoms 1 random 25 14141 myreg
+create_atoms 1 random 25 32141 myreg
 
 mass 1 1
 pair_coeff 1 1 0.1 1.0

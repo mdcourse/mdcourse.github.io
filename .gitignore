@@ -8,3 +8,5 @@ molecular-simulation/*.data
 docs/build
 
 **/log.*
+
+benchmark/*/*.data
