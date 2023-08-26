@@ -112,8 +112,10 @@ class InitializeSimulation:
         else:
             for dim in np.arange(self.dimensions):  
                 atoms_velocities[:, dim] = np.random.normal(size=self.number_atoms)
-            atoms_velocities *= np.sqrt(self.desired_temperature/self.atom_mass/self.dimensions)
         self.atoms_velocities = atoms_velocities
+        self.calculate_temperature()
+        scale = np.sqrt(1+((self.desired_temperature/self.temperature)-1))
+        self.atoms_velocities *= scale
 
     def wrap_in_box(self):
         for dim in np.arange(self.dimensions):
