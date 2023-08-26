@@ -14,6 +14,17 @@ files in it:
 
 .. code-block:: python
 
+    import numpy as np
+
+    import warnings
+    warnings.filterwarnings('ignore')
+
+The *numpy* functions will be used here, and some annoying warning
+are deactivated (will be useful when evaluating Metropolis criteria).
+Then, copy:
+
+.. code-block:: python
+
     class InitializeSimulation:
         def __init__(self,
                      number_atoms,
@@ -49,6 +60,13 @@ reference mass in g/mol. The *desired_temperature* and *desired_pressure* parame
 Kelvin and in atmosphere, are optional parameters that will be used in some case (as will be seen later
 on), and *seed* offer the possibility to fix the seed of the randomly generated number, allowing for
 repeating the same simulation if necessary -- this is usually useful during debugging. 
+
+Add the following lines to the *__init__* function:
+
+.. code-block:: python
+
+        if self.seed is not None:
+            np.random.seed(self.seed)
 
 Initialize box
 --------------
