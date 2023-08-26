@@ -133,7 +133,25 @@ class InitializeSimulation:
             cpt += 1
         f.close()
 
-class MolecularDynamics(InitializeSimulation):
+class Outputs:
+    def __init__(self,
+                 *args,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def log(self):
+        # Evaluate temperature (in K)
+        self.calculate_temperature()
+        kB = cst.Boltzmann*cst.Avogadro/cst.calorie/cst.kilo # kCal/mol/K
+        temperature = np.round(self.temperature*self.reference_energy/kB,2)
+        # Evaluate Pressure (in atm)
+        self.calculate_pressure()
+        pressure = np.round(self.pressure*self.reference_energy/self.reference_distance**3*cst.calorie*cst.kilo/cst.Avogadro/cst.angstrom**3/cst.atm, 3)
+        if self.step ==1:
+            print("step temp press")
+        print(self.step, temperature, pressure)
+
+class MolecularDynamics(InitializeSimulation, Outputs):
     def __init__(self,
                 maximum_steps,
                 tau_temp = None,
@@ -162,6 +180,7 @@ class MolecularDynamics(InitializeSimulation):
                 self.apply_berendsen_thermostat()
             if self.tau_press is not None:
                 self.apply_berendsen_barostat()
+            self.log()
         self.write_lammps_data(filename="final.data")
 
     def evaluate_LJ_force(self):
@@ -203,9 +222,7 @@ class MolecularDynamics(InitializeSimulation):
         """Rescale box size based on Berendsten barostat."""
         self.calculate_pressure()
         scale = np.sqrt(1+self.time_step*((self.pressure/self.desired_pressure)-1)/self.tau_press)
-        self.volume *= scale
         self.box_boundaries *= scale
-        self.box_size *= scale
         self.atoms_positions *= scale
 
     def calculate_temperature(self):
@@ -219,9 +236,10 @@ class MolecularDynamics(InitializeSimulation):
 
     def calculate_pressure(self):
         """Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smith 2002)"""
-        Ndof = self.dimensions*self.number_atoms-self.dimensions      
-        p_ideal = (Ndof/self.dimensions)*self.temperature/self.volume
-        p_non_ideal = 1/(self.volume*self.dimensions)*np.sum(self.atoms_positions*self.evaluate_LJ_force())
+        Ndof = self.dimensions*self.number_atoms-self.dimensions    
+        volume = np.prod(np.diff(self.box_boundaries))
+        p_ideal = (Ndof/self.dimensions)*self.temperature/volume
+        p_non_ideal = 1/(volume*self.dimensions)*np.sum(self.atoms_positions*self.evaluate_LJ_force())
         self.pressure = (p_ideal+p_non_ideal)
 
 
