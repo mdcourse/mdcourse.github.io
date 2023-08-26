@@ -20,7 +20,7 @@ neigh_modify every 1
 
 
 timestep 0.1
-fix mygcmc all gcmc 1 1 0 1 29494 300 -2 0.01
+fix mygcmc all gcmc 1 1 0 1 29494 300 -4 0.01
 
 thermo ${thermo}
 dump mydmp all custom ${dump} dump.lammpstrj id type x y z vx vy vz

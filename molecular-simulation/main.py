@@ -4,7 +4,6 @@ import numpy as np
 import logging
 import copy
 
-# to remove the runtime warning
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -73,7 +72,7 @@ class InitializeSimulation:
             elif type == "time":
                 variable /= self.reference_time
             elif type == "pressure":
-                variable /= (cst.atm*cst.angstrom**3*cst.Avogadro/cst.calorie/cst.kilo/self.reference_energy*self.reference_distance**3)
+                variable *= cst.atm*cst.angstrom**3*cst.Avogadro/cst.calorie/cst.kilo/self.reference_energy*self.reference_distance**3
             else:
                 print("Unknown variable type", type)
         return variable
@@ -176,6 +175,9 @@ class Outputs:
         """Measure energy and convert in kcal/mol"""
         self.calculate_kinetic_energy()
         return self.Ekin*self.reference_energy
+    
+    def evaluate_density(self):
+        return self.number_atoms/np.round(np.prod(np.diff(self.box_boundaries))*self.reference_distance**3)
 
     def update_log(self):
         if self.thermo is not None:
@@ -185,6 +187,7 @@ class Outputs:
                 volume = self.evaluate_volume()
                 epot = self.evaluate_potential_energy()
                 ekin = self.evaluate_kinetic_energy()
+                density = self.evaluate_density()
                 if self.step == 0:
                     print("step N temp epot ekin press vol")
                 print(self.step,
@@ -200,6 +203,7 @@ class Outputs:
                 self.write_data_file(volume, "volume.dat")
                 self.write_data_file(epot, "Epot.dat")
                 self.write_data_file(ekin, "Ekin.dat")
+                self.write_data_file(density, "density.dat")
 
     def write_data_file(self, output_value, filename):
         if self.step == 0:
@@ -383,6 +387,7 @@ class MonteCarlo(InitializeSimulation, Utilities, Outputs):
 
     def run(self):
         """Perform the loop over time."""
+        
         for self.step in range(0, self.maximum_steps+1):
             if self.displace_mc is not None:
                 self.monte_carlo_displacement()
