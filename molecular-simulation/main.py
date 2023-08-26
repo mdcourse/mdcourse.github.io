@@ -1,7 +1,6 @@
 from scipy import constants as cst
 from decimal import Decimal
 import numpy as np
-import logging
 import copy
 
 import warnings
