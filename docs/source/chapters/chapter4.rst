@@ -3,7 +3,7 @@ Molecular dynamics simulations
 
 The typical structure of a molecular dynamics simulation is the following:
 
-.. code-block:: bash
+.. code-block:: bw
 
     - Initialize the system
     - Loop for a desired number of steps

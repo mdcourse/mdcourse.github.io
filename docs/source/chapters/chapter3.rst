@@ -3,7 +3,7 @@ Monte carlo simulations
 
 The typical structure of a Monte Carlo simulation is the following:
 
-.. code-block:: bash
+.. code-block:: bw
 
     - Initialize the system
     - Loop for a desired number of steps
