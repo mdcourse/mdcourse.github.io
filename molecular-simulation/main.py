@@ -2,8 +2,6 @@ from scipy import constants as cst
 import numpy as np
 import logging
 import copy
-import sys
-import matplotlib.pyplot as plt
 
 # to remove the runtime warning
 import warnings
@@ -35,6 +33,9 @@ class InitializeSimulation:
         self.seed = seed
         self.desired_temperature = desired_temperature
 
+        if self.seed is not None:
+            np.random.seed(self.seed)
+
         self.reference_distance = self.sigma
         self.reference_energy = self.epsilon
         self.reference_mass = self.atom_mass
@@ -64,6 +65,8 @@ class InitializeSimulation:
                 variable /= self.reference_mass
             elif type == "temperature":
                 variable /= self.reference_energy/kB
+            elif type == "time":
+                variable /= self.reference_time
             else:
                 print("Unknown variable type", type)
         return variable
@@ -96,6 +99,15 @@ class InitializeSimulation:
         atoms_velocities *= np.sqrt(self.desired_temperature/self.atom_mass/self.dimensions)
         self.atoms_velocities = atoms_velocities
 
+    def wrap_in_box(self):
+        for dim in np.arange(self.dimensions):
+            out_ids = self.atoms_positions[:, dim] > self.box_boundaries[dim][1]
+            if np.sum(out_ids) > 0:
+                self.atoms_positions[:, dim][out_ids] -= np.diff(self.box_boundaries[dim])[0]
+            out_ids = self.atoms_positions[:, dim] < self.box_boundaries[dim][0]
+            if np.sum(out_ids) > 0:
+                self.atoms_positions[:, dim][out_ids] += np.diff(self.box_boundaries[dim])[0]
+
     def write_lammps_data(self, filename="lammps.data"):
         """Write a LAMMPS data file containing atoms positions and velocities"""
         f = open(filename, "w")
@@ -125,16 +137,110 @@ class MolecularDynamics(InitializeSimulation):
     def __init__(self,
                 maximum_steps,
                 tau_temp = None,
+                tau_press = None,
+                cut_off = 10,
+                time_step=1,
                 *args,
                 **kwargs,
                 ):
         self.maximum_steps = maximum_steps
         self.tau_temp = tau_temp  
+        self.tau_press = tau_press
+        self.cut_off = cut_off
+        self.time_step = time_step
         super().__init__(*args, **kwargs)
 
+        self.cut_off = self.nondimensionalise_units(self.cut_off, "distance")
+        self.time_step = self.nondimensionalise_units(self.time_step, "time")
+
     def run(self):
+        """Perform the loop over time."""
         for self.step in range(1, self.maximum_steps+1):
-            print(self.step)
+            self.integrate_equation_of_motion()
+            self.wrap_in_box()
+            if self.tau_temp is not None:
+                self.apply_berendsen_thermostat()
+            if self.tau_press is not None:
+                self.apply_berendsen_barostat()
+        self.write_lammps_data(filename="final.data")
+
+    def evaluate_LJ_force(self):
+        """Evaluate force based on LJ potential derivative."""
+        forces = np.zeros((self.number_atoms,3))
+        for Ni in range(self.number_atoms-1):
+            position_i = self.atoms_positions[Ni]
+            for Nj in np.arange(Ni+1,self.number_atoms):
+                position_j = self.atoms_positions[Nj]
+                box_size = np.diff(self.box_boundaries).reshape(3)
+                rij_xyz = (np.remainder(position_i - position_j + box_size/2., box_size) - box_size/2.).T
+                rij = np.sqrt(np.sum(rij_xyz**2))
+                if rij < self.cut_off:
+                    dU_dr = 48/rij*(1/rij**12-0.5/rij**6)
+                    forces[Ni] += dU_dr*rij_xyz/rij
+                    forces[Nj] -= dU_dr*rij_xyz/rij
+        return forces
+
+    def integrate_equation_of_motion(self):
+        """Integrate equation of motion using half-step velocity"""
+        if self.step == 1:
+            self.atoms_accelerations = self.evaluate_LJ_force()/self.atom_mass
+        atoms_velocity_Dt2 = self.atoms_velocities + self.atoms_accelerations*self.time_step/2
+        self.atoms_positions = self.atoms_positions + atoms_velocity_Dt2*self.time_step
+        self.atoms_accelerations = self.evaluate_LJ_force()/self.atom_mass
+        self.atoms_velocities = atoms_velocity_Dt2 + self.atoms_accelerations*self.time_step/2
+        if self.tau_temp is not None:
+            self.apply_berendsen_thermostat()
+        if self.tau_press is not None:
+            self.apply_berendsen_barostat()
+
+    def apply_berendsen_thermostat(self):
+        """Rescale velocities based on Berendsten thermostat."""
+        self.calculate_temperature()
+        scale = np.sqrt(1+self.time_step*((self.desired_temperature/self.temperature)-1)/self.tau_temp)
+        self.atoms_velocities *= scale
+
+    def apply_berendsen_barostat(self):
+        """Rescale box size based on Berendsten barostat."""
+        self.calculate_pressure()
+        scale = np.sqrt(1+self.time_step*((self.pressure/self.desired_pressure)-1)/self.tau_press)
+        self.volume *= scale
+        self.box_boundaries *= scale
+        self.box_size *= scale
+        self.atoms_positions *= scale
+
+    def calculate_temperature(self):
+        """Follow the expression given in the LAMMPS documentation"""
+        self.calculate_kinetic_energy()
+        Ndof = self.dimensions*self.number_atoms-self.dimensions
+        self.temperature = 2*self.Ekin/Ndof
+
+    def calculate_kinetic_energy(self):
+        self.Ekin = np.sum(self.atom_mass*np.sum(self.atoms_velocities**2, axis=1)/2)
+
+    def calculate_pressure(self):
+        """Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smith 2002)"""
+        Ndof = self.dimensions*self.number_atoms-self.dimensions      
+        p_ideal = (Ndof/self.dimensions)*self.temperature/self.volume
+        p_non_ideal = 1/(self.volume*self.dimensions)*np.sum(self.atoms_positions*self.evaluate_LJ_force())
+        self.pressure = (p_ideal+p_non_ideal)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class MolecularSimulation:
     def __init__(self,
