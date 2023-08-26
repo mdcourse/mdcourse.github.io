@@ -3,6 +3,7 @@
 **/*.dat
 **/*.lammpstrj
 **/*.pyc
+molecular-simulation/*.data
 
 docs/build
 
