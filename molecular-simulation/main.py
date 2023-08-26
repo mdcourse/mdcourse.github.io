@@ -20,7 +20,9 @@ class InitializeSimulation:
                  sigma=1,
                  atom_mass=1,
                  seed=None,
-                 desired_temperature=300
+                 desired_temperature=300,
+                 *args,
+                 **kwargs,
                  ):
         self.number_atoms = number_atoms
         self.Lx = Lx
@@ -120,21 +122,19 @@ class InitializeSimulation:
         f.close()
 
 class MolecularDynamics(InitializeSimulation):
-
-    def _init__(self,
+    def __init__(self,
                 maximum_steps,
                 tau_temp = None,
                 *args,
                 **kwargs,
                 ):
-        super().__init__(*args, **kwargs)
         self.maximum_steps = maximum_steps
         self.tau_temp = tau_temp  
+        super().__init__(*args, **kwargs)
 
     def run(self):
-
         for self.step in range(1, self.maximum_steps+1):
-             print(self.step)
+            print(self.step)
 
 class MolecularSimulation:
     def __init__(self,
