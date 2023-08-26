@@ -171,29 +171,38 @@ class Outputs:
         """Measure energy and convert in kcal/mol"""
         Epot = self.calculate_potential_energy(self.atoms_positions)
         return Epot*self.reference_energy
+    
+    def evaluate_kinetic_energy(self):
+        """Measure energy and convert in kcal/mol"""
+        self.calculate_kinetic_energy()
+        return self.Ekin*self.reference_energy
 
     def update_log(self):
         if self.thermo is not None:
             if (self.step % self.thermo == 0) | (self.step == 0):
-                temperature = self. evaluate_temperature()
+                temperature = self.evaluate_temperature()
                 pressure = self.evaluate_pressure()
                 volume = self.evaluate_volume()
-                epot = self.evaluate_potential_energy()    
+                epot = self.evaluate_potential_energy()
+                ekin = self.evaluate_kinetic_energy()
                 if self.step == 0:
-                    print("step N temp epot press vol")
+                    print("step N temp epot ekin press vol")
                 print(self.step,
                       self.number_atoms,
                       temperature,
                       '%.2E' % Decimal(epot),
+                      '%.2E' % Decimal(ekin),
                       '%.2E' % Decimal(pressure),
                       '%.2E' % Decimal(volume),
                       )
                 self.write_data_file(temperature, "temperature.dat")
                 self.write_data_file(pressure, "pressure.dat")
                 self.write_data_file(volume, "volume.dat")
+                self.write_data_file(epot, "Epot.dat")
+                self.write_data_file(ekin, "Ekin.dat")
 
     def write_data_file(self, output_value, filename):
-        if self.step == 1:
+        if self.step == 0:
             myfile = open(filename, "w")
         else:
             myfile = open(filename, "a")
@@ -227,7 +236,7 @@ class Outputs:
                 f.close()
 
 
-class Thermo:
+class Utilities:
     def __init__(self,
                  *args,
                  **kwargs):
@@ -290,7 +299,7 @@ class Thermo:
         return forces
     
 
-class MolecularDynamics(InitializeSimulation, Thermo, Outputs):
+class MolecularDynamics(InitializeSimulation, Utilities, Outputs):
     def __init__(self,
                 maximum_steps,
                 tau_temp = None,
@@ -309,6 +318,8 @@ class MolecularDynamics(InitializeSimulation, Thermo, Outputs):
 
         self.cut_off = self.nondimensionalise_units(self.cut_off, "distance")
         self.time_step = self.nondimensionalise_units(self.time_step, "time")
+        self.tau_temp = self.nondimensionalise_units(self.tau_temp, "time")
+        self.tau_press = self.nondimensionalise_units(self.tau_press, "time")
 
     def run(self):
         """Perform the loop over time."""
@@ -350,7 +361,7 @@ class MolecularDynamics(InitializeSimulation, Thermo, Outputs):
         self.atoms_positions *= scale
 
 
-class MonteCarlo(InitializeSimulation, Thermo, Outputs):
+class MonteCarlo(InitializeSimulation, Utilities, Outputs):
     def __init__(self,
         maximum_steps,
         cut_off = 10,
