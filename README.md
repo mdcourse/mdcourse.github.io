@@ -1,5 +1,7 @@
 # Learn molecular simulation with python
 
+[Link](https://mdcourse.github.io/) to the website.
+
 ### About me ###
 
 I am a computer physicist in soft matter and fluids at interfaces. You can 
