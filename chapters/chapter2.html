@@ -290,6 +290,9 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#initialize-box">Initialize box</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#populate-box">Populate box</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#give-initial-velocity-to-the-atoms">Give initial velocity to the atoms</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nondimensionalize-the-units">Nondimensionalize the units</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#final-function">Final function</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tests">Tests</a></li>
 </ul>
             </nav>
         </div>
@@ -423,8 +426,158 @@ certain sub-region of the system.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">atoms_velocities</span> <span class="o">*=</span> <span class="n">scale</span>
 </pre></div>
 </div>
-<p>Commonly, one can make sure that no overall translational nor rotational momentum is given to the
-atoms.</p>
+<p>Commonly, one can make sure that no overall translational nor rotational momentum is given
+to the atoms.</p>
+<p>The scale <span class="math notranslate nohighlight">\(\sqrt \left(1+((T_0/T)-1) \right)\)</span> is used to rescale the velocity of the
+atoms so that the temperature of the system goes from <span class="math notranslate nohighlight">\(T\)</span>, the current temperature,
+to <span class="math notranslate nohighlight">\(T_0\)</span>, the desired temperature.</p>
+</section>
+<section id="nondimensionalize-the-units">
+<h2>Nondimensionalize the units<a class="headerlink" href="#nondimensionalize-the-units" title="Permalink to this heading">#</a></h2>
+<p>Units are given by the user in the so-called <em>real</em> units as defined by LAMMPS,
+and are converted into non-dimensional units before the simulation starts. This
+is done thanks to the following function <em>nondimensionalise_units</em>, and is
+based on the references distance (<span class="math notranslate nohighlight">\(\sigma\)</span>), energy (<span class="math notranslate nohighlight">\(\epsilon\)</span>),
+and mass (<span class="math notranslate nohighlight">\(\mass\)</span>) as provided by default.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">nondimensionalise_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+    <span class="n">kB</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span> <span class="c1"># kCal/mol/K</span>
+    <span class="k">if</span> <span class="n">variable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;distance&quot;</span><span class="p">:</span>
+            <span class="n">variable</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span>
+        <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;energy&quot;</span><span class="p">:</span>
+            <span class="n">variable</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span>
+        <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;mass&quot;</span><span class="p">:</span>
+            <span class="n">variable</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_mass</span>
+        <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;temperature&quot;</span><span class="p">:</span>
+            <span class="n">variable</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span><span class="o">/</span><span class="n">kB</span>
+        <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
+            <span class="n">variable</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_time</span>
+        <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;pressure&quot;</span><span class="p">:</span>
+            <span class="n">variable</span> <span class="o">*=</span> <span class="n">cst</span><span class="o">.</span><span class="n">atm</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">angstrom</span><span class="o">**</span><span class="mi">3</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="o">**</span><span class="mi">3</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unknown variable type&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">variable</span>
+</pre></div>
+</div>
+</section>
+<section id="final-function">
+<h2>Final function<a class="headerlink" href="#final-function" title="Permalink to this heading">#</a></h2>
+<p>The final class looks like:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">InitializeSimulation</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">number_atoms</span><span class="p">,</span>
+                <span class="n">Lx</span><span class="p">,</span>
+                <span class="n">dimensions</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                <span class="n">Ly</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">Lz</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                <span class="n">sigma</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">atom_mass</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">desired_temperature</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+                <span class="n">desired_pressure</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">provided_positions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">provided_velocities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span> <span class="o">=</span> <span class="n">number_atoms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Lx</span> <span class="o">=</span> <span class="n">Lx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ly</span> <span class="o">=</span> <span class="n">Ly</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Lz</span> <span class="o">=</span> <span class="n">Lz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="n">dimensions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">epsilon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span> <span class="o">=</span> <span class="n">atom_mass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span> <span class="o">=</span> <span class="n">desired_temperature</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desired_pressure</span> <span class="o">=</span> <span class="n">desired_pressure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">provided_positions</span> <span class="o">=</span> <span class="n">provided_positions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">provided_velocities</span> <span class="o">=</span> <span class="n">provided_velocities</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference_mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_mass</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="p">))</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">femto</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">Lx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalise_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Lx</span><span class="p">,</span> <span class="s2">&quot;distance&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalise_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Ly</span><span class="p">,</span> <span class="s2">&quot;distance&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Lz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalise_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Lz</span><span class="p">,</span> <span class="s2">&quot;distance&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalise_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">,</span> <span class="s2">&quot;energy&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalise_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span> <span class="s2">&quot;distance&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalise_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span><span class="p">,</span> <span class="s2">&quot;mass&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalise_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span><span class="p">,</span> <span class="s2">&quot;temperature&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desired_pressure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalise_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_pressure</span><span class="p">,</span> <span class="s2">&quot;pressure&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_box</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">populate_box</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">give_velocity</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_lammps_data</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;initial.data&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">nondimensionalise_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="n">kB</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span> <span class="c1"># kCal/mol/K</span>
+        <span class="k">if</span> <span class="n">variable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;distance&quot;</span><span class="p">:</span>
+                <span class="n">variable</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span>
+            <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;energy&quot;</span><span class="p">:</span>
+                <span class="n">variable</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span>
+            <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;mass&quot;</span><span class="p">:</span>
+                <span class="n">variable</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_mass</span>
+            <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;temperature&quot;</span><span class="p">:</span>
+                <span class="n">variable</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span><span class="o">/</span><span class="n">kB</span>
+            <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
+                <span class="n">variable</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_time</span>
+            <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;pressure&quot;</span><span class="p">:</span>
+                <span class="n">variable</span> <span class="o">*=</span> <span class="n">cst</span><span class="o">.</span><span class="n">atm</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">angstrom</span><span class="o">**</span><span class="mi">3</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="o">**</span><span class="mi">3</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unknown variable type&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">variable</span>
+
+    <span class="k">def</span> <span class="nf">initialize_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Define box boundaries based on Lx, Ly, and Lz.</span>
+
+<span class="sd">        If Ly or Lz or both are None, then Lx is used instead&quot;&quot;&quot;</span>
+        <span class="n">box_boundaries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">dim</span><span class="p">,</span> <span class="n">L</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">),</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">Lx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ly</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Lz</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">L</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">box_boundaries</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">L</span><span class="o">/</span><span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">box_boundaries</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">Lx</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Lx</span><span class="o">/</span><span class="mi">2</span>
+        <span class="n">box_boundaries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalise_units</span><span class="p">(</span><span class="n">box_boundaries</span><span class="p">,</span> <span class="s2">&quot;distance&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span> <span class="o">=</span> <span class="n">box_boundaries</span>
+
+    <span class="k">def</span> <span class="nf">populate_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Place atoms at random positions within the box.&quot;&quot;&quot;</span>
+        <span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">provided_positions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">atoms_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">provided_positions</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
+                <span class="n">atoms_positions</span><span class="p">[:,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">atoms_positions</span>
+
+    <span class="k">def</span> <span class="nf">give_velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Give velocity to atoms so that the initial temperature is the desired one.&quot;&quot;&quot;</span>
+        <span class="n">atoms_velocities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">provided_velocities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">atoms_velocities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">provided_velocities</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_time</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
+                <span class="n">atoms_velocities</span><span class="p">[:,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms_velocities</span> <span class="o">=</span> <span class="n">atoms_velocities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_temperature</span><span class="p">()</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms_velocities</span> <span class="o">*=</span> <span class="n">scale</span>
+</pre></div>
+</div>
+</section>
+<section id="tests">
+<h2>Tests<a class="headerlink" href="#tests" title="Permalink to this heading">#</a></h2>
+<p>Let us test the <em>InitializeSimulation</em> to make sure it does what is expected of it.</p>
 </section>
 </section>
 
@@ -480,6 +633,9 @@ atoms.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#initialize-box">Initialize box</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#populate-box">Populate box</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#give-initial-velocity-to-the-atoms">Give initial velocity to the atoms</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nondimensionalize-the-units">Nondimensionalize the units</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#final-function">Final function</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tests">Tests</a></li>
 </ul>
   </nav></div>
 
