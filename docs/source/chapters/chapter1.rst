@@ -48,7 +48,6 @@ The overall structure of the code is the following:
                     ):
 
 
-
     class MonteCarlo(InitializeSimulation, Utilities, Outputs):
         def __init__(self,
                      *args,

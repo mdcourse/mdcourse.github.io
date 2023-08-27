@@ -247,14 +247,14 @@ class Utilities:
                  **kwargs):
         super().__init__(*args, **kwargs)
 
+    def calculate_kinetic_energy(self):
+        self.Ekin = np.sum(self.atom_mass*np.sum(self.atoms_velocities**2, axis=1)/2)
+
     def calculate_temperature(self):
         """Follow the expression given in the LAMMPS documentation"""
         self.calculate_kinetic_energy()
         Ndof = self.dimensions*self.number_atoms-self.dimensions
         self.temperature = 2*self.Ekin/Ndof
-
-    def calculate_kinetic_energy(self):
-        self.Ekin = np.sum(self.atom_mass*np.sum(self.atoms_velocities**2, axis=1)/2)
 
     def calculate_pressure(self):
         """Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smith 2002)"""
@@ -280,7 +280,7 @@ class Utilities:
         return rij
 
     def calculate_r(self, position_i, positions_j, number_atoms = None):
-        """Calculate the shortest distance between position_i and atoms_positions."""
+        """Calculate the shortest distance between position_i and positions_j."""
         if number_atoms is None:
             rij2 = np.zeros(self.number_atoms)
         else:
