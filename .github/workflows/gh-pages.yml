@@ -30,7 +30,7 @@ jobs:
           pip install sphinx-book-theme
       - name: Build
         run: |
-          cd docs/source/
+          cd docs/
           make clean
           make html
       - name: Deploy
