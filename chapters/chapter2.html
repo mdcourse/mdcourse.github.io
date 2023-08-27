@@ -291,8 +291,8 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#populate-box">Populate box</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#give-initial-velocity-to-the-atoms">Give initial velocity to the atoms</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nondimensionalize-the-units">Nondimensionalize the units</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#utilities">Utilities</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#probe-temperature">Probe temperature</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#save-atom-coordinate-to-file">Save atom coordinate to file</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#final-code">Final code</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tests">Tests</a></li>
 </ul>
@@ -462,10 +462,13 @@ and mass (<span class="math notranslate nohighlight">\(m\)</span>) as provided b
 </pre></div>
 </div>
 </section>
-<section id="utilities">
-<h2>Utilities<a class="headerlink" href="#utilities" title="Permalink to this heading">#</a></h2>
+<section id="probe-temperature">
+<h2>Probe temperature<a class="headerlink" href="#probe-temperature" title="Permalink to this heading">#</a></h2>
 <p>The rescaling of the velocity requires to be able to calculate temperature. This is
-done using the formula <span class="math notranslate nohighlight">\(T = 2 E_\text{kin} / N_\text{dof}\)</span>.</p>
+done using the formula <span class="math notranslate nohighlight">\(T = 2 E_\text{kin} / N_\text{dof}\)</span>. Create the <em>Utilities</em>
+class, and two functions: <em>calculate_kinetic_energy</em> and <em>calculate_temperature</em>. The
+kinetic energy is simply calculated as <span class="math notranslate nohighlight">\(E_\text{kin} = \sum_i 1/2 m v_i^2\)</span>, where
+<span class="math notranslate nohighlight">\(v_i\)</span> is the velocity of atom <span class="math notranslate nohighlight">\(i\)</span>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Utilities</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
@@ -483,8 +486,8 @@ done using the formula <span class="math notranslate nohighlight">\(T = 2 E_\tex
 </pre></div>
 </div>
 </section>
-<section id="output">
-<h2>Output<a class="headerlink" href="#output" title="Permalink to this heading">#</a></h2>
+<section id="save-atom-coordinate-to-file">
+<h2>Save atom coordinate to file<a class="headerlink" href="#save-atom-coordinate-to-file" title="Permalink to this heading">#</a></h2>
 <p>Since one would like to visualize the box that is being create, let us start to fill the
 <em>Outputs</em> class and crate our first function named <em>write_lammps_data</em>. <em>write_lammps_data</em>
 creates data file in a format that is readable by LAMMPS, as well as Ovito visualization
@@ -690,7 +693,40 @@ software.</p>
 </section>
 <section id="tests">
 <h2>Tests<a class="headerlink" href="#tests" title="Permalink to this heading">#</a></h2>
-<p>Let us test the <em>InitializeSimulation</em> to make sure it does what is expected of it.</p>
+<p>tofix : for the test to work, <em>Outputs</em> need to inerit from <em>InitializeSimulation</em>… does
+that make sense? Should I introduce already an empty MD class? Would be cleaner…</p>
+<p>Let us test the <em>InitializeSimulation</em> to make sure it does what is expected of it.
+Let us general a very large number of particle with a given temperature:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">temperature</span><span class="o">=</span><span class="mi">500</span> <span class="c1"># Kelvin</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">Outputs</span><span class="p">(</span><span class="n">number_atoms</span><span class="o">=</span><span class="mi">50000</span><span class="p">,</span>
+            <span class="n">Lx</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+            <span class="n">desired_temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="mi">69817</span><span class="p">,</span>
+            <span class="p">)</span>
+<span class="n">x</span><span class="o">.</span><span class="n">write_lammps_data</span><span class="p">()</span>
+
+<span class="n">velocity</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">atoms_velocities</span><span class="o">*</span><span class="n">x</span><span class="o">.</span><span class="n">reference_distance</span><span class="o">/</span><span class="n">x</span><span class="o">.</span><span class="n">reference_time</span>
+<span class="n">norm_velocity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">velocity</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">velocity</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">velocity</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let us calculate a histogram from the norm of the velocity:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">proba</span><span class="p">,</span> <span class="n">vel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">norm_velocity</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">))</span>
+<span class="n">vel</span> <span class="o">=</span> <span class="p">(</span><span class="n">vel</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">+</span><span class="n">vel</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span>
+<span class="n">proba</span> <span class="o">=</span> <span class="n">proba</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">proba</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally let us plot the distribution for 3 different temperatures using
+matplotlib pyplot:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vel</span><span class="p">,</span> <span class="n">proba</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;T = &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; K&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<figure class="align-default">
+<img alt="NVE energy as a function of time" class="only-dark" src="../_images/velocity-distributions-dark.png" />
+</figure>
+<figure class="align-default">
+<img alt="NVE energy as a function of time" class="only-light" src="../_images/velocity-distributions-light.png" />
+</figure>
 </section>
 </section>
 
@@ -747,8 +783,8 @@ software.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#populate-box">Populate box</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#give-initial-velocity-to-the-atoms">Give initial velocity to the atoms</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nondimensionalize-the-units">Nondimensionalize the units</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#utilities">Utilities</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#probe-temperature">Probe temperature</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#save-atom-coordinate-to-file">Save atom coordinate to file</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#final-code">Final code</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tests">Tests</a></li>
 </ul>

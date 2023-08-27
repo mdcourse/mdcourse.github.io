@@ -175,11 +175,14 @@ and mass (:math:`m`) as provided by default.
                 print("Unknown variable type", type)
         return variable
 
-Utilities
----------
+Probe temperature
+-----------------
 
 The rescaling of the velocity requires to be able to calculate temperature. This is 
-done using the formula :math:`T = 2 E_\text{kin} / N_\text{dof}`.
+done using the formula :math:`T = 2 E_\text{kin} / N_\text{dof}`. Create the *Utilities*
+class, and two functions: *calculate_kinetic_energy* and *calculate_temperature*. The
+kinetic energy is simply calculated as :math:`E_\text{kin} = \sum_i 1/2 m v_i^2`, where
+:math:`v_i` is the velocity of atom :math:`i`.
 
 .. code-block:: python
 
@@ -198,8 +201,8 @@ done using the formula :math:`T = 2 E_\text{kin} / N_\text{dof}`.
             Ndof = self.dimensions*self.number_atoms-self.dimensions
             self.temperature = 2*self.Ekin/Ndof
 
-Output
-------
+Save atom coordinate to file
+----------------------------
 
 Since one would like to visualize the box that is being create, let us start to fill the 
 *Outputs* class and crate our first function named *write_lammps_data*. *write_lammps_data*
@@ -410,4 +413,45 @@ The currently written code is:
 Tests
 -----
 
+tofix : for the test to work, *Outputs* need to inerit from *InitializeSimulation*... does 
+that make sense? Should I introduce already an empty MD class? Would be cleaner...
+
 Let us test the *InitializeSimulation* to make sure it does what is expected of it.
+Let us general a very large number of particle with a given temperature:
+
+.. code-block:: python
+
+    temperature=500 # Kelvin
+
+    x = Outputs(number_atoms=50000,
+                Lx=12,
+                desired_temperature=temperature,
+                seed=69817,
+                )
+    x.write_lammps_data()
+
+    velocity = x.atoms_velocities*x.reference_distance/x.reference_time
+    norm_velocity = np.sqrt(velocity.T[0]**2 + velocity.T[1]**2 + velocity.T[2]**2)
+
+Let us calculate a histogram from the norm of the velocity:
+
+.. code-block:: python
+
+    proba, vel = np.histogram(norm_velocity, bins=200, range=(0, 0.1))
+    vel = (vel[1:]+vel[:-1])/2
+    proba = proba/np.sum(proba)
+
+Finally let us plot the distribution for 3 different temperatures using 
+matplotlib pyplot:
+
+.. code-block:: python
+
+    plt.plot(vel, proba, 'o', color=color, markersize=15, label=r'T = '+str(temperature)+' K')
+
+.. figure:: ../_static/chapter1/velocity-distributions-dark.png
+    :alt: NVE energy as a function of time
+    :class: only-dark
+
+.. figure:: ../_static/chapter1/velocity-distributions-light.png
+    :alt: NVE energy as a function of time
+    :class: only-light 
