@@ -1,2 +1,0 @@
-Statistical physics
-===================
