@@ -141,7 +141,7 @@ Providing the atoms with an initial velocity is useful to reach the target tempe
 Commonly, one can make sure that no overall translational nor rotational momentum is given
 to the atoms. 
 
-The scale :math:`\sqrt \left(1+((T_0/T)-1) \right)` is used to rescale the velocity of the 
+The scale :math:`\sqrt{[ 1+((T_0/T-1) ]}` is used to rescale the velocity of the 
 atoms so that the temperature of the system goes from :math:`T`, the current temperature,
 to :math:`T_0`, the desired temperature.
 
@@ -152,7 +152,7 @@ Units are given by the user in the so-called *real* units as defined by LAMMPS,
 and are converted into non-dimensional units before the simulation starts. This 
 is done thanks to the following function *nondimensionalise_units*, and is
 based on the references distance (:math:`\sigma`), energy (:math:`\epsilon`),
-and mass (:math:`\mass`) as provided by default.
+and mass (:math:`m`) as provided by default.
 
 .. code-block:: python
 
@@ -175,12 +175,79 @@ and mass (:math:`\mass`) as provided by default.
                 print("Unknown variable type", type)
         return variable
 
-Final function
---------------
+Utilities
+---------
 
-The final class looks like:
+The rescaling of the velocity requires to be able to calculate temperature. This is 
+done using the formula :math:`T = 2 E_\text{kin} / N_\text{dof}`.
 
 .. code-block:: python
+
+    class Utilities:
+        def __init__(self,
+                    *args,
+                    **kwargs):
+            super().__init__(*args, **kwargs)
+
+        def calculate_kinetic_energy(self):
+            self.Ekin = np.sum(self.atom_mass*np.sum(self.atoms_velocities**2, axis=1)/2)
+
+        def calculate_temperature(self):
+            """Follow the expression given in the LAMMPS documentation"""
+            self.calculate_kinetic_energy()
+            Ndof = self.dimensions*self.number_atoms-self.dimensions
+            self.temperature = 2*self.Ekin/Ndof
+
+Output
+------
+
+Since one would like to visualize the box that is being create, let us start to fill the 
+*Outputs* class and crate our first function named *write_lammps_data*. *write_lammps_data*
+creates data file in a format that is readable by LAMMPS, as well as Ovito visualization
+software. 
+
+.. code-block:: python
+
+    class Outputs:
+        def __init__(self,
+                    *args,
+                    **kwargs):
+            super().__init__(*args, **kwargs)
+
+        def write_lammps_data(self, filename="lammps.data"):
+            """Write a LAMMPS data file containing atoms positions and velocities"""
+            f = open(filename, "w")
+            f.write('# LAMMPS data file \n\n')
+            f.write(str(self.number_atoms)+' atoms\n')
+            f.write('1 atom types\n')
+            f.write('\n')
+            for LminLmax, dim in zip(self.box_boundaries*self.reference_distance, ["x", "y", "z"]):
+                f.write(str(LminLmax[0])+' '+str(LminLmax[1])+' '+dim+'lo ' + dim +  'hi\n')
+            f.write('\n')
+            f.write('Atoms\n')
+            f.write('\n')
+            cpt = 1
+            for xyz in self.atoms_positions*self.reference_distance:
+                f.write(str(cpt)+ ' 1 ' + str(xyz[0]) + ' ' + str(xyz[1]) + ' ' + str(xyz[2]) +'\n')
+                cpt += 1
+            f.write('\n')
+            f.write('Velocities\n')
+            f.write('\n')
+            cpt = 1
+            for vxyz in self.atoms_velocities*self.reference_distance/self.reference_time:
+                f.write(str(cpt) + ' ' + str(vxyz[0]) + ' ' + str(vxyz[1]) + ' ' + str(vxyz[2]) +'\n')
+                cpt += 1
+            f.close()
+
+Final code
+----------
+
+The currently written code is:
+
+.. code-block:: python
+
+    from scipy import constants as cst
+    import numpy as np
 
     class InitializeSimulation:
         def __init__(self,
@@ -291,6 +358,54 @@ The final class looks like:
             self.calculate_temperature()
             scale = np.sqrt(1+((self.desired_temperature/self.temperature)-1))
             self.atoms_velocities *= scale
+
+
+    class Utilities:
+        def __init__(self,
+                    *args,
+                    **kwargs):
+            super().__init__(*args, **kwargs)
+
+        def calculate_kinetic_energy(self):
+            self.Ekin = np.sum(self.atom_mass*np.sum(self.atoms_velocities**2, axis=1)/2)
+
+        def calculate_temperature(self):
+            """Follow the expression given in the LAMMPS documentation"""
+            self.calculate_kinetic_energy()
+            Ndof = self.dimensions*self.number_atoms-self.dimensions
+            self.temperature = 2*self.Ekin/Ndof
+
+
+    class Outputs:
+        def __init__(self,
+                    *args,
+                    **kwargs):
+            super().__init__(*args, **kwargs)
+
+        def write_lammps_data(self, filename="lammps.data"):
+            """Write a LAMMPS data file containing atoms positions and velocities"""
+            f = open(filename, "w")
+            f.write('# LAMMPS data file \n\n')
+            f.write(str(self.number_atoms)+' atoms\n')
+            f.write('1 atom types\n')
+            f.write('\n')
+            for LminLmax, dim in zip(self.box_boundaries*self.reference_distance, ["x", "y", "z"]):
+                f.write(str(LminLmax[0])+' '+str(LminLmax[1])+' '+dim+'lo ' + dim +  'hi\n')
+            f.write('\n')
+            f.write('Atoms\n')
+            f.write('\n')
+            cpt = 1
+            for xyz in self.atoms_positions*self.reference_distance:
+                f.write(str(cpt)+ ' 1 ' + str(xyz[0]) + ' ' + str(xyz[1]) + ' ' + str(xyz[2]) +'\n')
+                cpt += 1
+            f.write('\n')
+            f.write('Velocities\n')
+            f.write('\n')
+            cpt = 1
+            for vxyz in self.atoms_velocities*self.reference_distance/self.reference_time:
+                f.write(str(cpt) + ' ' + str(vxyz[0]) + ' ' + str(vxyz[1]) + ' ' + str(vxyz[2]) +'\n')
+                cpt += 1
+            f.close()
 
 Tests
 -----

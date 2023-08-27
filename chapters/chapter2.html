@@ -291,7 +291,9 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#populate-box">Populate box</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#give-initial-velocity-to-the-atoms">Give initial velocity to the atoms</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nondimensionalize-the-units">Nondimensionalize the units</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#final-function">Final function</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#utilities">Utilities</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#final-code">Final code</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tests">Tests</a></li>
 </ul>
             </nav>
@@ -428,7 +430,7 @@ certain sub-region of the system.</p>
 </div>
 <p>Commonly, one can make sure that no overall translational nor rotational momentum is given
 to the atoms.</p>
-<p>The scale <span class="math notranslate nohighlight">\(\sqrt \left(1+((T_0/T)-1) \right)\)</span> is used to rescale the velocity of the
+<p>The scale <span class="math notranslate nohighlight">\(\sqrt{[ 1+((T_0/T-1) ]}\)</span> is used to rescale the velocity of the
 atoms so that the temperature of the system goes from <span class="math notranslate nohighlight">\(T\)</span>, the current temperature,
 to <span class="math notranslate nohighlight">\(T_0\)</span>, the desired temperature.</p>
 </section>
@@ -438,7 +440,7 @@ to <span class="math notranslate nohighlight">\(T_0\)</span>, the desired temper
 and are converted into non-dimensional units before the simulation starts. This
 is done thanks to the following function <em>nondimensionalise_units</em>, and is
 based on the references distance (<span class="math notranslate nohighlight">\(\sigma\)</span>), energy (<span class="math notranslate nohighlight">\(\epsilon\)</span>),
-and mass (<span class="math notranslate nohighlight">\(\mass\)</span>) as provided by default.</p>
+and mass (<span class="math notranslate nohighlight">\(m\)</span>) as provided by default.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">nondimensionalise_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
     <span class="n">kB</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span> <span class="c1"># kCal/mol/K</span>
     <span class="k">if</span> <span class="n">variable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -460,10 +462,73 @@ and mass (<span class="math notranslate nohighlight">\(\mass\)</span>) as provid
 </pre></div>
 </div>
 </section>
-<section id="final-function">
-<h2>Final function<a class="headerlink" href="#final-function" title="Permalink to this heading">#</a></h2>
-<p>The final class looks like:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">InitializeSimulation</span><span class="p">:</span>
+<section id="utilities">
+<h2>Utilities<a class="headerlink" href="#utilities" title="Permalink to this heading">#</a></h2>
+<p>The rescaling of the velocity requires to be able to calculate temperature. This is
+done using the formula <span class="math notranslate nohighlight">\(T = 2 E_\text{kin} / N_\text{dof}\)</span>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Utilities</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">calculate_kinetic_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ekin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_velocities</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">calculate_temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Follow the expression given in the LAMMPS documentation&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_kinetic_energy</span><span class="p">()</span>
+        <span class="n">Ndof</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">Ekin</span><span class="o">/</span><span class="n">Ndof</span>
+</pre></div>
+</div>
+</section>
+<section id="output">
+<h2>Output<a class="headerlink" href="#output" title="Permalink to this heading">#</a></h2>
+<p>Since one would like to visualize the box that is being create, let us start to fill the
+<em>Outputs</em> class and crate our first function named <em>write_lammps_data</em>. <em>write_lammps_data</em>
+creates data file in a format that is readable by LAMMPS, as well as Ovito visualization
+software.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Outputs</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">write_lammps_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;lammps.data&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write a LAMMPS data file containing atoms positions and velocities&quot;&quot;&quot;</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;# LAMMPS data file </span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; atoms</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;1 atom types</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">LminLmax</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">LminLmax</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">LminLmax</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="n">dim</span><span class="o">+</span><span class="s1">&#39;lo &#39;</span> <span class="o">+</span> <span class="n">dim</span> <span class="o">+</span>  <span class="s1">&#39;hi</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Atoms</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">cpt</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">xyz</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cpt</span><span class="p">)</span><span class="o">+</span> <span class="s1">&#39; 1 &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Velocities</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">cpt</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">vxyz</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_velocities</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_time</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cpt</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vxyz</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vxyz</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vxyz</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="final-code">
+<h2>Final code<a class="headerlink" href="#final-code" title="Permalink to this heading">#</a></h2>
+<p>The currently written code is:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">class</span> <span class="nc">InitializeSimulation</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">number_atoms</span><span class="p">,</span>
                 <span class="n">Lx</span><span class="p">,</span>
@@ -572,6 +637,54 @@ and mass (<span class="math notranslate nohighlight">\(\mass\)</span>) as provid
         <span class="bp">self</span><span class="o">.</span><span class="n">calculate_temperature</span><span class="p">()</span>
         <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms_velocities</span> <span class="o">*=</span> <span class="n">scale</span>
+
+
+<span class="k">class</span> <span class="nc">Utilities</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">calculate_kinetic_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Ekin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_velocities</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">calculate_temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Follow the expression given in the LAMMPS documentation&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_kinetic_energy</span><span class="p">()</span>
+        <span class="n">Ndof</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">Ekin</span><span class="o">/</span><span class="n">Ndof</span>
+
+
+<span class="k">class</span> <span class="nc">Outputs</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">write_lammps_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;lammps.data&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write a LAMMPS data file containing atoms positions and velocities&quot;&quot;&quot;</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;# LAMMPS data file </span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; atoms</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;1 atom types</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">LminLmax</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">LminLmax</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">LminLmax</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="n">dim</span><span class="o">+</span><span class="s1">&#39;lo &#39;</span> <span class="o">+</span> <span class="n">dim</span> <span class="o">+</span>  <span class="s1">&#39;hi</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Atoms</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">cpt</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">xyz</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cpt</span><span class="p">)</span><span class="o">+</span> <span class="s1">&#39; 1 &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Velocities</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">cpt</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">vxyz</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_velocities</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_time</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cpt</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vxyz</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vxyz</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vxyz</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
@@ -634,7 +747,9 @@ and mass (<span class="math notranslate nohighlight">\(\mass\)</span>) as provid
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#populate-box">Populate box</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#give-initial-velocity-to-the-atoms">Give initial velocity to the atoms</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nondimensionalize-the-units">Nondimensionalize the units</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#final-function">Final function</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#utilities">Utilities</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output">Output</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#final-code">Final code</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tests">Tests</a></li>
 </ul>
   </nav></div>
@@ -657,13 +772,6 @@ By Simon Gravelle
   
   <div class="footer-item">
     
-  <p class="copyright">
-    
-      © Copyright All source code is available under the GNU General Public License v3.0.
-      <br/>
-    
-  </p>
-
   </div>
   
   <div class="footer-item">
