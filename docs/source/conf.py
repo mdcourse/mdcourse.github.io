@@ -15,7 +15,7 @@ pygments_style = 'tango'
 html_title = "    "
 html_static_path = ['_static']
 
-html_logo = "_static/logo/logo-lmdwp.png"
+html_logo = "_static/logo/logo-py.png"
 
 html_show_copyright = False
 html_show_sphinx = False
