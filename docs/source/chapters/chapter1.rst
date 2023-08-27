@@ -14,3 +14,43 @@ class 1 is to set up the system, place atoms in the box. Class 2 deals with outp
 and logging of information during the simulations. Class 3 contains some 
 functionalities such as pressure or temperature measurements. Finally classes 4 
 and 5 are the core Molecular Dynamics and Monte Carlo codes, respectively.
+
+The overall structure of the code is the following:
+
+.. code-block:: python
+
+    class InitializeSimulation:
+        def __init__(self,
+                     *args,
+                     **kwargs,
+                     ):
+            super().__init__(*args, **kwargs) 
+
+
+    class Outputs:
+        def __init__(self,
+                     *args,
+                     **kwargs):
+            super().__init__(*args, **kwargs)
+
+
+    class Utilities:
+        def __init__(self,
+                    *args,
+                    **kwargs):
+            super().__init__(*args, **kwargs)
+
+
+    class MolecularDynamics(InitializeSimulation, Utilities, Outputs):
+        def __init__(self,
+                    *args,
+                    **kwargs,
+                    ):
+
+
+
+    class MonteCarlo(InitializeSimulation, Utilities, Outputs):
+        def __init__(self,
+                     *args,
+                     **kwargs,
+                     ):
