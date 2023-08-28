@@ -128,13 +128,13 @@ class Utilities:
         self.temperature = 2*self.Ekin/Ndof
 
 
-class Outputs(InitializeSimulation, Utilities):
+class Outputs():
     def __init__(self,
                 *args,
                 **kwargs):
         super().__init__(*args, **kwargs)
 
-    def write_lammps_data(self, filename="lammps.data"):
+    def write_lammps_data(self, filename="atoms-positions.data"):
         """Write a LAMMPS data file containing atoms positions and velocities"""
         f = open(filename, "w")
         f.write('# LAMMPS data file \n\n')
@@ -158,3 +158,10 @@ class Outputs(InitializeSimulation, Utilities):
             f.write(str(cpt) + ' ' + str(vxyz[0]) + ' ' + str(vxyz[1]) + ' ' + str(vxyz[2]) +'\n')
             cpt += 1
         f.close()
+
+class MolecularDynamics(InitializeSimulation, Utilities, Outputs):
+    def __init__(self,
+                *args,
+                **kwargs,
+                ):
+        super().__init__(*args, **kwargs)
