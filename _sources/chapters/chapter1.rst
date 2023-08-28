@@ -46,6 +46,7 @@ The overall structure of the code is the following:
                     *args,
                     **kwargs,
                     ):
+            super().__init__(*args, **kwargs)
 
 
     class MonteCarlo(InitializeSimulation, Utilities, Outputs):
@@ -53,3 +54,4 @@ The overall structure of the code is the following:
                      *args,
                      **kwargs,
                      ):
+            super().__init__(*args, **kwargs)

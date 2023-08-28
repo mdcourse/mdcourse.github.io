@@ -294,7 +294,11 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#probe-temperature">Probe temperature</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#save-atom-coordinate-to-file">Save atom coordinate to file</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#final-code">Final code</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tests">Tests</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tests">Tests</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#initial-position">Initial position</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#velocity-distribution">Velocity distribution</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -688,45 +692,86 @@ software.</p>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">cpt</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vxyz</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vxyz</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">vxyz</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">MolecularDynamics</span><span class="p">(</span><span class="n">InitializeSimulation</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">,</span> <span class="n">Outputs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">InitializeSimulation</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">,</span> <span class="n">Outputs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="tests">
 <h2>Tests<a class="headerlink" href="#tests" title="Permalink to this heading">#</a></h2>
-<p>tofix : for the test to work, <em>Outputs</em> need to inerit from <em>InitializeSimulation</em>… does
-that make sense? Should I introduce already an empty MD class? Would be cleaner…</p>
-<p>Let us test the <em>InitializeSimulation</em> to make sure it does what is expected of it.
-Let us general a very large number of particle with a given temperature:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">temperature</span><span class="o">=</span><span class="mi">500</span> <span class="c1"># Kelvin</span>
+<p>Let us test the <em>InitializeSimulation</em> to make sure it does what we expect.</p>
+<section id="initial-position">
+<h3>Initial position<a class="headerlink" href="#initial-position" title="Permalink to this heading">#</a></h3>
+<p>Let us create a small box of (2 nm)³ containing 30 particles. In a new python file,
+or in a Jupyter notebook, write:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">main</span> <span class="kn">import</span> <span class="n">MolecularDynamics</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="n">x</span> <span class="o">=</span> <span class="n">Outputs</span><span class="p">(</span><span class="n">number_atoms</span><span class="o">=</span><span class="mi">50000</span><span class="p">,</span>
-            <span class="n">Lx</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-            <span class="n">desired_temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
-            <span class="n">seed</span><span class="o">=</span><span class="mi">69817</span><span class="p">,</span>
-            <span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">MolecularDynamics</span><span class="p">(</span><span class="n">number_atoms</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+                      <span class="n">Lx</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                      <span class="n">seed</span><span class="o">=</span><span class="mi">69817</span><span class="p">,</span>
+                      <span class="p">)</span>
+<span class="n">x</span><span class="o">.</span><span class="n">write_lammps_data</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>After executing this script, a data file named <em>atoms-positions.data</em> has been created.</p>
+</section>
+<section id="velocity-distribution">
+<h3>Velocity distribution<a class="headerlink" href="#velocity-distribution" title="Permalink to this heading">#</a></h3>
+<p>Let us general a very large number of particle with a given temperature:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">main</span> <span class="kn">import</span> <span class="n">MolecularDynamics</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">temperature</span><span class="o">=</span><span class="mi">500</span> <span class="c1"># Kelvin</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">MolecularDynamics</span><span class="p">(</span><span class="n">number_atoms</span><span class="o">=</span><span class="mi">50000</span><span class="p">,</span>
+                      <span class="n">Lx</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+                      <span class="n">desired_temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span>
+                      <span class="n">seed</span><span class="o">=</span><span class="mi">69817</span><span class="p">,</span>
+                      <span class="p">)</span>
 <span class="n">x</span><span class="o">.</span><span class="n">write_lammps_data</span><span class="p">()</span>
 
 <span class="n">velocity</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">atoms_velocities</span><span class="o">*</span><span class="n">x</span><span class="o">.</span><span class="n">reference_distance</span><span class="o">/</span><span class="n">x</span><span class="o">.</span><span class="n">reference_time</span>
 <span class="n">norm_velocity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">velocity</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">velocity</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">velocity</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Let us calculate a histogram from the norm of the velocity:</p>
+<p>Let us calculate a histogram from the norm of the velocity <em>norm_velocity</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">proba</span><span class="p">,</span> <span class="n">vel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">norm_velocity</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">))</span>
 <span class="n">vel</span> <span class="o">=</span> <span class="p">(</span><span class="n">vel</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">+</span><span class="n">vel</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span>
 <span class="n">proba</span> <span class="o">=</span> <span class="n">proba</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">proba</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Finally let us plot the distribution for 3 different temperatures using
-matplotlib pyplot:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vel</span><span class="p">,</span> <span class="n">proba</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;T = &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; K&#39;</span><span class="p">)</span>
+<p>Finally let us plot the distribution using matplotlib pyplot:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">vel</span><span class="p">,</span> <span class="n">proba</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;T = &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; K&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Using 3 different temperatures, and modifying slightly the default pyplot representation, here are
+the velocity distribution that we obtain:</p>
 <figure class="align-default">
 <img alt="NVE energy as a function of time" class="only-dark" src="../_images/velocity-distributions-dark.png" />
 </figure>
 <figure class="align-default">
 <img alt="NVE energy as a function of time" class="only-light" src="../_images/velocity-distributions-light.png" />
 </figure>
+<p>Note that those initial distributions are usually considered as non important in molecular
+simulations, as they will quickly be over</p>
+</section>
 </section>
 </section>
 
@@ -786,7 +831,11 @@ matplotlib pyplot:</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#probe-temperature">Probe temperature</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#save-atom-coordinate-to-file">Save atom coordinate to file</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#final-code">Final code</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tests">Tests</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tests">Tests</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#initial-position">Initial position</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#velocity-distribution">Velocity distribution</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

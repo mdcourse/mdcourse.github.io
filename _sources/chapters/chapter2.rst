@@ -410,30 +410,69 @@ The currently written code is:
                 cpt += 1
             f.close()
 
+
+    class MolecularDynamics(InitializeSimulation, Utilities, Outputs):
+        def __init__(self,
+                    *args,
+                    **kwargs,
+                    ):
+            super().__init__(*args, **kwargs)
+
+
+    class MonteCarlo(InitializeSimulation, Utilities, Outputs):
+        def __init__(self,
+                    *args,
+                    **kwargs,
+                    ):
+            super().__init__(*args, **kwargs)
+
 Tests
 -----
 
-tofix : for the test to work, *Outputs* need to inerit from *InitializeSimulation*... does 
-that make sense? Should I introduce already an empty MD class? Would be cleaner...
+Let us test the *InitializeSimulation* to make sure it does what we expect.
 
-Let us test the *InitializeSimulation* to make sure it does what is expected of it.
+Initial position
+****************
+
+Let us create a small box of (2 nm)³ containing 30 particles. In a new python file, 
+or in a Jupyter notebook, write:
+
+.. code-block:: python
+
+    from main import MolecularDynamics
+    import numpy as np
+
+    x = MolecularDynamics(number_atoms=30,
+                          Lx=20,
+                          seed=69817,
+                          )
+    x.write_lammps_data()
+
+After executing this script, a data file named *atoms-positions.data* has been created.
+
+Velocity distribution
+*********************
+
 Let us general a very large number of particle with a given temperature:
 
 .. code-block:: python
 
+    from main import MolecularDynamics
+    import numpy as np
+
     temperature=500 # Kelvin
 
-    x = Outputs(number_atoms=50000,
-                Lx=12,
-                desired_temperature=temperature,
-                seed=69817,
-                )
+    x = MolecularDynamics(number_atoms=50000,
+                          Lx=12,
+                          desired_temperature=temperature,
+                          seed=69817,
+                          )
     x.write_lammps_data()
 
     velocity = x.atoms_velocities*x.reference_distance/x.reference_time
     norm_velocity = np.sqrt(velocity.T[0]**2 + velocity.T[1]**2 + velocity.T[2]**2)
 
-Let us calculate a histogram from the norm of the velocity:
+Let us calculate a histogram from the norm of the velocity *norm_velocity*:
 
 .. code-block:: python
 
@@ -441,12 +480,16 @@ Let us calculate a histogram from the norm of the velocity:
     vel = (vel[1:]+vel[:-1])/2
     proba = proba/np.sum(proba)
 
-Finally let us plot the distribution for 3 different temperatures using 
-matplotlib pyplot:
+Finally let us plot the distribution using matplotlib pyplot:
 
 .. code-block:: python
 
+    from matplotlib import pyplot as plt
+
     plt.plot(vel, proba, 'o', color=color, markersize=15, label=r'T = '+str(temperature)+' K')
+
+Using 3 different temperatures, and modifying slightly the default pyplot representation, here are 
+the velocity distribution that we obtain:
 
 .. figure:: ../_static/chapter1/velocity-distributions-dark.png
     :alt: NVE energy as a function of time
@@ -455,3 +498,6 @@ matplotlib pyplot:
 .. figure:: ../_static/chapter1/velocity-distributions-light.png
     :alt: NVE energy as a function of time
     :class: only-light 
+
+Note that those initial distributions are usually considered as non important in molecular 
+simulations, as they will quickly be over  
