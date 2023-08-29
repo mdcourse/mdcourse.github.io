@@ -4,10 +4,8 @@ The goal of [Learn molecular simulations with Python](https://mdcourse.github.io
 code containing most of the basic-most functionalities of molecular simulations: including molecular
 dynamics and monte carlo simulations.
 
-<p float="right">
-  <a href="https://mdcourse.github.io/">
-  <img src="docs/source/_static/logo/logo-py.png" width="30%" /></a>
-</p>
+<img src="docs/source/_static/logo/logo-py.png" width="30%" align="right"/></a>
+
 
 The target audience are people either completely new to molecular simulations, or user of user-friendly
 codes such as LAMMPS and GROMACS wanting to understand better what is hiding behind those codes.
@@ -27,4 +25,11 @@ find more information on my [personal webpage](https://simongravelle.github.io/)
 
 All the inputs, scripts, and data files are released under the 
 GNU general public license v3.0.
+
+### Acknowledgment ###
+
+<img src="docs/source/_static/logo/msca.png" width="30%" align="right"/></a>
+
+This project has received funding from the European Union's Horizon 2020 research and innovation programme
+under the Marie Skłodowska-Curie grant agreement No 101065060.
 
