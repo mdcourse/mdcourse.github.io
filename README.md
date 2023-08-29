@@ -28,7 +28,7 @@ GNU general public license v3.0.
 
 ### Acknowledgment ###
 
-<img src="docs/source/_static/logo/msca.png" width="30%" align="right"/></a>
+<img src="docs/source/_static/logo/msca.png" width="10%" align="right"/></a>
 
 This project has received funding from the European Union's Horizon 2020 research and innovation programme
 under the Marie Skłodowska-Curie grant agreement No 101065060.
