@@ -728,7 +728,14 @@ or in a Jupyter notebook, write:</p>
 <span class="n">x</span><span class="o">.</span><span class="n">write_lammps_data</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>After executing this script, a data file named <em>atoms-positions.data</em> has been created.</p>
+<p>After executing this script, a data file named <em>atoms-positions.data</em> has been created. The data file is in
+LAMMPS format and can be read by standard molecular dynamics visualization softwares:</p>
+<figure class="align-default">
+<a class="only-dark reference internal image-reference" href="../_images/system-dark.png"><img alt="atomic system generated" class="only-dark" src="../_images/system-dark.png" style="width: 334.0px; height: 319.20000000000005px;" /></a>
+</figure>
+<figure class="align-default">
+<a class="only-light reference internal image-reference" href="../_images/system-light.png"><img alt="atomic system generated" class="only-light" src="../_images/system-light.png" style="width: 334.0px; height: 319.20000000000005px;" /></a>
+</figure>
 </section>
 <section id="velocity-distribution">
 <h3>Velocity distribution<a class="headerlink" href="#velocity-distribution" title="Permalink to this heading">#</a></h3>
@@ -764,10 +771,10 @@ or in a Jupyter notebook, write:</p>
 <p>Using 3 different temperatures, and modifying slightly the default pyplot representation, here are
 the velocity distribution that we obtain:</p>
 <figure class="align-default">
-<img alt="NVE energy as a function of time" class="only-dark" src="../_images/velocity-distributions-dark.png" />
+<img alt="velocity distribution of the atoms for different temperatures" class="only-dark" src="../_images/velocity-distributions-dark.png" />
 </figure>
 <figure class="align-default">
-<img alt="NVE energy as a function of time" class="only-light" src="../_images/velocity-distributions-light.png" />
+<img alt="velocity distribution of the atoms for different temperatures" class="only-light" src="../_images/velocity-distributions-light.png" />
 </figure>
 <p>Note that those initial distributions are usually considered as non important in molecular
 simulations, as they will quickly be over</p>
