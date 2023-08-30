@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Structure of the code &#8212;     </title>
+    <title>Code structure &#8212;     </title>
   
   
   
@@ -129,7 +129,7 @@
     <div class="bd-toc-item navbar-nav active">
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Chapters</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Structure of the code</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Code structure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter2.html">Initialize simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter3.html">Monte carlo simulations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter4.html">Molecular dynamics simulations</a></li>
@@ -262,7 +262,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
 </div></div>
       
     </div>
@@ -273,11 +275,19 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Structure of the code</h1>
+    <h1>Code structure</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tests">Tests</a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -287,8 +297,8 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section id="structure-of-the-code">
-<h1>Structure of the code<a class="headerlink" href="#structure-of-the-code" title="Permalink to this heading">#</a></h1>
+  <section id="code-structure">
+<h1>Code structure<a class="headerlink" href="#code-structure" title="Permalink to this heading">#</a></h1>
 <p>The code is divided into fives classes:</p>
 <ul class="simple">
 <li><ol class="arabic simple">
@@ -317,13 +327,16 @@ class 1 is to set up the system, place atoms in the box. Class 2 deals with outp
 and logging of information during the simulations. Class 3 contains some
 functionalities such as pressure or temperature measurements. Finally classes 4
 and 5 are the core Molecular Dynamics and Monte Carlo codes, respectively.</p>
-<p>The overall structure of the code is the following:</p>
+<p>Create a blank python file, call it <em>ms_code.py</em>, and copy the following
+classes into it:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">InitializeSimulation</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                  <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                  <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Initialize Simulation&quot;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">Outputs</span><span class="p">:</span>
@@ -332,12 +345,16 @@ and 5 are the core Molecular Dynamics and Monte Carlo codes, respectively.</p>
                  <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Outputs&quot;</span><span class="p">)</span>
+
 
 <span class="k">class</span> <span class="nc">Utilities</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Utilities&quot;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">MolecularDynamics</span><span class="p">(</span><span class="n">InitializeSimulation</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">,</span> <span class="n">Outputs</span><span class="p">):</span>
@@ -347,6 +364,8 @@ and 5 are the core Molecular Dynamics and Monte Carlo codes, respectively.</p>
                 <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Start molecular dynamics simulation&quot;</span><span class="p">)</span>
+
 
 <span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">InitializeSimulation</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">,</span> <span class="n">Outputs</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -354,8 +373,27 @@ and 5 are the core Molecular Dynamics and Monte Carlo codes, respectively.</p>
                  <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                  <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Start Monte Carlo simulation&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>The <em>args</em> and <em>kwargs</em> arguments ensure that arguments of classes
+<em>InitializeSimulation</em>, <em>Outputs</em>, <em>Utilities</em> are inherited by
+the classes <em>MolecularDynamics</em> and <em>MonteCarlo</em>.</p>
+<section id="tests">
+<h2>Tests<a class="headerlink" href="#tests" title="Permalink to this heading">#</a></h2>
+<p>Although the code is currently mostly empty, one can test that classes
+are being inherited as expected.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ms_code</span> <span class="kn">import</span> <span class="n">Utilities</span><span class="p">,</span> <span class="n">MolecularDynamics</span><span class="p">,</span> <span class="n">MonteCarlo</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">Utilities</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">MolecularDynamics</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -397,6 +435,20 @@ and 5 are the core Molecular Dynamics and Monte Carlo codes, respectively.</p>
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tests">Tests</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>

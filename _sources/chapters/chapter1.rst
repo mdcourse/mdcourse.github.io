@@ -1,5 +1,5 @@
-Structure of the code
-=====================
+Code structure
+==============
 
 The code is divided into fives classes:
 
@@ -15,7 +15,8 @@ and logging of information during the simulations. Class 3 contains some
 functionalities such as pressure or temperature measurements. Finally classes 4 
 and 5 are the core Molecular Dynamics and Monte Carlo codes, respectively.
 
-The overall structure of the code is the following:
+Create a blank python file, call it *ms_code.py*, and copy the following
+classes into it:
 
 .. code-block:: python
 
@@ -26,6 +27,8 @@ The overall structure of the code is the following:
                      ):
             super().__init__(*args, **kwargs) 
 
+            print("Initialize Simulation")
+
 
     class Outputs:
         def __init__(self,
@@ -33,12 +36,16 @@ The overall structure of the code is the following:
                      **kwargs):
             super().__init__(*args, **kwargs)
 
+            print("Outputs")
+
 
     class Utilities:
         def __init__(self,
                     *args,
                     **kwargs):
             super().__init__(*args, **kwargs)
+
+            print("Utilities")
 
 
     class MolecularDynamics(InitializeSimulation, Utilities, Outputs):
@@ -48,6 +55,8 @@ The overall structure of the code is the following:
                     ):
             super().__init__(*args, **kwargs)
 
+            print("Start molecular dynamics simulation")
+
 
     class MonteCarlo(InitializeSimulation, Utilities, Outputs):
         def __init__(self,
@@ -55,3 +64,25 @@ The overall structure of the code is the following:
                      **kwargs,
                      ):
             super().__init__(*args, **kwargs)
+
+            print("Start Monte Carlo simulation")
+
+The *args* and *kwargs* arguments ensure that arguments of classes
+*InitializeSimulation*, *Outputs*, *Utilities* are inherited by
+the classes *MolecularDynamics* and *MonteCarlo*.
+
+Tests
+-----
+
+Although the code is currently mostly empty, one can test that classes
+are being inherited as expected.
+
+.. code-block:: python
+
+    from ms_code import Utilities, MolecularDynamics, MonteCarlo
+
+    x = Utilities()
+    print()
+    y = MolecularDynamics()
+    print()
+    z = MonteCarlo()
