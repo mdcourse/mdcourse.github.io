@@ -448,7 +448,18 @@ or in a Jupyter notebook, write:
                           )
     x.write_lammps_data()
 
-After executing this script, a data file named *atoms-positions.data* has been created.
+After executing this script, a data file named *atoms-positions.data* has been created. The data file is in
+LAMMPS format and can be read by standard molecular dynamics visualization softwares:
+
+.. figure:: ../_static/chapter2/system-dark.png
+    :alt: atomic system generated
+    :class: only-dark
+    :scale: 40 %
+
+.. figure:: ../_static/chapter2/system-light.png
+    :alt: atomic system generated
+    :class: only-light 
+    :scale: 40 %
 
 Velocity distribution
 *********************
@@ -491,12 +502,12 @@ Finally let us plot the distribution using matplotlib pyplot:
 Using 3 different temperatures, and modifying slightly the default pyplot representation, here are 
 the velocity distribution that we obtain:
 
-.. figure:: ../_static/chapter1/velocity-distributions-dark.png
-    :alt: NVE energy as a function of time
+.. figure:: ../_static/chapter2/velocity-distributions-dark.png
+    :alt: velocity distribution of the atoms for different temperatures
     :class: only-dark
 
-.. figure:: ../_static/chapter1/velocity-distributions-light.png
-    :alt: NVE energy as a function of time
+.. figure:: ../_static/chapter2/velocity-distributions-light.png
+    :alt: velocity distribution of the atoms for different temperatures
     :class: only-light 
 
 Note that those initial distributions are usually considered as non important in molecular 
