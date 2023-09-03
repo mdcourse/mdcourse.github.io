@@ -40,6 +40,7 @@
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'chapters/chapter3';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -262,7 +263,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
 </div></div>
       
     </div>
@@ -278,6 +281,17 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#measure-the-potential-energy">Measure the potential energy</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#monte-carlo-step">Monte Carlo step</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calculate-lambda">Calculate Lambda</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main-loop">Main loop</a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -298,6 +312,111 @@ document.write(`
     * Decide wether to keep the attempted move based on Metropolis criteria
 </pre></div>
 </div>
+<section id="measure-the-potential-energy">
+<h2>Measure the potential energy<a class="headerlink" href="#measure-the-potential-energy" title="Permalink to this heading">#</a></h2>
+<p>One of the most important step of Monte Carlo simulation is to evaluate the potential energy
+of the system. Potential energy needs to be measured before and after any random Monte Carlo
+attempt.</p>
+<p>Assuming that the only potential of interaction in the system is the Lennard-Jones potential,
+one needs to calculate, for every pair of atoms <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span>, with <span class="math notranslate nohighlight">\(i &lt; j\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[V_\text{LJ} (r) = \sum_{i &lt; j} 4 \epsilon \left[ \left(\dfrac{\sigma}{r_{ij}}\right)^{12} - \left(\dfrac{\sigma}{r_{ij}}\right)^{6} \right],\]</div>
+<p>where <span class="math notranslate nohighlight">\(r_{ij}\)</span> is the distance between atoms <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span>. In non-dimensionalized units,
+it reads</p>
+<div class="math notranslate nohighlight">
+\[V_\text{LJ} (r) = \sum_{i &lt; j} 4 \left[ r_{ij}^{-12} - r_{ij}^{-6} \right],\]</div>
+<p>The condition <span class="math notranslate nohighlight">\(i &lt; j\)</span> ensures that interaction are counted only once, and that interaction of an
+atom with itself is excluded.</p>
+<p>Let us create a Python function, within the <em>Utilities</em> class, named <em>calculate_potential_energy</em>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_potential_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms_positions</span><span class="p">):</span>
+    <span class="n">energy_potential</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">position_i</span> <span class="ow">in</span> <span class="n">atoms_positions</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_r</span><span class="p">(</span><span class="n">position_i</span><span class="p">,</span> <span class="n">atoms_positions</span><span class="p">)</span>
+        <span class="n">energy_potential</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">r</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">],</span> <span class="mi">12</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">r</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">],</span> <span class="mi">6</span><span class="p">)))</span>
+    <span class="n">energy_potential</span> <span class="o">/=</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">energy_potential</span>
+</pre></div>
+</div>
+<p>The function <em>calculate_potential_energy</em> takes the <em>atoms_positions</em>, which is an array
+containing all x, y, z coordinates of the atoms, and return a scalar, the total potential
+energy of the system. Let us create another function called <em>calculate_r</em>, still within
+the <em>Utilities</em> class, for the calculation of the inter atom distances.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position_i</span><span class="p">,</span> <span class="n">positions_j</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the shortest distance between position_i and positions_j.&quot;&quot;&quot;</span>
+    <span class="n">rij2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span>
+    <span class="n">box_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">rij</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">position_i</span> <span class="o">-</span> <span class="n">positions_j</span> <span class="o">+</span> <span class="n">box_size</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span> <span class="n">box_size</span><span class="p">)</span> <span class="o">-</span> <span class="n">box_size</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
+        <span class="n">rij2</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">rij</span><span class="p">[</span><span class="n">dim</span><span class="p">,</span> <span class="p">:],</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">rij2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In principle, inter atoms positions could simply be calculated as <em>position_i - positions_j</em>.
+However, due to the periodic boundary condition, the simple direct evaluation <em>position_i - positions_j</em>
+would not always return the shortest distance between the atom <span class="math notranslate nohighlight">\(i\)</span> and all the others atoms <span class="math notranslate nohighlight">\(j\)</span>,
+which explain the more complex relation used.</p>
+</section>
+<section id="monte-carlo-step">
+<h2>Monte Carlo step<a class="headerlink" href="#monte-carlo-step" title="Permalink to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">monte_carlo_displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">beta</span> <span class="o">=</span>  <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span>
+    <span class="n">Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_potential_energy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span>
+    <span class="n">trial_atoms_positions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span>
+    <span class="n">atom_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span>
+    <span class="n">trial_atoms_positions</span><span class="p">[</span><span class="n">atom_id</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span>
+    <span class="n">trial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_potential_energy</span><span class="p">(</span><span class="n">trial_atoms_positions</span><span class="p">)</span>
+    <span class="n">acceptation_probability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">beta</span><span class="o">*</span><span class="p">(</span><span class="n">trial_Epot</span><span class="o">-</span><span class="n">Epot</span><span class="p">))])</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">acceptation_probability</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">trial_atoms_positions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="n">trial_Epot</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="n">Epot</span>
+</pre></div>
+</div>
+</section>
+<section id="calculate-lambda">
+<h2>Calculate Lambda<a class="headerlink" href="#calculate-lambda" title="Permalink to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_Lambda</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mass</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Estimate de Broglie wavelength in LJ units.&quot;&quot;&quot;</span>
+    <span class="n">m_kg</span> <span class="o">=</span> <span class="n">mass</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">milli</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_mass</span>
+    <span class="n">kB_kCal_mol_K</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span>
+    <span class="n">T_K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span><span class="o">/</span><span class="n">kB_kCal_mol_K</span>
+    <span class="n">Lambda</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">h</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">m_kg</span><span class="o">*</span><span class="n">T_K</span><span class="p">)</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">angstrom</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalise_units</span><span class="p">(</span><span class="n">Lambda</span><span class="p">,</span> <span class="s2">&quot;distance&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="main-loop">
+<h2>Main loop<a class="headerlink" href="#main-loop" title="Permalink to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">InitializeSimulation</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">,</span> <span class="n">Outputs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+        <span class="n">maximum_steps</span><span class="p">,</span>
+        <span class="n">cut_off</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">displace_mc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span> <span class="o">=</span> <span class="n">maximum_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cut_off</span> <span class="o">=</span> <span class="n">cut_off</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span> <span class="o">=</span> <span class="n">displace_mc</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cut_off</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalise_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cut_off</span><span class="p">,</span> <span class="s2">&quot;distance&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalise_units</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span><span class="p">,</span> <span class="s2">&quot;distance&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform the loop over time.&quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_displacement</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_box</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_log</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_dump</span><span class="p">(</span><span class="n">velocity</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_lammps_data</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;final.data&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -339,6 +458,23 @@ document.write(`
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#measure-the-potential-energy">Measure the potential energy</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#monte-carlo-step">Monte Carlo step</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calculate-lambda">Calculate Lambda</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#main-loop">Main loop</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>
