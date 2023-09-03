@@ -69,6 +69,8 @@ However, due to the periodic boundary condition, the simple direct evaluation *p
 would not always return the shortest distance between the atom :math:`i` and all the others atoms :math:`j`,
 which explain the more complex relation used. 
 
+TO ADD : TEST IT ON THE CURRENT SYSTEM !!!
+
 Monte Carlo step
 ----------------
 
