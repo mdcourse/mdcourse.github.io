@@ -26,7 +26,7 @@ find more information on my [personal webpage](https://simongravelle.github.io/)
 All the inputs, scripts, and data files are released under the 
 GNU general public license v3.0.
 
-### Acknowledgment ###
+### Acknowledgments ###
 
 <img src="docs/source/_static/logo/msca.png" width="10%" align="right"/></a>
 

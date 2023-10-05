@@ -26,6 +26,12 @@ understand molecular simulations, *Learn molecular simulations with Python* can 
 even without deep knowledge in those fields. Annexes with key concept and suggested readings 
 are given when necessary.
 
+Acknowledgments
+---------------
+
+This project has received funding from the European Union's Horizon 2020 research and innovation programme
+under the Marie Skłodowska-Curie grant agreement No 101065060.
+
 Indices and tables
 ==================
 
