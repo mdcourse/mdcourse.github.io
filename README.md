@@ -1,4 +1,4 @@
-# Learn molecular simulation with python
+# Learn Molecular Simulations with python
 
 The goal of [Learn molecular simulations with Python](https://mdcourse.github.io/) is to write a simple
 codes containing most of the basic-most functionalities of molecular simulations, including molecular
@@ -15,20 +15,20 @@ Although basics of coding, thermodynamics, statistical physics are necessary to 
 simulations, Learn molecular simulations with Python can be followed even without deep knowledge in those
 fields. Annexes with key concept and suggested readings are given when necessary.
 
-### About me ###
+### About me
 
 I am a computer physicist in soft matter and fluids at interfaces. You can 
 find more information on my [personal webpage](https://simongravelle.github.io/).
 
-### License ###
+### License
 
 All the inputs, scripts, and data files are released under the 
 GNU general public license v3.0.
 
-### Acknowledgments ###
+### Acknowledgments
 
-<img src="docs/source/_static/logo/msca.png" width="10%" align="right"/></a>
-
-This project has received funding from the European Union's Horizon 2020 research and innovation programme
+This project has received funding from the European
+Union's Horizon 2020 research and innovation programme
 under the Marie Skłodowska-Curie grant agreement No 101065060.
 
+![MSCA image](https://raw.githubusercontent.com/simongravelle/nmrformd/main/docs/source/figures/logo/msca.png)
