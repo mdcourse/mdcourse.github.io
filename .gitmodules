@@ -1,0 +1,3 @@
+[submodule "python-codes"]
+	path = python-codes
+	url = git@github.com:mdcourse/python-codes.git
