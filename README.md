@@ -16,7 +16,7 @@ Although some basic knowledge in coding, thermodynamics, and statistical physics
 
 - molecules
 - thermostats and barostats other than Berendsen
-- energy minimization methods other than steepest descent
+- energy minimization methods other than the steepest descent
 - non-cubic boxes
 
 ### About me
