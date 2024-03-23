@@ -70,3 +70,49 @@ Write the LAMMPS data file
             q = 0
             f.write("%d %d %d %.3f %.3f %.3f %.3f %s"%(cpt, 1, type, q, xyz[0], xyz[1], xyz[2], '\n')) 
             cpt += 1
+
+Test the code
+-------------
+
+.. container:: justify
+
+    We can take advantage of the current code and print the
+    positions of the atoms in data files. 
+
+.. code-block:: python
+
+    import os
+    from MolecularDynamics import MolecularDynamics
+
+    md = MolecularDynamics(number_atoms=[10, 60],
+                        Lx=30,
+                        sigma=[3, 6],
+                        epsilon=[0.1, 0.1],
+                        atom_mass=[1, 1],
+                        data_folder = "md-output/")
+    md.run()
+
+.. container:: justify
+
+    The following figure shows systems with different numbers of atoms.
+    |VMD| was used for generating the snapshot, you can find a |VMD_tutorial|
+    here.
+
+.. |VMD| raw:: html
+
+    <a href="https://www.ks.uiuc.edu/Research/vmd" target="_blank">VMD</a>
+
+.. |VMD_tutorial| raw:: html
+
+    <a href="https://lammpstutorials.github.io/sphinx/build/html/tutorials/vmd/vmd-tutorial.html" target="_blank">VMD tutorial</a>
+
+.. figure:: ../_static/chapter4/systems.png
+    :alt: atomic systems generated
+
+..  container:: figurelegend
+
+    Figure: Systems generated with 3 different particle numbers. In all 3 cases,
+    the box is a cube of volume :math:`(3~\text{nm})^3`.
+    Left: 20 atoms of type 1.
+    Middle: 200 atoms of type 1.
+    Right: 10 atoms of type 1, and 60 atoms of type 2.
