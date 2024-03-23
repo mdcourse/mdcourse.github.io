@@ -1,6 +1,11 @@
 Code structure
 ==============
 
+.. container:: justify
+
+    The main files and classes that constitute the basis of the code
+    are defined.
+
 Presentation
 ------------
 
@@ -44,25 +49,12 @@ Start coding
     class InitializeSimulation:
         def __init__(self,
                      *args,
-                     **kwargs,
-                     ):
+                     **kwargs):
             super().__init__(*args, **kwargs) 
-
-            print("Initialize Simulation")
 
 .. container:: justify
 
-    The Outputs.py and Utilities.py are similar:
-
-.. code-block:: python
-
-    class Outputs:
-        def __init__(self,
-                     *args,
-                     **kwargs):
-            super().__init__(*args, **kwargs)
-
-            print("Outputs")
+    The Utilities.py is similar:
 
 .. code-block:: python
 
@@ -72,34 +64,67 @@ Start coding
                     **kwargs):
             super().__init__(*args, **kwargs)
 
-            print("Utilities")
+.. container:: justify
+
+    For the Outputs.py class, let us anticipate that the outputs
+    from the code will be saved in a folder, which by default
+    is named *results/*. If the folder does not exist, it will be
+    created using *os.mkdir*:
+
+.. code-block:: python
+
+    import os
+
+    class Outputs:
+        def __init__(self,
+                    data_folder = "results/",
+                    *args,
+                    **kwargs):
+            self.data_folder = data_folder
+            super().__init__(*args, **kwargs)
+
+            if os.path.exists(self.data_folder) is False:
+                os.mkdir(self.data_folder)
 
 .. container:: justify
 
-    The MolecularDynamics.py and MonteCarlo.py are inheriting
+    The MolecularDynamics class is inheriting
     the 3 previously defined classes:
 
 .. code-block:: python
 
+    from InitializeSimulation import InitializeSimulation
+    from Utilities import Utilities
+    from Outputs import Outputs
+
     class MolecularDynamics(InitializeSimulation, Utilities, Outputs):
         def __init__(self,
                     *args,
-                    **kwargs,
-                    ):
+                    **kwargs):
             super().__init__(*args, **kwargs)
 
-            print("Start molecular dynamics simulation")
+        def run(self):
+            pass
+
+.. container:: justify
+
+    The *run* method will be filled later. Let us do the same for the
+    MonteCarlo class:
 
 .. code-block:: python
+
+    from InitializeSimulation import InitializeSimulation
+    from Utilities import Utilities
+    from Outputs import Outputs
 
     class MonteCarlo(InitializeSimulation, Utilities, Outputs):
         def __init__(self,
                      *args,
-                     **kwargs,
-                     ):
+                     **kwargs):
             super().__init__(*args, **kwargs)
 
-            print("Start Monte Carlo simulation")
+        def run(self):
+            pass
 
 .. container:: justify
 
@@ -107,20 +132,30 @@ Start coding
     *InitializeSimulation*, *Outputs*, *Utilities* are inherited by
     the classes *MolecularDynamics* and *MonteCarlo*.
 
-Tests
------
+Test the code
+-------------
 
 .. container:: justify
 
-    Although the code is currently mostly empty, one can test that classes
-    are being inherited as expected.
+    We can create a simple test to ensure that the classes
+    are being inherited as expected. Within the same folder,
+    create a new Jupyter notebook called *test.ipynb*, and copy
+    the following lines into it:
 
 .. code-block:: python
 
-    from ms_code import Utilities, MolecularDynamics, MonteCarlo
+    from InitializeSimulation import InitializeSimulation
+    from Utilities import Utilities
+    from Outputs import Outputs
+    from MolecularDynamics import MolecularDynamics
+    from MonteCarlo import MonteCarlo
 
-    x = Utilities()
-    print()
-    y = MolecularDynamics()
-    print()
-    z = MonteCarlo()
+    md = MolecularDynamics(data_folder = "md-output/")
+    md.run()
+    mc = MolecularDynamics(data_folder = "mc-output/")
+    mc.run()
+
+.. container:: justify
+
+    If everything is working just fine, two folders named *md-output/*
+    and *mc-output/* must have been created.
