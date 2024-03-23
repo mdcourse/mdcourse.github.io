@@ -10,7 +10,7 @@ codes such as LAMMPS and GROMACS wanting to better understand what is hiding beh
 
 The Python code that will be written here will be used to realize some simple scientific projects.
 
-Although some basic knowledge in coding, thermodynamics, and statistical physics is recommended to fully understand molecular simulations, Learn molecular simulations with Python can be followed even without deep knowledge in those fields. Annexes with key concepts and suggested readings are given when necessary.
+Although some basic knowledge in coding, thermodynamics, and statistical physics is recommended to fully understand molecular simulations, Learning molecular simulations with Python can be followed even without deep knowledge in those fields. Annexes with key concepts and suggested readings are given when necessary.
 
 ### What is not in the code (yet)
 
@@ -33,4 +33,4 @@ This project has received funding from the European
 Union's Horizon 2020 research and innovation programme
 under the Marie Skłodowska-Curie grant agreement No 101065060.
 
-![MSCA image](https://raw.githubusercontent.com/simongravelle/nmrformd/main/docs/source/figures/logo/msca.png)
+![Acknowledgments-logos](./credits/cnrs-uga-liphy-msca.png)
