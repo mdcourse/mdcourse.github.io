@@ -150,6 +150,16 @@ Test the code
                         atom_mass=[1],
                         data_folder = "md-output/")
     md.run()
-    print("normalised epsilon value:", md.epsilon[0])
-    print("normalised sigma value:", md.sigma[0])
-    print("normalised mass value:", md.atom_mass[0])
+    print("normalized epsilon value:", md.epsilon[0])
+    print("normalized sigma value:", md.sigma[0])
+    print("normalized mass value:", md.atom_mass[0])
+
+.. container:: justify
+
+    If it works, the code should return:
+
+.. code-block:: python
+
+    normalized epsilon value: 1.0
+    normalized sigma value: 1.0
+    normalized mass value: 1.0
