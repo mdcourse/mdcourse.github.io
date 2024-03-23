@@ -13,18 +13,20 @@ Presentation
 
     The Python code will be divided into five classes:
 
-    - 1. InitializeSimulation
-    - 2. Outputs
-    - 3. Utilities
-    - 4. MolecularDynamics
-    - 5. MonteCarlo
+    - *InitializeSimulation*
+    - *Outputs*
+    - *Utilities*
+    - *MolecularDynamics*
+    - *MonteCarlo*
 
-    Here, classes 1, 2, and 3 are being inherited by classes 4 and 5. 
-    The purpose of class 1 is to set up the system and place atoms in the
-    box. Class 2 deals with outputs and logging of information during
-    the simulations. Class 3 contains some functionalities such as pressure
-    or temperature measurements. Finally classes 4 
-    and 5 are the core Molecular Dynamics and Monte Carlo codes, respectively.
+    Here, classes *InitializeSimulation*, *Outputs*, and *Utilities*
+    will being inherited by classes *MolecularDynamics* and *MonteCarlo*. 
+    The purpose of the class *InitializeSimulation* is to set up the
+    system and place atoms in the box. Class *Outputs* deals with
+    data files, dumps, and log files. Class *Utilities* contains
+    some general-use functionalities. Finally classes *MolecularDynamics*
+    and *MonteCarlo* are the core Molecular Dynamics and Monte Carlo
+    codes, respectively.
 
 Start coding
 -------------
@@ -33,16 +35,16 @@ Start coding
 
     Inside a dedicated folder, create 5 blank Python scripts named:
 
-    - InitializeSimulation.py
-    - Outputs.py
-    - Utilities.py
-    - MolecularDynamics.py
-    - MonteCarlo.py
+    - *InitializeSimulation.py*
+    - *Outputs.py*
+    - *Utilities.py*
+    - *MolecularDynamics.py*
+    - *MonteCarlo.py*
 
 .. container:: justify
 
     For each script, let us write the basis of each script.
-    Let us start with InitializeSimulation.py: 
+    Let us start with the *InitializeSimulation* class: 
 
 .. code-block:: python
 
@@ -66,7 +68,7 @@ Start coding
 
 .. container:: justify
 
-    For the Outputs.py class, let us anticipate that the outputs
+    For the *Outputs* class, let us anticipate that the outputs
     from the code will be saved in a folder, which by default
     is named *results/*. If the folder does not exist, it will be
     created using *os.mkdir*:
@@ -88,7 +90,7 @@ Start coding
 
 .. container:: justify
 
-    The MolecularDynamics class is inheriting
+    The *MolecularDynamics* class is inheriting
     the 3 previously defined classes:
 
 .. code-block:: python
@@ -109,7 +111,7 @@ Start coding
 .. container:: justify
 
     The *run* method will be filled later. Let us do the same for the
-    MonteCarlo class:
+    *MonteCarlo* class:
 
 .. code-block:: python
 
