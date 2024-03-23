@@ -332,15 +332,12 @@ are being inherited as expected. Within the same folder,
 create a new Jupyter notebook called <em>test.ipynb</em>, and copy
 the following lines into it:</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
-<span class="kn">from</span> <span class="nn">Utilities</span> <span class="kn">import</span> <span class="n">Utilities</span>
-<span class="kn">from</span> <span class="nn">Outputs</span> <span class="kn">import</span> <span class="n">Outputs</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
 <span class="kn">from</span> <span class="nn">MolecularDynamics</span> <span class="kn">import</span> <span class="n">MolecularDynamics</span>
-<span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
 
 <span class="n">md</span> <span class="o">=</span> <span class="n">MolecularDynamics</span><span class="p">(</span><span class="n">data_folder</span> <span class="o">=</span> <span class="s2">&quot;md-output/&quot;</span><span class="p">)</span>
 <span class="n">md</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-<span class="n">mc</span> <span class="o">=</span> <span class="n">MolecularDynamics</span><span class="p">(</span><span class="n">data_folder</span> <span class="o">=</span> <span class="s2">&quot;mc-output/&quot;</span><span class="p">)</span>
+<span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span><span class="n">data_folder</span> <span class="o">=</span> <span class="s2">&quot;mc-output/&quot;</span><span class="p">)</span>
 <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>

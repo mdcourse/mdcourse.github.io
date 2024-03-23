@@ -94,7 +94,7 @@ Calculate the LJ prefactors
 
 .. container:: justify
 
-    First, the prefactors needed for the normalization are calculated
+    Here, prefactors needed for the normalization are calculated
     from :math:`m`, :math:`\sigma`, and :math:`\epsilon`. Add the
     following method to the *InitializeSimulation* class:
 
@@ -104,20 +104,11 @@ Calculate the LJ prefactors
         self.reference_distance = self.sigma[0] # Angstrom
         self.reference_energy = self.epsilon[0] # Kcal/mol
         self.reference_mass = self.atom_mass[0] # g/mol
-        mass_kg = self.atom_mass[0]/cst.kilo/cst.Avogadro # kg
-        epsilon_J = self.epsilon[0]*cst.calorie*cst.kilo/cst.Avogadro # J
-        sigma_m = self.sigma[0]*cst.angstrom # m
-        time_s = np.sqrt(mass_kg*sigma_m**2/epsilon_J) # s
-        self.reference_time = time_s / cst.femto # fs
-        kB = cst.Boltzmann*cst.Avogadro/cst.calorie/cst.kilo # kCal/mol/K
-        self.reference_temperature = self.epsilon[0]/kB # K
-        pressure_pa = epsilon_J/sigma_m**3 # Pa
-        self.reference_pressure = pressure_pa/cst.atm # atm
 
 .. container:: justify
 
-    Here, *reference_distance*, *reference_energy*, *reference_mass*, *reference_time*,
-    *reference_temperature*, and *reference_pressure* are calculated and saved into *self*.
+    Here, *reference_distance*, *reference_energy*, and *reference_mass*
+    are calculated and saved into *self*.
     
     If more than one atom type is used, and the lists *sigma*, *epsilon*, and *atom_mass*
     contain more than one element, the first values will be used for the normalization.
@@ -127,7 +118,8 @@ Non-dimensionalize the units
 
 .. container:: justify
 
-    Add the following method to the *InitializeSimulation* class.
+    Here, the initial values for :math:`m`, :math:`\sigma`, and :math:`\epsilon`
+    are normalized. Add the following method to the *InitializeSimulation* class.
 
 .. code-block:: python
 
@@ -141,8 +133,23 @@ Non-dimensionalize the units
         self.sigma = sigma
         self.atom_mass = atom_mass
 
+Test the code
+-------------
+
 .. container:: justify
 
-    The first step of the *nondimensionalize_units* method is to 
+    Let us make sure that the normalization is properly made
+    by our script, by calling the MolecularDynamics class:
 
+.. code-block:: python
 
+    from MolecularDynamics import MolecularDynamics
+
+    md = MolecularDynamics(sigma=[3],
+                        epsilon=[0.1],
+                        atom_mass=[1],
+                        data_folder = "md-output/")
+    md.run()
+    print("normalised epsilon value:", md.epsilon[0])
+    print("normalised sigma value:", md.sigma[0])
+    print("normalised mass value:", md.atom_mass[0])

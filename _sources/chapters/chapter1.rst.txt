@@ -146,15 +146,12 @@ Test the code
 
 .. code-block:: python
 
-    from InitializeSimulation import InitializeSimulation
-    from Utilities import Utilities
-    from Outputs import Outputs
-    from MolecularDynamics import MolecularDynamics
     from MonteCarlo import MonteCarlo
+    from MolecularDynamics import MolecularDynamics
 
     md = MolecularDynamics(data_folder = "md-output/")
     md.run()
-    mc = MolecularDynamics(data_folder = "mc-output/")
+    mc = MonteCarlo(data_folder = "mc-output/")
     mc.run()
 
 .. container:: justify
