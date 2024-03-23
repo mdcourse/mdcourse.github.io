@@ -19,8 +19,8 @@ Presentation
     - *MolecularDynamics*
     - *MonteCarlo*
 
-    Here, classes *InitializeSimulation*, *Outputs*, and *Utilities*
-    will being inherited by classes *MolecularDynamics* and *MonteCarlo*. 
+    The three first classes named *InitializeSimulation*, *Outputs*, and *Utilities*
+    will be inherited by the two former classes *MolecularDynamics* and *MonteCarlo*. 
     The purpose of the class *InitializeSimulation* is to set up the
     system and place atoms in the box. Class *Outputs* deals with
     data files, dumps, and log files. Class *Utilities* contains

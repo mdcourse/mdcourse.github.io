@@ -37,8 +37,6 @@ Indices and tables
 
     chapters/chapter1
     chapters/chapter2
-    chapters/chapter3
-    chapters/chapter4
 
 .. toctree::
     :maxdepth: 2
