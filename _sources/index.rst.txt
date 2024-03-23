@@ -39,3 +39,4 @@ Indices and tables
     chapters/chapter2
     chapters/chapter3
     chapters/chapter4
+    chapters/chapter5
