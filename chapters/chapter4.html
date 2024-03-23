@@ -265,6 +265,40 @@ to add the <em>write_lammps_data</em> method, which will be defined below.</p>
 </pre></div>
 </div>
 </section>
+<section id="test-the-code">
+<h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">#</a></h2>
+<div class="justify docutils container">
+<p>We can take advantage of the current code and print the
+positions of the atoms in data files.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">MolecularDynamics</span> <span class="kn">import</span> <span class="n">MolecularDynamics</span>
+
+<span class="n">md</span> <span class="o">=</span> <span class="n">MolecularDynamics</span><span class="p">(</span><span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">60</span><span class="p">],</span>
+                    <span class="n">Lx</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+                    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+                    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+                    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                    <span class="n">data_folder</span> <span class="o">=</span> <span class="s2">&quot;md-output/&quot;</span><span class="p">)</span>
+<span class="n">md</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="justify docutils container">
+<p>The following figure shows systems with different numbers of atoms.
+<a href="https://www.ks.uiuc.edu/Research/vmd" target="_blank">VMD</a> was used for generating the snapshot, you can find a <a href="https://lammpstutorials.github.io/sphinx/build/html/tutorials/vmd/vmd-tutorial.html" target="_blank">VMD tutorial</a>
+here.</p>
+</div>
+<figure class="align-default">
+<img alt="atomic systems generated" src="../_images/systems.png" />
+</figure>
+<div class="figurelegend docutils container">
+<p>Figure: Systems generated with 3 different particle numbers. In all 3 cases,
+the box is a cube of volume <span class="math notranslate nohighlight">\((3~\text{nm})^3\)</span>.
+Left: 20 atoms of type 1.
+Middle: 200 atoms of type 1.
+Right: 10 atoms of type 1, and 60 atoms of type 2.</p>
+</div>
+</section>
 </section>
 
         </article>
@@ -313,6 +347,7 @@ to add the <em>write_lammps_data</em> method, which will be defined below.</p>
 <li><a class="reference internal" href="#">Print a data file</a><ul>
 <li><a class="reference internal" href="#call-the-write-lammps-data-method">Call the write_lammps_data method</a></li>
 <li><a class="reference internal" href="#write-the-lammps-data-file">Write the LAMMPS data file</a></li>
+<li><a class="reference internal" href="#test-the-code">Test the code</a></li>
 </ul>
 </li>
 </ul>
@@ -328,5 +363,6 @@ to add the <em>write_lammps_data</em> method, which will be defined below.</p>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>
