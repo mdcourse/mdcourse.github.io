@@ -139,7 +139,7 @@ Test the code
 .. container:: justify
 
     Let us make sure that the normalization is properly made
-    by our script, by calling the MolecularDynamics class:
+    by our script, by calling the *MolecularDynamics* class:
 
 .. code-block:: python
 

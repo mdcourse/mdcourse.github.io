@@ -153,3 +153,26 @@ Populate the box
         for dim in np.arange(self.dimensions):
             atoms_positions[:, dim] = np.random.random(self.total_number_atoms)*np.diff(self.box_boundaries[dim]) - np.diff(self.box_boundaries[dim])/2    
         self.atoms_positions = atoms_positions
+
+Test the code
+-------------
+
+.. container:: justify
+
+    Let us call the *MolecularDynamics* class and 
+    create a cubic box with 20 atoms, and print the box size and
+    the position of the first atom:
+
+.. code-block:: python
+
+    from MolecularDynamics import MolecularDynamics
+
+    md = MolecularDynamics(number_atoms=[20],
+                        Lx=30,
+                        sigma=[3],
+                        epsilon=[0.1],
+                        atom_mass=[1],
+                        data_folder = "md-output/")
+    md.run()
+    print("normalized box size:", md.box_size)
+    print("first atom position:", md.atoms_positions[0])
