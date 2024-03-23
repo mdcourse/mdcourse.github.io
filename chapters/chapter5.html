@@ -246,6 +246,33 @@ for all pairs of atoms.</p>
 </pre></div>
 </div>
 </section>
+<section id="test-the-code">
+<h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">#</a></h2>
+<div class="justify docutils container">
+<p>Let us calculate the potential energy of a system of
+atoms by calling the <em>calculate_potential_energy</em> method/</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
+
+<span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span><span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">],</span>
+                    <span class="n">Lx</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+                    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">],</span>
+                    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">data_folder</span> <span class="o">=</span> <span class="s2">&quot;mc-output/&quot;</span><span class="p">)</span>
+<span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;potential energy = &quot;</span><span class="p">,</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">mc</span><span class="o">.</span><span class="n">calculate_potential_energy</span><span class="p">(</span><span class="n">mc</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">),</span><span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="justify docutils container">
+<p>After running the code, one can see:</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">potential</span> <span class="n">energy</span> <span class="o">=</span>  <span class="o">-</span><span class="mf">0.99</span>
+</pre></div>
+</div>
+</section>
 </section>
 
         </article>
@@ -294,6 +321,7 @@ for all pairs of atoms.</p>
 <li><a class="reference internal" href="#">Measure the potential energy</a><ul>
 <li><a class="reference internal" href="#calculate-the-inter-atomic-distances">Calculate the inter-atomic distances</a></li>
 <li><a class="reference internal" href="#calculate-the-potential-energy">Calculate the potential energy</a></li>
+<li><a class="reference internal" href="#test-the-code">Test the code</a></li>
 </ul>
 </li>
 </ul>
