@@ -4,3 +4,6 @@
 [submodule "applications"]
 	path = applications
 	url = git@github.com:mdcourse/applications.git
+[submodule "credits"]
+	path = credits
+	url = git@github.com:simongravelle/credits.git
