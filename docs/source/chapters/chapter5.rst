@@ -51,3 +51,34 @@ Calculate the potential energy
             energy_potential_i = np.sum(4*epsilon_ij[r>0]*(np.power(sigma_ij[r>0]/r[r>0], 12)-np.power(sigma_ij[r>0]/r[r>0], 6)))
             energy_potential += energy_potential_i
         return energy_potential/2
+
+Test the code
+-------------
+
+.. container:: justify
+
+    Let us calculate the potential energy of a system of 
+    atoms by calling the *calculate_potential_energy* method/
+
+.. code-block:: python
+
+    import numpy as np
+    from MonteCarlo import MonteCarlo
+
+    mc = MonteCarlo(number_atoms=[20],
+                        Lx=30,
+                        sigma=[3],
+                        epsilon=[0.1],
+                        atom_mass=[1],
+                        data_folder = "mc-output/")
+    mc.run()
+    print("potential energy = ",
+        np.round(mc.calculate_potential_energy(mc.atoms_positions),2))
+
+.. container:: justify
+
+    After running the code, one can see:
+    
+.. code-block:: python
+
+    potential energy =  -0.99
