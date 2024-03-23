@@ -215,33 +215,20 @@ are defined.</p>
 <div class="justify docutils container">
 <p>The Python code will be divided into five classes:</p>
 <ul class="simple">
-<li><ol class="arabic simple">
-<li><p>InitializeSimulation</p></li>
-</ol>
-</li>
-<li><ol class="arabic simple" start="2">
-<li><p>Outputs</p></li>
-</ol>
-</li>
-<li><ol class="arabic simple" start="3">
-<li><p>Utilities</p></li>
-</ol>
-</li>
-<li><ol class="arabic simple" start="4">
-<li><p>MolecularDynamics</p></li>
-</ol>
-</li>
-<li><ol class="arabic simple" start="5">
-<li><p>MonteCarlo</p></li>
-</ol>
-</li>
+<li><p><em>InitializeSimulation</em></p></li>
+<li><p><em>Outputs</em></p></li>
+<li><p><em>Utilities</em></p></li>
+<li><p><em>MolecularDynamics</em></p></li>
+<li><p><em>MonteCarlo</em></p></li>
 </ul>
-<p>Here, classes 1, 2, and 3 are being inherited by classes 4 and 5.
-The purpose of class 1 is to set up the system and place atoms in the
-box. Class 2 deals with outputs and logging of information during
-the simulations. Class 3 contains some functionalities such as pressure
-or temperature measurements. Finally classes 4
-and 5 are the core Molecular Dynamics and Monte Carlo codes, respectively.</p>
+<p>Here, classes <em>InitializeSimulation</em>, <em>Outputs</em>, and <em>Utilities</em>
+will being inherited by classes <em>MolecularDynamics</em> and <em>MonteCarlo</em>.
+The purpose of the class <em>InitializeSimulation</em> is to set up the
+system and place atoms in the box. Class <em>Outputs</em> deals with
+data files, dumps, and log files. Class <em>Utilities</em> contains
+some general-use functionalities. Finally classes <em>MolecularDynamics</em>
+and <em>MonteCarlo</em> are the core Molecular Dynamics and Monte Carlo
+codes, respectively.</p>
 </div>
 </section>
 <section id="start-coding">
@@ -249,16 +236,16 @@ and 5 are the core Molecular Dynamics and Monte Carlo codes, respectively.</p>
 <div class="justify docutils container">
 <p>Inside a dedicated folder, create 5 blank Python scripts named:</p>
 <ul class="simple">
-<li><p>InitializeSimulation.py</p></li>
-<li><p>Outputs.py</p></li>
-<li><p>Utilities.py</p></li>
-<li><p>MolecularDynamics.py</p></li>
-<li><p>MonteCarlo.py</p></li>
+<li><p><em>InitializeSimulation.py</em></p></li>
+<li><p><em>Outputs.py</em></p></li>
+<li><p><em>Utilities.py</em></p></li>
+<li><p><em>MolecularDynamics.py</em></p></li>
+<li><p><em>MonteCarlo.py</em></p></li>
 </ul>
 </div>
 <div class="justify docutils container">
 <p>For each script, let us write the basis of each script.
-Let us start with InitializeSimulation.py:</p>
+Let us start with the <em>InitializeSimulation</em> class:</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">InitializeSimulation</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -278,7 +265,7 @@ Let us start with InitializeSimulation.py:</p>
 </pre></div>
 </div>
 <div class="justify docutils container">
-<p>For the Outputs.py class, let us anticipate that the outputs
+<p>For the <em>Outputs</em> class, let us anticipate that the outputs
 from the code will be saved in a folder, which by default
 is named <em>results/</em>. If the folder does not exist, it will be
 created using <em>os.mkdir</em>:</p>
@@ -298,7 +285,7 @@ created using <em>os.mkdir</em>:</p>
 </pre></div>
 </div>
 <div class="justify docutils container">
-<p>The MolecularDynamics class is inheriting
+<p>The <em>MolecularDynamics</em> class is inheriting
 the 3 previously defined classes:</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
@@ -317,7 +304,7 @@ the 3 previously defined classes:</p>
 </div>
 <div class="justify docutils container">
 <p>The <em>run</em> method will be filled later. Let us do the same for the
-MonteCarlo class:</p>
+<em>MonteCarlo</em> class:</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
 <span class="kn">from</span> <span class="nn">Utilities</span> <span class="kn">import</span> <span class="n">Utilities</span>
