@@ -35,4 +35,4 @@ This project has received funding from the European
 Union's Horizon 2020 research and innovation programme
 under the Marie Skłodowska-Curie grant agreement No 101065060.
 
-![Acknowledgments-logos](./credits/cnrs-uga-liphy-msca.png)
+![Acknowledgments-logos](https://raw.githubusercontent.com/simongravelle/credits/1c44b5ae76a33c5bbbd33a54243365c6abdc24b2/cnrs-uga-liphy-msca.png)
