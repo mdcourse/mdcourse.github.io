@@ -202,13 +202,17 @@
 <div class="justify docutils container">
 <p>The simulations box is defined and populated with atoms.</p>
 </div>
-<section id="define-the-box-dimensions">
-<h2>Define the box dimensions<a class="headerlink" href="#define-the-box-dimensions" title="Link to this heading">#</a></h2>
+<section id="define-the-box-dimensions-and-atom-number">
+<h2>Define the box dimensions and atom number<a class="headerlink" href="#define-the-box-dimensions-and-atom-number" title="Link to this heading">#</a></h2>
 <div class="justify docutils container">
 <p>First, let us modify the <em>__init__</em> method of the <em>InitializeSimulation</em> class
-to allow for 3 new parameters to be defined: <span class="math notranslate nohighlight">\(L_x, L_y\)</span>, and <span class="math notranslate nohighlight">\(L_z\)</span>.</p>
+to allow for 3 new parameters to be defined: <span class="math notranslate nohighlight">\(L_x, L_y\)</span>, and <span class="math notranslate nohighlight">\(L_z\)</span>,
+i.e. the box dimensions along <em>x</em>, <em>y</em>, and <em>z</em>, respectively.
+We also define the number of atoms, <em>number_atoms</em>, which should be
+provided by users.</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">number_atoms</span>
              <span class="n">Lx</span><span class="p">,</span>
              <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">],</span>
              <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
@@ -219,6 +223,7 @@ to allow for 3 new parameters to be defined: <span class="math notranslate nohig
              <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
+    <span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span> <span class="o">=</span> <span class="n">number_atoms</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">Lx</span> <span class="o">=</span> <span class="n">Lx</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">Ly</span> <span class="o">=</span> <span class="n">Ly</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">Lz</span> <span class="o">=</span> <span class="n">Lz</span>
@@ -229,11 +234,16 @@ to allow for 3 new parameters to be defined: <span class="math notranslate nohig
 
     <span class="bp">self</span><span class="o">.</span><span class="n">calculate_LJunits_prefactors</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">define_box</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">identify_atom_properties</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">populate_box</span><span class="p">()</span>
 </pre></div>
 </div>
 <div class="justify docutils container">
 <p>A variable named <em>dimensions</em> was also created, and its value is enforced to be 3.
 In the future, the code could be adapted to create 2D or 1D simulations.</p>
+<p>The 3 new methods called <em>define_box</em>, <em>identify_atom_properties</em>, and <em>populate_box</em>
+will be defined below.</p>
 <p>The <em>nondimensionalize_units</em> units method must be modified to allow for
 the normalization of <em>Lx</em>, <em>Ly</em>, and <em>Lz</em>:</p>
 </div>
@@ -257,10 +267,42 @@ the normalization of <em>Lx</em>, <em>Ly</em>, and <em>Lz</em>:</p>
 <p>If <em>Ly</em> or <em>Lz</em> has a value of <em>None</em>, it is not normalized.</p>
 </div>
 </section>
+<section id="identify-the-atom-properties">
+<h2>Identify the atom properties<a class="headerlink" href="#identify-the-atom-properties" title="Link to this heading">#</a></h2>
+<div class="justify docutils container">
+<p>Since it is anticipated that the code allows for more than one types
+of atoms, let us store the information for each atoms in arrays.
+Add the following method to the <em>InitializeSimulation</em> class.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">identify_atom_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span>
+    <span class="n">atoms_sigma</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">atoms_epsilon</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">atoms_mass</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">atoms_type</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">number_atoms</span><span class="p">,</span> <span class="nb">type</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">,</span>
+                                                        <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">,</span>
+                                                        <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">atoms_sigma</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sigma</span><span class="p">]</span> <span class="o">*</span> <span class="n">number_atoms</span>
+        <span class="n">atoms_epsilon</span> <span class="o">+=</span> <span class="p">[</span><span class="n">epsilon</span><span class="p">]</span> <span class="o">*</span> <span class="n">number_atoms</span>
+        <span class="n">atoms_mass</span> <span class="o">+=</span> <span class="p">[</span><span class="n">mass</span><span class="p">]</span> <span class="o">*</span> <span class="n">number_atoms</span>
+        <span class="n">atoms_type</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">type</span><span class="p">]</span> <span class="o">*</span> <span class="n">number_atoms</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">atoms_sigma</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">atoms_epsilon</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">atoms_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">atoms_mass</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">atoms_type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">atoms_type</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="justify docutils container">
+<p>Here, <em>atoms_sigma</em>, <em>atoms_epsilon</em>, <em>atoms_mass</em>, and <em>atoms_type</em>
+are arrays of lengths equal to the total number of atoms. They will be used,
+among others, for calculating the forces between the atoms.</p>
+</div>
+</section>
 <section id="define-the-box">
 <h2>Define the box<a class="headerlink" href="#define-the-box" title="Link to this heading">#</a></h2>
 <div class="justify docutils container">
-<p>Here, the values for <em>Lx</em>, <em>Ly</em>, and <em>Lz</em> that are provided by the
+<p>The values for <em>Lx</em>, <em>Ly</em>, and <em>Lz</em> that are provided by the
 users are used to define the box boundaries and box size.
 Add the following method to the <em>InitializeSimulation</em> class.</p>
 </div>
@@ -279,6 +321,19 @@ Add the following method to the <em>InitializeSimulation</em> class.</p>
 <div class="justify docutils container">
 <p>If <em>Ly</em> or <em>Lz</em> are not provided, their values is <em>None</em>, and
 <em>Lx</em> is used along the <em>y</em> or <em>z</em> direction.</p>
+</div>
+</section>
+<section id="populate-the-box">
+<h2>Populate the box<a class="headerlink" href="#populate-the-box" title="Link to this heading">#</a></h2>
+<div class="justify docutils container">
+<p>The previously defined box is populated with a number of atoms.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">populate_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
+        <span class="n">atoms_positions</span><span class="p">[:,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">atoms_positions</span>
+</pre></div>
 </div>
 </section>
 </section>
@@ -327,8 +382,10 @@ Add the following method to the <em>InitializeSimulation</em> class.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Create the box</a><ul>
-<li><a class="reference internal" href="#define-the-box-dimensions">Define the box dimensions</a></li>
+<li><a class="reference internal" href="#define-the-box-dimensions-and-atom-number">Define the box dimensions and atom number</a></li>
+<li><a class="reference internal" href="#identify-the-atom-properties">Identify the atom properties</a></li>
 <li><a class="reference internal" href="#define-the-box">Define the box</a></li>
+<li><a class="reference internal" href="#populate-the-box">Populate the box</a></li>
 </ul>
 </li>
 </ul>
