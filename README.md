@@ -1,6 +1,6 @@
 # Learn Molecular Simulations with Python
 
-The goal of [Learn molecular simulations with Python](https://mdcourse.github.io/) is to write a simple code containing most of the basic functionalities of molecular simulations, including molecular
+The goal of [Learn Molecular Simulations with Python](https://mdcourse.github.io/) is to write a simple code containing most of the basic functionalities of molecular simulations, including molecular
 dynamics and Monte Carlo simulations.
 
 <img src="docs/source/_static/logo/logo-py.png" width="30%" align="right"/></a>
@@ -8,7 +8,7 @@ dynamics and Monte Carlo simulations.
 The target audience is people either completely new to molecular simulations, or users of user-friendly
 codes such as LAMMPS and GROMACS wanting to better understand what is hiding behind those codes.
 
-The Python code that will be written here will be used to realize some simple scientific projects.
+The Python code that will be written here will be used to realize some simple scientific projects. Note that the code is slow and that efficiency is not the objective of the present project.
 
 Although some basic knowledge in coding, thermodynamics, and statistical physics is recommended to fully understand molecular simulations, Learning molecular simulations with Python can be followed even without deep knowledge in those fields. Annexes with key concepts and suggested readings are given when necessary.
 
@@ -16,6 +16,8 @@ Although some basic knowledge in coding, thermodynamics, and statistical physics
 
 - molecules
 - thermostats and barostats other than Berendsen
+- energy minimization methods other than steepest descent
+- non-cubic boxes
 
 ### About me
 
