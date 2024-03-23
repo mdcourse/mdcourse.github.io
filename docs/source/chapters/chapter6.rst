@@ -212,13 +212,34 @@ Test the code
     from MonteCarlo import MonteCarlo
 
     mc = MonteCarlo(
-        maximum_steps=50,
+        maximum_steps=300,
         displace_mc=1,
         dump = 1,
-        number_atoms=[100],
-        Lx=30,
-        sigma=[3],
-        epsilon=[0.1],
-        atom_mass=[1],
+        number_atoms=[100, 30],
+        Lx=50,
+        sigma=[1.5, 3],
+        epsilon=[0.1, 0.1],
+        atom_mass=[1, 1],
         data_folder = "mc-output/")
     mc.run()
+
+.. figure:: ../_static/chapter6/avatar-dark.webp
+    :alt: binary lennard jones fluid
+    :height: 250
+    :align: right
+    :class: only-dark
+
+.. figure:: ../_static/chapter6/avatar-light.webp
+    :alt: binary lennard jones fluid
+    :height: 250
+    :align: right
+    :class: only-light
+
+.. container:: justify
+
+    Looking at the generate file named *dump.mc.lammpstrj* using VMD, 
+    one can see that the atoms are moving
+    one by one (see the animation on the right). Each motion of an atom
+    correspond to a successful Monte Carlo move. Since the initial 
+    energy of the system can be large due to overlapping between atoms,
+    one expect the initial energy of the system to decrease rapidly.
