@@ -27,7 +27,7 @@ jobs:
       - name: Install sphinx
         run: |
           pip install sphinx
-          pip install sphinx-book-theme
+          pip install furo
       - name: Build
         run: |
           cd docs/
