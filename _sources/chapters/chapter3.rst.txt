@@ -176,3 +176,12 @@ Test the code
     md.run()
     print("normalized box size:", md.box_size)
     print("first atom position:", md.atoms_positions[0])
+
+.. container:: justify
+
+    This is what I see:
+
+.. code-block:: python
+
+    normalized box size: [10. 10. 10.]
+    first atom position: [ 0.36546066 -1.65788067  3.49811286]
