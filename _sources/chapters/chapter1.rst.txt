@@ -22,6 +22,7 @@ Presentation
 
     The three first classes named *InitializeSimulation*, *Outputs*, and *Utilities*
     are inherited by the two former classes *MolecularDynamics* and *MonteCarlo*. 
+    The *Utilities* class is inherited by all other four classes.
 
 .. container:: justify
 
