@@ -3,15 +3,16 @@ Code structure
 
 .. container:: justify
 
-    The main files and classes that constitute the basis of the code
-    are defined.
+    Here, the five files that constitute the basis of the code
+    are created. These files will be progressively filled. 
 
 Presentation
 ------------
 
 .. container:: justify
 
-    The Python code will be divided into five classes:
+    The Python code performing the molecular simulations will be
+    divided into five classes:
 
     - *InitializeSimulation*
     - *Outputs*
@@ -20,7 +21,10 @@ Presentation
     - *MonteCarlo*
 
     The three first classes named *InitializeSimulation*, *Outputs*, and *Utilities*
-    will be inherited by the two former classes *MolecularDynamics* and *MonteCarlo*. 
+    are inherited by the two former classes *MolecularDynamics* and *MonteCarlo*. 
+
+.. container:: justify
+
     The purpose of the class *InitializeSimulation* is to set up the
     system and place atoms in the box. Class *Outputs* deals with
     data files, dumps, and log files. Class *Utilities* contains
@@ -33,7 +37,7 @@ Start coding
 
 .. container:: justify
 
-    Inside a dedicated folder, create 5 blank Python scripts named:
+    Inside a dedicated folder, create 5 blank Python scripts named respectively:
 
     - *InitializeSimulation.py*
     - *Outputs.py*
@@ -43,8 +47,8 @@ Start coding
 
 .. container:: justify
 
-    For each script, let us write the basis of each script.
-    Let us start with the *InitializeSimulation* class: 
+    Let us start by filing some parts of the *InitializeSimulation*
+    class within the *InitializeSimulation.py* file: 
 
 .. code-block:: python
 
@@ -56,7 +60,8 @@ Start coding
 
 .. container:: justify
 
-    The Utilities.py is similar:
+    Let us write something similar for the *Utilities* class 
+    within the *Utilities.py* file:
 
 .. code-block:: python
 
@@ -71,7 +76,7 @@ Start coding
     For the *Outputs* class, let us anticipate that the outputs
     from the code will be saved in a folder, which by default
     is named *results/*. If the folder does not exist, it will be
-    created using *os.mkdir*:
+    created using *os.mkdir()*:
 
 .. code-block:: python
 
@@ -90,8 +95,8 @@ Start coding
 
 .. container:: justify
 
-    The *MolecularDynamics* class is inheriting
-    the 3 previously defined classes:
+    Let us create the *MolecularDynamics* class which inherits
+    the 3 previously defined classes.
 
 .. code-block:: python
 
@@ -156,5 +161,6 @@ Test the code
 
 .. container:: justify
 
-    If everything is working just fine, two folders named *md-output/*
-    and *mc-output/* must have been created.
+    If everything is working well two folders named *md-output/*
+    and *mc-output/* must have been created, and no error message
+    should appear.
