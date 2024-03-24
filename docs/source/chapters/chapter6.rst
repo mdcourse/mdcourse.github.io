@@ -126,14 +126,14 @@ Monte Carlo displacement
             else:
                 self.Epot = Epot 
 
-Wrap in box
------------
+Wrap in the box
+---------------
 
 .. container:: justify
 
     One has to make sure that the atoms remain within the 
-    box by wrapping the atoms positions. Within the *Utilities* method,
-    add the following *method*.
+    box by wrapping the positions of the atoms. Within the
+    *Utilities* method, add the following *method*.
 
 .. code-block:: python
 
@@ -197,14 +197,14 @@ Printing the trajectory
     We keep the option of printing the velocities as well in the future,
     when we perform molecular dynamics.
 
-Test the code
--------------
+Test the code (1/2)
+-------------------
 
 .. container:: justify
 
     Let us call the *MonteCarlo* and run for 50 steps
     with a Monte Carlo displacement of :math:`1~\text{Angstrom}`.
-    Let us also dump the positions of the atoms in a file every step.
+    Let us also dump the positions of the atoms in a file at every step.
 
 .. code-block:: python
 
@@ -237,9 +237,161 @@ Test the code
 
 .. container:: justify
 
-    Looking at the generate file named *dump.mc.lammpstrj* using VMD, 
+    Looking at the generated file named *dump.mc.lammpstrj* using VMD, 
     one can see that the atoms are moving
     one by one (see the animation on the right). Each motion of an atom
-    correspond to a successful Monte Carlo move. Since the initial 
+    corresponds to a successful Monte Carlo move. Since the initial 
     energy of the system can be large due to overlapping between atoms,
-    one expect the initial energy of the system to decrease rapidly.
+    one expects the initial energy of the system to decrease rapidly.
+
+Printing out the energy
+-----------------------
+
+.. container:: justify
+
+    To follow the evolution of the system, let us print out the potential energy
+    in a file, and in the terminal. Let us add the *update_log* method to the 
+    *run* method from the *MonteCarlo* class.
+
+.. code-block:: python
+
+    def run(self):
+        for self.step in range(0, self.maximum_steps+1):
+            self.monte_carlo_displacement()
+            self.wrap_in_box()
+            self.update_dump(filename="dump.mc.lammpstrj", velocity=False)
+            self.update_log()
+
+.. container:: justify
+
+    Then, within the *Outputs* class, ass the following method
+    named *update_log* to print the potential energy as well
+    as the steps, number of atoms, and volume of the system. 
+
+.. code-block:: python
+
+    def update_log(self):
+        if self.thermo is not None:
+            if (self.step % self.thermo == 0) | (self.step == 0):
+                # convert the units
+                volume_A3 = np.prod(self.box_size)*self.reference_distance**3
+                epot_kcalmol = self.calculate_potential_energy(self.atoms_positions) \
+                    * self.reference_energy
+
+                if self.step == 0:         
+                    print('{:<5} {:<5} {:<9} {:<13}'.format(
+                        '%s' % ("step"),
+                        '%s' % ("N"),
+                        '%s' % ("V (A3)"),
+                        '%s' % ("Ep (kcal/mol)"),
+                        ))
+                print('{:<5} {:<5} {:<9} {:<13}'.format(
+                    '%s' % (self.step),
+                    '%s' % (self.total_number_atoms),
+                    '%s' % (f"{volume_A3:.3}"),
+                    '%s' % (f"{epot_kcalmol:.3}"),                      
+                    ))
+
+                for output_value, filename in zip([self.total_number_atoms,
+                                                    epot_kcalmol,
+                                                    volume_A3],
+                                                    ["atom_number.dat",
+                                                    "Epot.dat",
+                                                    "volume.dat"]):
+                    self.write_data_file(output_value, filename)
+
+.. container:: justify
+
+    The printing is made every *thermo*, a parameter that must be added
+    to the *__init__* method of the *Outputs* class. 
+
+.. code-block:: python
+
+    def __init__(self,
+                 thermo = None,
+                 data_folder = "./",
+                 dump = None,
+                 *args,
+                 **kwargs):
+        self.thermo = thermo
+        self.dump = dump
+        self.data_folder = data_folder
+        super().__init__(*args, **kwargs)
+
+.. container:: justify
+
+    The *write_data_file* method that is called from *update_log*
+    allow us to print the potential energy to a data file.
+
+.. code-block:: python
+
+    def write_data_file(self, output_value, filename):
+        if self.step == 0:
+            myfile = open(self.data_folder + filename, "w")
+        else:
+            myfile = open(self.data_folder + filename, "a")
+        myfile.write(str(self.step) + " " + str(output_value) + "\n")
+        myfile.close()
+
+Test the code (2/2)
+-------------------
+
+.. container:: justify
+
+    Let us have a look at the evolution of the potential
+    energy of the system. 
+
+.. code-block:: python
+
+    import numpy as np
+    from MonteCarlo import MonteCarlo
+
+    mc = MonteCarlo(
+        thermo=5,
+        maximum_steps=5000,
+        displace_mc=1,
+        dump = 1,
+        number_atoms=[50],
+        Lx=20,
+        sigma=[3],
+        epsilon=[0.1],
+        atom_mass=[1],
+        data_folder = "mc-output/")
+    mc.run()
+
+.. container:: justify
+
+    You should see the following in the terminal:
+
+.. code-block:: python
+
+    step  N     V (A3)    Ep (kcal/mol)
+    0     50    8e+03     6.65e+06     
+    5     50    8e+03     6.65e+06     
+    10    50    8e+03     4.47e+04     
+    15    50    8e+03     4.46e+04 
+
+.. container:: justify
+
+    The following figure shows the evolution of the potential energy
+    as a function of the steps. The energy rapidly decreases until it
+    reaches a plateau.
+
+.. figure:: ../_static/chapter6/Epot-vs-time-dark.png
+    :alt: evolution of the potential energy during monte carlo simulation
+    :height: 250
+    :align: right
+    :class: only-dark
+
+.. figure:: ../_static/chapter6/Epot-vs-time-light.png
+    :alt: evolution of the potential energy during monte carlo simulation
+    :height: 250
+    :align: right
+    :class: only-light
+
+..  container:: figurelegend
+
+    Figure: Evolution of the potential energy as a function of the time. 
+    Panel a shows the rapid evolution of the energy at the beginning
+    of the simulation thanks to a semi-log scale. Panel b shows the
+    final plateau in potential energy.
