@@ -379,14 +379,10 @@ Test the code (2/2)
 
 .. figure:: ../_static/chapter6/Epot-vs-time-dark.png
     :alt: evolution of the potential energy during monte carlo simulation
-    :height: 250
-    :align: right
     :class: only-dark
 
 .. figure:: ../_static/chapter6/Epot-vs-time-light.png
     :alt: evolution of the potential energy during monte carlo simulation
-    :height: 250
-    :align: right
     :class: only-light
 
 ..  container:: figurelegend
