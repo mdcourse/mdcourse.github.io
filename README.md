@@ -1,7 +1,9 @@
 # Learn Molecular Simulations with Python
 
-The goal of [Learn Molecular Simulations with Python](https://mdcourse.github.io/) is to write a simple code containing most of the basic functionalities of molecular simulations, including molecular
-dynamics and Monte Carlo simulations.
+The goal of [Learn Molecular Simulations with Python](https://mdcourse.github.io/) is to write a simple code containing most of the basic functionalities of molecular simulations:
+- Energy minimization,
+- Molecular dynamics
+- Monte Carlo displacement/insertion/deletion
 
 <img src="docs/source/_static/logo/logo-py.png" width="30%" align="right"/></a>
 
