@@ -12,17 +12,14 @@ Presentation
 .. container:: justify
 
     The Python code performing the molecular simulations will be
-    divided into five classes:
+    divided into six classes:
 
-    - *InitializeSimulation*
-    - *Outputs*
-    - *Utilities*
-    - *MolecularDynamics*
-    - *MonteCarlo*
-
-    The three first classes named *InitializeSimulation*, *Outputs*, and *Utilities*
-    are inherited by the two former classes *MolecularDynamics* and *MonteCarlo*. 
-    The *Utilities* class is inherited by all other four classes.
+    - *Utilities*: Methods of general purpose, inherited by all the other classes
+    - *Outputs*: Methods of interest for printing information in log or data files, inherited by all the classes except *Utilities*
+    - *InitializeSimulation*: Methods necessary to set up the system and prepare the simulation, inherited by all the classes except *Outputs* and *Utilities*
+    - *MinimizeEnergy*: Methods for performing energy minimization, including 
+    - *MonteCarlo*: Methods for performing Monte Carlo simulation in different ensembles (Grand canonical, canonical)
+    - *MolecularDynamics*: Methods for performing molecular dynamics in different ensembles (NVE, NPT, NVT)
 
 .. container:: justify
 

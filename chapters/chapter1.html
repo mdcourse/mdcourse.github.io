@@ -210,17 +210,15 @@ are created. These files will be progressively filled.</p>
 <h2>Presentation<a class="headerlink" href="#presentation" title="Link to this heading">#</a></h2>
 <div class="justify docutils container">
 <p>The Python code performing the molecular simulations will be
-divided into five classes:</p>
+divided into six classes:</p>
 <ul class="simple">
-<li><p><em>InitializeSimulation</em></p></li>
-<li><p><em>Outputs</em></p></li>
-<li><p><em>Utilities</em></p></li>
-<li><p><em>MolecularDynamics</em></p></li>
-<li><p><em>MonteCarlo</em></p></li>
+<li><p><em>Utilities</em>: Methods of general purpose, inherited by all the other classes</p></li>
+<li><p><em>Outputs</em>: Methods of interest for printing information in log or data files, inherited by all the classes except <em>Utilities</em></p></li>
+<li><p><em>InitializeSimulation</em>: Methods necessary to set up the system and prepare the simulation, inherited by all the classes except <em>Outputs</em> and <em>Utilities</em></p></li>
+<li><p><em>MinimizeEnergy</em>: Methods for performing energy minimization, including</p></li>
+<li><p><em>MonteCarlo</em>: Methods for performing Monte Carlo simulation in different ensembles (Grand canonical, canonical)</p></li>
+<li><p><em>MolecularDynamics</em>: Methods for performing molecular dynamics in different ensembles (NVE, NPT, NVT)</p></li>
 </ul>
-<p>The three first classes named <em>InitializeSimulation</em>, <em>Outputs</em>, and <em>Utilities</em>
-are inherited by the two former classes <em>MolecularDynamics</em> and <em>MonteCarlo</em>.
-The <em>Utilities</em> class is inherited by all other four classes.</p>
 </div>
 <div class="justify docutils container">
 <p>The purpose of the class <em>InitializeSimulation</em> is to set up the
