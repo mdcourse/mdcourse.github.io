@@ -3,7 +3,7 @@ Code structure
 
 .. container:: justify
 
-    Here, the five files that constitute the basis of the code
+    Here, the files that constitute the basis of the code
     are created. These files will be progressively filled. 
 
 Presentation
@@ -12,23 +12,20 @@ Presentation
 .. container:: justify
 
     The Python code performing the molecular simulations will be
-    divided into six classes:
+    divided into seven classes:
 
-    - *Utilities*: Methods of general purpose, inherited by all the other classes
-    - *Outputs*: Methods of interest for printing information in log or data files, inherited by all the classes except *Utilities*
-    - *InitializeSimulation*: Methods necessary to set up the system and prepare the simulation, inherited by all the classes except *Outputs* and *Utilities*
-    - *MinimizeEnergy*: Methods for performing energy minimization, including 
-    - *MonteCarlo*: Methods for performing Monte Carlo simulation in different ensembles (Grand canonical, canonical)
-    - *MolecularDynamics*: Methods for performing molecular dynamics in different ensembles (NVE, NPT, NVT)
+    - *Prepare.py --* Methods preparing the non-dimensionalization of the units
+    - *Utilities --* Methods of general purpose, inherited by all the other classes
+    - *Outputs --* Methods of interest for printing information in log or data files, inherited by all the classes except *Utilities*
+    - *InitializeSimulation --* Methods necessary to set up the system and prepare the simulation, inherited by all the classes except *Outputs* and *Utilities*
+    - *MinimizeEnergy --* Methods for performing energy minimization, including 
+    - *MonteCarlo --* Methods for performing Monte Carlo simulation in different ensembles (Grand canonical, canonical)
+    - *MolecularDynamics --* Methods for performing molecular dynamics in different ensembles (NVE, NPT, NVT)
 
 .. container:: justify
 
-    The purpose of the class *InitializeSimulation* is to set up the
-    system and place atoms in the box. Class *Outputs* deals with
-    data files, dumps, and log files. Class *Utilities* contains
-    some general-use functionalities. Finally classes *MolecularDynamics*
-    and *MonteCarlo* are the core Molecular Dynamics and Monte Carlo
-    codes, respectively.
+    Two additional files named *Potentials.py* and *Functions.py* will contain
+    some additional files.
 
 Start coding
 -------------
