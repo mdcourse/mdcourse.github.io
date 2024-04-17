@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
+    <!-- Generated with Sphinx 7.3.5 and Furo 2024.01.29 -->
         <title>Monte carlo simulations - </title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
@@ -197,7 +197,7 @@
         </div>
         <article role="main">
           <section id="monte-carlo-simulations">
-<h1>Monte carlo simulations<a class="headerlink" href="#monte-carlo-simulations" title="Link to this heading">#</a></h1>
+<h1>Monte carlo simulations<a class="headerlink" href="#monte-carlo-simulations" title="Link to this heading">¶</a></h1>
 <p>The typical structure of a Monte Carlo simulation is the following:</p>
 <div class="highlight-bw notranslate"><div class="highlight"><pre><span></span>- Initialize the system
 - Loop for a desired number of steps
@@ -208,7 +208,7 @@
 </pre></div>
 </div>
 <section id="measure-the-potential-energy">
-<h2>Measure the potential energy<a class="headerlink" href="#measure-the-potential-energy" title="Link to this heading">#</a></h2>
+<h2>Measure the potential energy<a class="headerlink" href="#measure-the-potential-energy" title="Link to this heading">¶</a></h2>
 <p>One of the most important step of Monte Carlo simulation is to evaluate the potential energy
 of the system. Potential energy needs to be measured before and after any random Monte Carlo
 attempt.</p>
@@ -257,7 +257,7 @@ which explain the more complex relation used.</p>
 <p>TO ADD : TEST IT ON THE CURRENT SYSTEM !!!</p>
 </section>
 <section id="monte-carlo-step">
-<h2>Monte Carlo step<a class="headerlink" href="#monte-carlo-step" title="Link to this heading">#</a></h2>
+<h2>Monte Carlo step<a class="headerlink" href="#monte-carlo-step" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">monte_carlo_displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">beta</span> <span class="o">=</span>  <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span>
     <span class="n">Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_potential_energy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span>
@@ -275,7 +275,7 @@ which explain the more complex relation used.</p>
 </div>
 </section>
 <section id="calculate-lambda">
-<h2>Calculate Lambda<a class="headerlink" href="#calculate-lambda" title="Link to this heading">#</a></h2>
+<h2>Calculate Lambda<a class="headerlink" href="#calculate-lambda" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_Lambda</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mass</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Estimate de Broglie wavelength in LJ units.&quot;&quot;&quot;</span>
     <span class="n">m_kg</span> <span class="o">=</span> <span class="n">mass</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">milli</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_mass</span>
@@ -287,7 +287,7 @@ which explain the more complex relation used.</p>
 </div>
 </section>
 <section id="main-loop">
-<h2>Main loop<a class="headerlink" href="#main-loop" title="Link to this heading">#</a></h2>
+<h2>Main loop<a class="headerlink" href="#main-loop" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">InitializeSimulation</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">,</span> <span class="n">Outputs</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
         <span class="n">maximum_steps</span><span class="p">,</span>
@@ -369,7 +369,7 @@ which explain the more complex relation used.</p>
     </aside>
   </div>
 </div><script src="../../_static/documentation_options.js?v=7026087e"></script>
-    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>

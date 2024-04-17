@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
 
-    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
+    <!-- Generated with Sphinx 7.3.5 and Furo 2024.01.29 -->
         <title>Create the box - </title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
@@ -197,12 +197,12 @@
         </div>
         <article role="main">
           <section id="create-the-box">
-<h1>Create the box<a class="headerlink" href="#create-the-box" title="Link to this heading">#</a></h1>
+<h1>Create the box<a class="headerlink" href="#create-the-box" title="Link to this heading">¶</a></h1>
 <div class="justify docutils container">
 <p>The simulations box is defined and populated with atoms.</p>
 </div>
 <section id="define-the-box-dimensions-and-atom-number">
-<h2>Define the box dimensions and atom number<a class="headerlink" href="#define-the-box-dimensions-and-atom-number" title="Link to this heading">#</a></h2>
+<h2>Define the box dimensions and atom number<a class="headerlink" href="#define-the-box-dimensions-and-atom-number" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
 <p>First, let us modify the <em>__init__</em> method of the <em>InitializeSimulation</em> class
 to allow for 3 new parameters to be defined: <span class="math notranslate nohighlight">\(L_x, L_y\)</span>, and <span class="math notranslate nohighlight">\(L_z\)</span>,
@@ -267,7 +267,7 @@ the normalization of <em>Lx</em>, <em>Ly</em>, and <em>Lz</em>:</p>
 </div>
 </section>
 <section id="identify-the-atom-properties">
-<h2>Identify the atom properties<a class="headerlink" href="#identify-the-atom-properties" title="Link to this heading">#</a></h2>
+<h2>Identify the atom properties<a class="headerlink" href="#identify-the-atom-properties" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
 <p>Since it is anticipated that the code allows for more than one types
 of atoms, let us store the information for each atoms in arrays.
@@ -299,7 +299,7 @@ among others, for calculating the forces between the atoms.</p>
 </div>
 </section>
 <section id="define-the-box">
-<h2>Define the box<a class="headerlink" href="#define-the-box" title="Link to this heading">#</a></h2>
+<h2>Define the box<a class="headerlink" href="#define-the-box" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
 <p>The values for <em>Lx</em>, <em>Ly</em>, and <em>Lz</em> that are provided by the
 users are used to define the box boundaries and box size.
@@ -323,7 +323,7 @@ Add the following method to the <em>InitializeSimulation</em> class.</p>
 </div>
 </section>
 <section id="populate-the-box">
-<h2>Populate the box<a class="headerlink" href="#populate-the-box" title="Link to this heading">#</a></h2>
+<h2>Populate the box<a class="headerlink" href="#populate-the-box" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
 <p>The previously defined box is populated with a number of atoms.</p>
 </div>
@@ -336,7 +336,7 @@ Add the following method to the <em>InitializeSimulation</em> class.</p>
 </div>
 </section>
 <section id="test-the-code">
-<h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">#</a></h2>
+<h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
 <p>Let us call the <em>MolecularDynamics</em> class and
 create a cubic box with 20 atoms, and print the box size and
@@ -416,7 +416,7 @@ the position of the first atom:</p>
     </aside>
   </div>
 </div><script src="../_static/documentation_options.js?v=7026087e"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>

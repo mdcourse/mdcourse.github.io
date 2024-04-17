@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
+    <!-- Generated with Sphinx 7.3.5 and Furo 2024.01.29 -->
         <title>Initialize simulation - </title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
@@ -197,13 +197,13 @@
         </div>
         <article role="main">
           <section id="initialize-simulation">
-<h1>Initialize simulation<a class="headerlink" href="#initialize-simulation" title="Link to this heading">#</a></h1>
+<h1>Initialize simulation<a class="headerlink" href="#initialize-simulation" title="Link to this heading">¶</a></h1>
 <p>The <em>InitializeSimulation</em> class deals with creating the simulation box,
 populating it with a chosen number of atoms with initial velocity. The
 <em>InitializeSimulation</em> class also takes care of converting the inputs units
 into non-dimensionalized.</p>
 <section id="the-init-function">
-<h2>The <em>__init__</em> function<a class="headerlink" href="#the-init-function" title="Link to this heading">#</a></h2>
+<h2>The <em>__init__</em> function<a class="headerlink" href="#the-init-function" title="Link to this heading">¶</a></h2>
 <p>Open a new blank <em>.py</em> file, call it <em>main.py</em>, and copy the following
 files in it:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -258,7 +258,7 @@ repeating the same simulation if necessary – this is usually useful during deb
 </div>
 </section>
 <section id="initialize-box">
-<h2>Initialize box<a class="headerlink" href="#initialize-box" title="Link to this heading">#</a></h2>
+<h2>Initialize box<a class="headerlink" href="#initialize-box" title="Link to this heading">¶</a></h2>
 <p>The <em>initialize_box</em> functions takes the inputs values for <span class="math notranslate nohighlight">\(Lx\)</span> (and optionally
 <span class="math notranslate nohighlight">\(Ly\)</span> and <span class="math notranslate nohighlight">\(Lz\)</span>) to create a cuboid box of dimensions <span class="math notranslate nohighlight">\(Lx \times Ly \times Lz\)</span>,
 if <span class="math notranslate nohighlight">\(Ly\)</span> and <span class="math notranslate nohighlight">\(Lz\)</span> are provided, or <span class="math notranslate nohighlight">\(Lx \times Lx \times Lx\)</span>,
@@ -281,7 +281,7 @@ if <span class="math notranslate nohighlight">\(Ly\)</span> and <span class="mat
 <p>Note that choosing a dimension different fom 3 may cause problem in other parts of the code, to be fixed.</p>
 </section>
 <section id="populate-box">
-<h2>Populate box<a class="headerlink" href="#populate-box" title="Link to this heading">#</a></h2>
+<h2>Populate box<a class="headerlink" href="#populate-box" title="Link to this heading">¶</a></h2>
 <p>The <em>populate_box</em> function add a number corresponding to <em>number_atoms</em> of atoms in the
 box at random positions.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">populate_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -302,7 +302,7 @@ useful for studying solids. Another common option is to restrain the placement o
 certain sub-region of the system.</p>
 </section>
 <section id="give-initial-velocity-to-the-atoms">
-<h2>Give initial velocity to the atoms<a class="headerlink" href="#give-initial-velocity-to-the-atoms" title="Link to this heading">#</a></h2>
+<h2>Give initial velocity to the atoms<a class="headerlink" href="#give-initial-velocity-to-the-atoms" title="Link to this heading">¶</a></h2>
 <p>Providing the atoms with an initial velocity is useful to reach the target temperature faster.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">give_velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Give velocity to atoms so that the initial temperature is the desired one.&quot;&quot;&quot;</span>
@@ -325,7 +325,7 @@ atoms so that the temperature of the system goes from <span class="math notransl
 to <span class="math notranslate nohighlight">\(T_0\)</span>, the desired temperature.</p>
 </section>
 <section id="nondimensionalize-the-units">
-<h2>Nondimensionalize the units<a class="headerlink" href="#nondimensionalize-the-units" title="Link to this heading">#</a></h2>
+<h2>Nondimensionalize the units<a class="headerlink" href="#nondimensionalize-the-units" title="Link to this heading">¶</a></h2>
 <p>Units are given by the user in the so-called <em>real</em> units as defined by LAMMPS,
 and are converted into non-dimensional units before the simulation starts. This
 is done thanks to the following function <em>nondimensionalise_units</em>, and is
@@ -353,7 +353,7 @@ and mass (<span class="math notranslate nohighlight">\(m\)</span>) as provided b
 </div>
 </section>
 <section id="probe-temperature">
-<h2>Probe temperature<a class="headerlink" href="#probe-temperature" title="Link to this heading">#</a></h2>
+<h2>Probe temperature<a class="headerlink" href="#probe-temperature" title="Link to this heading">¶</a></h2>
 <p>The rescaling of the velocity requires to be able to calculate temperature. This is
 done using the formula <span class="math notranslate nohighlight">\(T = 2 E_\text{kin} / N_\text{dof}\)</span>. Create the <em>Utilities</em>
 class, and two functions: <em>calculate_kinetic_energy</em> and <em>calculate_temperature</em>. The
@@ -377,7 +377,7 @@ kinetic energy is simply calculated as <span class="math notranslate nohighlight
 </div>
 </section>
 <section id="save-atom-coordinate-to-file">
-<h2>Save atom coordinate to file<a class="headerlink" href="#save-atom-coordinate-to-file" title="Link to this heading">#</a></h2>
+<h2>Save atom coordinate to file<a class="headerlink" href="#save-atom-coordinate-to-file" title="Link to this heading">¶</a></h2>
 <p>Since one would like to visualize the box that is being create, let us start to fill the
 <em>Outputs</em> class and crate our first function named <em>write_lammps_data</em>. <em>write_lammps_data</em>
 creates data file in a format that is readable by LAMMPS, as well as Ovito visualization
@@ -416,7 +416,7 @@ software.</p>
 </div>
 </section>
 <section id="final-code">
-<h2>Final code<a class="headerlink" href="#final-code" title="Link to this heading">#</a></h2>
+<h2>Final code<a class="headerlink" href="#final-code" title="Link to this heading">¶</a></h2>
 <p>The currently written code is:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -598,10 +598,10 @@ software.</p>
 </div>
 </section>
 <section id="tests">
-<h2>Tests<a class="headerlink" href="#tests" title="Link to this heading">#</a></h2>
+<h2>Tests<a class="headerlink" href="#tests" title="Link to this heading">¶</a></h2>
 <p>Let us test the <em>InitializeSimulation</em> to make sure it does what we expect.</p>
 <section id="initial-position">
-<h3>Initial position<a class="headerlink" href="#initial-position" title="Link to this heading">#</a></h3>
+<h3>Initial position<a class="headerlink" href="#initial-position" title="Link to this heading">¶</a></h3>
 <p>Let us create a small box of (2 nm)³ containing 30 particles. In a new python file,
 or in a Jupyter notebook, write:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">main</span> <span class="kn">import</span> <span class="n">MolecularDynamics</span>
@@ -617,14 +617,28 @@ or in a Jupyter notebook, write:</p>
 <p>After executing this script, a data file named <em>atoms-positions.data</em> has been created. The data file is in
 LAMMPS format and can be read by standard molecular dynamics visualization softwares:</p>
 <figure class="align-default">
-<a class="only-dark reference internal image-reference" href="chapters/_static/chapter2/system-dark.png"><img alt="atomic system generated" class="only-dark" src="chapters/_static/chapter2/system-dark.png" /></a>
+<a class="only-dark reference internal image-reference" href="chapters/_static/chapter2/system-dark.png"><img alt="atomic system generated" class="only-dark" src="chapters/_static/chapter2/system-dark.png" />
+<aside class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<span class="docutils literal">/home/runner/work/mdcourse.github.io/mdcourse.github.io/docs/source/chapters/previous/chapter2.rst</span>, line 454)</p>
+<p>Cannot scale image!
+  Could not get size from &quot;chapters/_static/chapter2/system-dark.png&quot;:
+  Requires Python Imaging Library.</p>
+</aside>
+</a>
 </figure>
 <figure class="align-default">
-<a class="only-light reference internal image-reference" href="chapters/_static/chapter2/system-light.png"><img alt="atomic system generated" class="only-light" src="chapters/_static/chapter2/system-light.png" /></a>
+<a class="only-light reference internal image-reference" href="chapters/_static/chapter2/system-light.png"><img alt="atomic system generated" class="only-light" src="chapters/_static/chapter2/system-light.png" />
+<aside class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<span class="docutils literal">/home/runner/work/mdcourse.github.io/mdcourse.github.io/docs/source/chapters/previous/chapter2.rst</span>, line 459)</p>
+<p>Cannot scale image!
+  Could not get size from &quot;chapters/_static/chapter2/system-light.png&quot;:
+  Requires Python Imaging Library.</p>
+</aside>
+</a>
 </figure>
 </section>
 <section id="velocity-distribution">
-<h3>Velocity distribution<a class="headerlink" href="#velocity-distribution" title="Link to this heading">#</a></h3>
+<h3>Velocity distribution<a class="headerlink" href="#velocity-distribution" title="Link to this heading">¶</a></h3>
 <p>Let us general a very large number of particle with a given temperature:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">main</span> <span class="kn">import</span> <span class="n">MolecularDynamics</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -727,7 +741,7 @@ simulations, as they will quickly be over</p>
     </aside>
   </div>
 </div><script src="../../_static/documentation_options.js?v=7026087e"></script>
-    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>

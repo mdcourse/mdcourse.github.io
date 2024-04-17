@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
 
-    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
+    <!-- Generated with Sphinx 7.3.5 and Furo 2024.01.29 -->
         <title>Monte carlo displacement - </title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
@@ -197,13 +197,13 @@
         </div>
         <article role="main">
           <section id="monte-carlo-displacement">
-<h1>Monte carlo displacement<a class="headerlink" href="#monte-carlo-displacement" title="Link to this heading">#</a></h1>
+<h1>Monte carlo displacement<a class="headerlink" href="#monte-carlo-displacement" title="Link to this heading">¶</a></h1>
 <div class="justify docutils container">
 <p>A Monte Carlo algorithm is implemented and the
 evolution of the system is followed with time.</p>
 </div>
 <section id="add-desired-temperature">
-<h2>Add desired temperature<a class="headerlink" href="#add-desired-temperature" title="Link to this heading">#</a></h2>
+<h2>Add desired temperature<a class="headerlink" href="#add-desired-temperature" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
 <p>In the <em>InitializeSimulation</em> class, add a parameter
 called <em>desired_temperature</em>.</p>
@@ -255,7 +255,7 @@ called <em>desired_temperature</em>.</p>
 </div>
 </section>
 <section id="create-new-parameters">
-<h2>Create new parameters<a class="headerlink" href="#create-new-parameters" title="Link to this heading">#</a></h2>
+<h2>Create new parameters<a class="headerlink" href="#create-new-parameters" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
 <p>Add 2 new parameters called <em>maximum_steps</em> and <em>displace_mc</em>
 to the <em>__init__</em> method of the <em>MonteCarlo</em> class.
@@ -278,7 +278,7 @@ Let us also normalized the displace_mc.</p>
 </div>
 </section>
 <section id="id1">
-<h2>Monte Carlo displacement<a class="headerlink" href="#id1" title="Link to this heading">#</a></h2>
+<h2>Monte Carlo displacement<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
 <p>Within the <em>MonteCarlo</em> class, create a new loop that
 runs over a number of steps corresponding to maximum_steps + 1.</p>
@@ -311,7 +311,7 @@ runs over a number of steps corresponding to maximum_steps + 1.</p>
 </div>
 </section>
 <section id="wrap-in-the-box">
-<h2>Wrap in the box<a class="headerlink" href="#wrap-in-the-box" title="Link to this heading">#</a></h2>
+<h2>Wrap in the box<a class="headerlink" href="#wrap-in-the-box" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
 <p>One has to make sure that the atoms remain within the
 box by wrapping the positions of the atoms. Within the
@@ -327,7 +327,7 @@ box by wrapping the positions of the atoms. Within the
 </div>
 </section>
 <section id="printing-the-trajectory">
-<h2>Printing the trajectory<a class="headerlink" href="#printing-the-trajectory" title="Link to this heading">#</a></h2>
+<h2>Printing the trajectory<a class="headerlink" href="#printing-the-trajectory" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
 <p>Let us add the <em>update_dump</em> method to follow the evolution of the system with time.</p>
 </div>
@@ -376,7 +376,7 @@ when we perform molecular dynamics.</p>
 </div>
 </section>
 <section id="test-the-code-1-2">
-<h2>Test the code (1/2)<a class="headerlink" href="#test-the-code-1-2" title="Link to this heading">#</a></h2>
+<h2>Test the code (1/2)<a class="headerlink" href="#test-the-code-1-2" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
 <p>Let us call the <em>MonteCarlo</em> and run for 50 steps
 with a Monte Carlo displacement of <span class="math notranslate nohighlight">\(1~\text{Angstrom}\)</span>.
@@ -399,10 +399,12 @@ Let us also dump the positions of the atoms in a file at every step.</p>
 </pre></div>
 </div>
 <figure class="align-right">
-<a class="only-dark reference internal image-reference" href="../_images/avatar-dark.webp"><img alt="binary lennard jones fluid" class="only-dark" src="../_images/avatar-dark.webp" style="height: 250px;" /></a>
+<a class="only-dark reference internal image-reference" href="../_images/avatar-dark.webp"><img alt="binary lennard jones fluid" class="only-dark" src="../_images/avatar-dark.webp" style="height: 250px;" />
+</a>
 </figure>
 <figure class="align-right">
-<a class="only-light reference internal image-reference" href="../_images/avatar-light.webp"><img alt="binary lennard jones fluid" class="only-light" src="../_images/avatar-light.webp" style="height: 250px;" /></a>
+<a class="only-light reference internal image-reference" href="../_images/avatar-light.webp"><img alt="binary lennard jones fluid" class="only-light" src="../_images/avatar-light.webp" style="height: 250px;" />
+</a>
 </figure>
 <div class="justify docutils container">
 <p>Looking at the generated file named <em>dump.mc.lammpstrj</em> using VMD,
@@ -414,7 +416,7 @@ one expects the initial energy of the system to decrease rapidly.</p>
 </div>
 </section>
 <section id="printing-out-the-energy">
-<h2>Printing out the energy<a class="headerlink" href="#printing-out-the-energy" title="Link to this heading">#</a></h2>
+<h2>Printing out the energy<a class="headerlink" href="#printing-out-the-energy" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
 <p>To follow the evolution of the system, let us print out the potential energy
 in a file, and in the terminal. Let us add the <em>update_log</em> method to the
@@ -495,7 +497,7 @@ allow us to print the potential energy to a data file.</p>
 </div>
 </section>
 <section id="test-the-code-2-2">
-<h2>Test the code (2/2)<a class="headerlink" href="#test-the-code-2-2" title="Link to this heading">#</a></h2>
+<h2>Test the code (2/2)<a class="headerlink" href="#test-the-code-2-2" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
 <p>Let us have a look at the evolution of the potential
 energy of the system.</p>
@@ -601,7 +603,7 @@ final plateau in potential energy.</p>
     </aside>
   </div>
 </div><script src="../_static/documentation_options.js?v=7026087e"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
