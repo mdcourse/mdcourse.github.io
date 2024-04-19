@@ -167,6 +167,33 @@ Calculate LJ units prefactors
     Every time the *Prepare* class will be initialized, all five reference values
     will be calculated and passed as *self*. 
 
+Nondimensionalize units
+-----------------------
+
+.. container:: justify
+
+    Let us take advantage of the calculated reference values and normalize the 
+    three inputs of the *Prepare* class that have a physical dimension, i.e.
+    *epsilon*, *sigma*, and *atom_mass*.
+
+.. container:: justify
+
+    Create a new method called 
+
+.. code-block:: python
+
+   def nondimensionalize_units_0(self):
+        r"""Use LJ prefactors to convert units into non-dimensional."""
+        # Normalize LJ properties
+        epsilon, sigma, atom_mass = [], [], []
+        for e0, s0, m0 in zip(self.epsilon, self.sigma, self.atom_mass):
+            epsilon.append(e0/self.reference_energy)
+            sigma.append(s0/self.reference_distance)
+            atom_mass.append(m0/self.reference_mass)
+        self.epsilon = epsilon
+        self.sigma = sigma
+        self.atom_mass = atom_mass
+
 .. code-block:: python
 
 

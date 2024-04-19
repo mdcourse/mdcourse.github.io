@@ -343,6 +343,30 @@ by adding the following line to the <em>__init__</em> method:</p>
 <p>Every time the <em>Prepare</em> class will be initialized, all five reference values
 will be calculated and passed as <em>self</em>.</p>
 </div>
+</section>
+<section id="nondimensionalize-units">
+<h2>Nondimensionalize units<a class="headerlink" href="#nondimensionalize-units" title="Link to this heading">¶</a></h2>
+<div class="justify docutils container">
+<p>Let us take advantage of the calculated reference values and normalize the
+three inputs of the <em>Prepare</em> class that have a physical dimension, i.e.
+<em>epsilon</em>, <em>sigma</em>, and <em>atom_mass</em>.</p>
+</div>
+<div class="justify docutils container">
+<p>Create a new method called</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">nondimensionalize_units_0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">     </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Use LJ prefactors to convert units into non-dimensional.&quot;&quot;&quot;</span>
+     <span class="c1"># Normalize LJ properties</span>
+     <span class="n">epsilon</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">atom_mass</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+     <span class="k">for</span> <span class="n">e0</span><span class="p">,</span> <span class="n">s0</span><span class="p">,</span> <span class="n">m0</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span><span class="p">):</span>
+         <span class="n">epsilon</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span><span class="p">)</span>
+         <span class="n">sigma</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="p">)</span>
+         <span class="n">atom_mass</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_mass</span><span class="p">)</span>
+     <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">epsilon</span>
+     <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span>
+     <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span> <span class="o">=</span> <span class="n">atom_mass</span>
+</pre></div>
+</div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units_0</span><span class="p">()</span>
 <span class="bp">self</span><span class="o">.</span><span class="n">calculate_cross_coefficients</span><span class="p">()</span>
 </pre></div>
@@ -450,6 +474,7 @@ will be calculated and passed as <em>self</em>.</p>
 <li><a class="reference internal" href="#unit-systems">Unit systems</a></li>
 <li><a class="reference internal" href="#start-coding">Start coding</a></li>
 <li><a class="reference internal" href="#calculate-lj-units-prefactors">Calculate LJ units prefactors</a></li>
+<li><a class="reference internal" href="#nondimensionalize-units">Nondimensionalize units</a></li>
 </ul>
 </li>
 </ul>
