@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="prev" title="Code structure" href="chapter1.html" />
 
-    <!-- Generated with Sphinx 7.3.5 and Furo 2024.01.29 -->
+    <!-- Generated with Sphinx 7.3.7 and Furo 2024.01.29 -->
         <title>Prepare the simulation - </title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
@@ -199,15 +199,15 @@
           <section id="prepare-the-simulation">
 <h1>Prepare the simulation<a class="headerlink" href="#prepare-the-simulation" title="Link to this heading">¶</a></h1>
 <div class="justify docutils container">
-<p>For simplicity, all parameters entered are normalized.
-This is done within the <em>Prepare</em> class, which is defined
-here.</p>
+<p>For simplicity, all the parameters that are specified as inputs by the user
+will be normalized. This makes all the calculations much simpler. The
+normalization is done within the <em>Prepare</em> class, which is defined here.</p>
 </div>
 <section id="unit-systems">
 <h2>Unit systems<a class="headerlink" href="#unit-systems" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
 <p>Two separate unit systems are used. The first unit system is called
-<em>real</em>, and followed the convention from the LAMMPS unit systems.
+<em>real</em>. It follows the convention from the <a href="https://docs.lammps.org/units.html" target="_blank">LAMMPS unit systems</a>.
 All input parameters are to be provided to the code in <em>real</em>
 units, for which:</p>
 <ul class="simple">
@@ -229,7 +229,7 @@ as it would involve complicated prefactors. Instead, the LJ (for Lennard-Jones)
 unit system will be used. With the LJ unit systems, all quantities are
 unitless. All masses, distances, and energies are specified as multiples
 of <span class="math notranslate nohighlight">\(m\)</span>, <span class="math notranslate nohighlight">\(\sigma\)</span>, and <span class="math notranslate nohighlight">\(\epsilon\)</span>, which are the mass and LJ
-parameters of the atoms. Other quantities are specified from these 3 paraters,
+parameters of the atoms. Other quantities are specified from these 3 parameters,
 such as:</p>
 <ul class="simple">
 <li><p>the time is in <span class="math notranslate nohighlight">\(\sqrt{m \sigma^2 / \epsilon}\)</span>,</p></li>
@@ -285,9 +285,66 @@ method:</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span> <span class="o">=</span> <span class="n">atom_mass</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">calculate_LJunits_prefactors</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units_0</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">calculate_cross_coefficients</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="justify docutils container">
+<p>All four lists, <em>number_atoms</em>, <em>epsilon</em>, <em>sigma</em>, and <em>atom_mass</em> are
+given default values of <span class="math notranslate nohighlight">\(10\)</span>,
+<span class="math notranslate nohighlight">\(0.1~\text{[Kcal/mol]}\)</span>,
+<span class="math notranslate nohighlight">\(1~\text{[Å]}\)</span>,
+and <span class="math notranslate nohighlight">\(0.1~\text{[g/mol]}\)</span>, respectively. All four parameters are passed
+as <em>self</em>, which will allow for other methods to access them. Here, <em>args</em> and
+<em>kwargs</em> are used to accept an arbitrary number of positional
+and keyword arguments, respectively.</p>
+</div>
+</section>
+<section id="calculate-lj-units-prefactors">
+<h2>Calculate LJ units prefactors<a class="headerlink" href="#calculate-lj-units-prefactors" title="Link to this heading">¶</a></h2>
+<div class="justify docutils container">
+<p>Let us create a method called <em>calculate_LJunits_prefactors</em> that will be
+used to calculate the prefactors necessary to convert units from the <em>real</em>
+unit system to the <em>LJ</em> unit system.</p>
+</div>
+<div class="justify docutils container">
+<p>Within the <em>Prepare</em> class, copy the following method:</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_LJunits_prefactors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Angstrom</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Kcal/mol</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">reference_mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># g/mol</span>
+    <span class="n">mass_kg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span>  <span class="c1"># kg</span>
+    <span class="n">epsilon_J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span>  <span class="c1"># J</span>
+    <span class="n">sigma_m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">angstrom</span>  <span class="c1"># m</span>
+    <span class="n">time_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mass_kg</span><span class="o">*</span><span class="n">sigma_m</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">epsilon_J</span><span class="p">)</span>  <span class="c1"># s</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">reference_time</span> <span class="o">=</span> <span class="n">time_s</span> <span class="o">/</span> <span class="n">cst</span><span class="o">.</span><span class="n">femto</span>  <span class="c1"># fs</span>
+    <span class="n">kB</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span>  <span class="c1"># kCal/mol/K</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">reference_temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">kB</span>  <span class="c1"># K</span>
+    <span class="n">pressure_pa</span> <span class="o">=</span> <span class="n">epsilon_J</span><span class="o">/</span><span class="n">sigma_m</span><span class="o">**</span><span class="mi">3</span>  <span class="c1"># Pa</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">reference_pressure</span> <span class="o">=</span> <span class="n">pressure_pa</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">atm</span>  <span class="c1"># atm</span>
+</pre></div>
+</div>
+<div class="justify docutils container">
+<p>This method defines the <em>reference_distance</em> as the first element in the
+<em>sigma</em> list, i.e. <span class="math notranslate nohighlight">\(\sigma_{11}\)</span>. Therefore atoms of type one will
+always be used for the normalization. Similarly, the first element
+in the <em>epsilon</em> list (<span class="math notranslate nohighlight">\(\epsilon_{11}\)</span>) is used as a <em>reference_energy</em>,
+and the first element in the <em>atom_mass</em> list (<span class="math notranslate nohighlight">\(m_1\)</span>) is used as <em>reference_mass</em>.
+Then, the <em>reference_time</em> in femtosecond is calculated as <span class="math notranslate nohighlight">\(\sqrt{m_1 \sigma_{11}^2 / \epsilon_{11}}\)</span>,
+and the <em>reference_pressure</em> is atmospheres is calculated as <span class="math notranslate nohighlight">\(\epsilon_{11}/\sigma_{11}^3\)</span>.</p>
+</div>
+<div class="justify docutils container">
+<p>Finally, let us call the <em>calculate_LJunits_prefactors()</em>
+by adding the following line to the <em>__init__</em> method:</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_LJunits_prefactors</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="justify docutils container">
+<p>Every time the <em>Prepare</em> class will be initialized, all five reference values
+will be calculated and passed as <em>self</em>.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units_0</span><span class="p">()</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">calculate_cross_coefficients</span><span class="p">()</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">nondimensionalize_units_0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -341,33 +398,6 @@ method:</p>
             <span class="n">sigma_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
             <span class="n">sigma_ij</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">sigma_i</span><span class="o">+</span><span class="n">sigma_j</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">array_sigma_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigma_ij</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">calculate_LJunits_prefactors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate LJ non-dimensional units.</span>
-<span class="sd">    Distances, energies, and masses are normalized by</span>
-<span class="sd">    the $\sigma$, $\epsilon$, and $m$ parameters from the</span>
-<span class="sd">    first type of atom.</span>
-<span class="sd">    In addition:</span>
-<span class="sd">    - Times are normalized by $\sqrt{m \sigma^2 / \epsilon}$.</span>
-<span class="sd">    - Temperature are normalized by $\epsilon/k_\text{B}$,</span>
-<span class="sd">    where $k_\text{B}$ is the Boltzmann constant.</span>
-<span class="sd">    - Pressures are normalized by $\epsilon/\sigma^3$.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Distance, energie, and mass</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Angstrom</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Kcal/mol</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">reference_mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># g/mol</span>
-    <span class="c1"># Time</span>
-    <span class="n">mass_kg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span>  <span class="c1"># kg</span>
-    <span class="n">epsilon_J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span>  <span class="c1"># J</span>
-    <span class="n">sigma_m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">angstrom</span>  <span class="c1"># m</span>
-    <span class="n">time_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mass_kg</span><span class="o">*</span><span class="n">sigma_m</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">epsilon_J</span><span class="p">)</span>  <span class="c1"># s</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">reference_time</span> <span class="o">=</span> <span class="n">time_s</span> <span class="o">/</span> <span class="n">cst</span><span class="o">.</span><span class="n">femto</span>  <span class="c1"># fs</span>
-    <span class="c1"># Pressure</span>
-    <span class="n">kB</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span>  <span class="c1"># kCal/mol/K</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">reference_temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">kB</span>  <span class="c1"># K</span>
-    <span class="n">pressure_pa</span> <span class="o">=</span> <span class="n">epsilon_J</span><span class="o">/</span><span class="n">sigma_m</span><span class="o">**</span><span class="mi">3</span>  <span class="c1"># Pa</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">reference_pressure</span> <span class="o">=</span> <span class="n">pressure_pa</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">atm</span>  <span class="c1"># atm</span>
 </pre></div>
 </div>
 </section>
@@ -419,6 +449,7 @@ method:</p>
 <li><a class="reference internal" href="#">Prepare the simulation</a><ul>
 <li><a class="reference internal" href="#unit-systems">Unit systems</a></li>
 <li><a class="reference internal" href="#start-coding">Start coding</a></li>
+<li><a class="reference internal" href="#calculate-lj-units-prefactors">Calculate LJ units prefactors</a></li>
 </ul>
 </li>
 </ul>

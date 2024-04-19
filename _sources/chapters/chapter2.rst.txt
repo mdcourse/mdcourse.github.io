@@ -3,9 +3,9 @@ Prepare the simulation
 
 .. container:: justify
 
-    For simplicity, all parameters entered are normalized.
-    This is done within the *Prepare* class, which is defined
-    here.
+    For simplicity, all the parameters that are specified as inputs by the user
+    will be normalized. This makes all the calculations much simpler. The
+    normalization is done within the *Prepare* class, which is defined here.
 
 Unit systems
 ------------
@@ -13,7 +13,7 @@ Unit systems
 .. container:: justify
 
     Two separate unit systems are used. The first unit system is called
-    *real*, and followed the convention from the LAMMPS unit systems.
+    *real*. It follows the convention from the |lammps-unit-systems|.
     All input parameters are to be provided to the code in *real*
     units, for which:
 
@@ -27,6 +27,10 @@ Unit systems
     - the pressure is in atmospheres,
     - and the density is in g/cm^dim.
 
+.. |lammps-unit-systems| raw:: html
+
+   <a href="https://docs.lammps.org/units.html" target="_blank">LAMMPS unit systems</a>
+
 .. container:: justify
 
     The *real* unit system is conventional in molecular simulations. However,
@@ -35,7 +39,7 @@ Unit systems
     unit system will be used. With the LJ unit systems, all quantities are
     unitless. All masses, distances, and energies are specified as multiples 
     of :math:`m`, :math:`\sigma`, and :math:`\epsilon`, which are the mass and LJ
-    parameters of the atoms. Other quantities are specified from these 3 paraters,
+    parameters of the atoms. Other quantities are specified from these 3 parameters,
     such as:
 
     - the time is in :math:`\sqrt{m \sigma^2 / \epsilon}`,
@@ -98,9 +102,76 @@ Start coding
         self.sigma = sigma
         self.atom_mass = atom_mass
         super().__init__(*args, **kwargs)
-        self.calculate_LJunits_prefactors()
-        self.nondimensionalize_units_0()
-        self.calculate_cross_coefficients()
+
+.. container:: justify
+
+    All four lists, *number_atoms*, *epsilon*, *sigma*, and *atom_mass* are
+    given default values of :math:`10`,
+    :math:`0.1~\text{[Kcal/mol]}`,
+    :math:`1~\text{[Å]}`,
+    and :math:`0.1~\text{[g/mol]}`, respectively. All four parameters are passed
+    as *self*, which will allow for other methods to access them. Here, *args* and
+    *kwargs* are used to accept an arbitrary number of positional
+    and keyword arguments, respectively.
+
+Calculate LJ units prefactors
+-----------------------------
+
+.. container:: justify
+
+    Let us create a method called *calculate_LJunits_prefactors* that will be
+    used to calculate the prefactors necessary to convert units from the *real*
+    unit system to the *LJ* unit system.
+
+.. container:: justify
+
+    Within the *Prepare* class, copy the following method:
+
+.. code-block:: python
+
+    def calculate_LJunits_prefactors(self):
+        self.reference_distance = self.sigma[0]  # Angstrom
+        self.reference_energy = self.epsilon[0]  # Kcal/mol
+        self.reference_mass = self.atom_mass[0]  # g/mol
+        mass_kg = self.atom_mass[0]/cst.kilo/cst.Avogadro  # kg
+        epsilon_J = self.epsilon[0]*cst.calorie*cst.kilo/cst.Avogadro  # J
+        sigma_m = self.sigma[0]*cst.angstrom  # m
+        time_s = np.sqrt(mass_kg*sigma_m**2/epsilon_J)  # s
+        self.reference_time = time_s / cst.femto  # fs
+        kB = cst.Boltzmann*cst.Avogadro/cst.calorie/cst.kilo  # kCal/mol/K
+        self.reference_temperature = self.epsilon[0]/kB  # K
+        pressure_pa = epsilon_J/sigma_m**3  # Pa
+        self.reference_pressure = pressure_pa/cst.atm  # atm
+
+.. container:: justify
+
+    This method defines the *reference_distance* as the first element in the
+    *sigma* list, i.e. :math:`\sigma_{11}`. Therefore atoms of type one will
+    always be used for the normalization. Similarly, the first element
+    in the *epsilon* list (:math:`\epsilon_{11}`) is used as a *reference_energy*, 
+    and the first element in the *atom_mass* list (:math:`m_1`) is used as *reference_mass*.
+    Then, the *reference_time* in femtosecond is calculated as :math:`\sqrt{m_1 \sigma_{11}^2 / \epsilon_{11}}`,
+    and the *reference_pressure* is atmospheres is calculated as :math:`\epsilon_{11}/\sigma_{11}^3`.
+
+.. container:: justify
+
+    Finally, let us call the *calculate_LJunits_prefactors()*
+    by adding the following line to the *__init__* method:
+
+.. code-block:: python
+
+    self.calculate_LJunits_prefactors()
+
+.. container:: justify
+
+    Every time the *Prepare* class will be initialized, all five reference values
+    will be calculated and passed as *self*. 
+
+.. code-block:: python
+
+
+    self.nondimensionalize_units_0()
+    self.calculate_cross_coefficients()
 
 .. code-block:: python
 
@@ -156,29 +227,4 @@ Start coding
                 sigma_ij.append((sigma_i+sigma_j)/2)
         self.array_sigma_ij = np.array(sigma_ij)
 
-    def calculate_LJunits_prefactors(self):
-        r"""Calculate LJ non-dimensional units.
-        Distances, energies, and masses are normalized by
-        the $\sigma$, $\epsilon$, and $m$ parameters from the
-        first type of atom.
-        In addition:
-        - Times are normalized by $\sqrt{m \sigma^2 / \epsilon}$.
-        - Temperature are normalized by $\epsilon/k_\text{B}$,
-        where $k_\text{B}$ is the Boltzmann constant.
-        - Pressures are normalized by $\epsilon/\sigma^3$.
-        """
-        # Distance, energie, and mass
-        self.reference_distance = self.sigma[0]  # Angstrom
-        self.reference_energy = self.epsilon[0]  # Kcal/mol
-        self.reference_mass = self.atom_mass[0]  # g/mol
-        # Time
-        mass_kg = self.atom_mass[0]/cst.kilo/cst.Avogadro  # kg
-        epsilon_J = self.epsilon[0]*cst.calorie*cst.kilo/cst.Avogadro  # J
-        sigma_m = self.sigma[0]*cst.angstrom  # m
-        time_s = np.sqrt(mass_kg*sigma_m**2/epsilon_J)  # s
-        self.reference_time = time_s / cst.femto  # fs
-        # Pressure
-        kB = cst.Boltzmann*cst.Avogadro/cst.calorie/cst.kilo  # kCal/mol/K
-        self.reference_temperature = self.epsilon[0]/kB  # K
-        pressure_pa = epsilon_J/sigma_m**3  # Pa
-        self.reference_pressure = pressure_pa/cst.atm  # atm
+
