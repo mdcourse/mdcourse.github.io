@@ -106,7 +106,7 @@ Final code
 
     The second class is named *Utilities*.
 
-.. label:: start_Prepare_class
+.. label:: start_Utilities_class
 
 .. code-block:: python
 
@@ -123,6 +123,8 @@ Final code
                     *args,
                     **kwargs):
             super().__init__(*args, **kwargs)
+
+.. label:: end_Utilities_class
 
 .. container:: justify
 
