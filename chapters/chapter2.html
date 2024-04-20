@@ -627,27 +627,23 @@ method.</p>
 <div class="justify docutils container">
 <p>Let us test the <em>Prepare</em> class to make sure that it does what is expected.</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Prepare</span> <span class="kn">import</span> <span class="n">Prepare</span>
+
+<span class="bp">self</span> <span class="o">=</span> <span class="n">Prepare</span><span class="p">(</span><span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="c1"># g/mol</span>
+    <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reference energy:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reference distance:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;array_epsilon_ij:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">array_epsilon_ij</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;array_sigma_ij:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">array_sigma_ij</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>from Prepare import Prepare</p>
-<blockquote>
-<div><dl class="simple">
-<dt>self = Prepare(number_atoms=[2, 3],</dt><dd><p>epsilon=[0.1, 1.0], # kcal/mol
-sigma=[3, 6], # A
-atom_mass=[1, 1], # g/mol
-)</p>
-</dd>
-</dl>
-<p>print(“Reference energy:”)
-print(self.reference_energy)
-print(“Reference distance:”)
-print(self.reference_distance)
-print(“array_epsilon_ij:”)
-print(self.array_epsilon_ij)
-print(“array_sigma_ij:”)
-print(self.array_sigma_ij)</p>
-</div></blockquote>
 <div class="justify docutils container">
 <p>Which should return:</p>
 </div>

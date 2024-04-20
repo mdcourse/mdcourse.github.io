@@ -111,7 +111,7 @@ Populate the box
     positions were not provided (i.e. *initial_positions = None*), atoms
     are placed randomly within the box. If initial positions were provided
     as an array, they are used instead. Note that in that case, the array
-    number be of size 'number of atoms' x ''number of dimensions'.
+    number be of size 'number of atoms' x ''number of dimensions.
 
 .. code-block:: python
 
@@ -135,6 +135,8 @@ Final code
     After following these steps, this is what the final code should
     look like. For clarity, some comments and descriptions were added for each
     method.
+
+.. label:: InitializeSimulation_class
 
 .. code-block:: python
 
@@ -192,3 +194,39 @@ Final code
                 self.atoms_positions = atoms_positions
             else:
                 self.atoms_positions = self.initial_positions
+
+Test the code
+-------------
+
+.. container:: justify
+
+    Let us test the *InitializeSimulation* class to make sure that it does what
+    is expected.
+
+.. label:: test_InitializeSimulation_class
+
+.. code-block:: python
+
+    from InitializeSimulation import InitializeSimulation
+
+    self = InitializeSimulation(number_atoms=[2, 3],
+        epsilon=[0.1, 1.0], # kcal/mol
+        sigma=[3, 6], # A
+        atom_mass=[1, 1], # g/mol
+        box_dimensions=[20, 20, 20], # A
+        )
+    print("Atom positions:")
+    print(self.atoms_positions)
+
+.. container:: justify
+
+    Which should return:
+
+.. code-block:: python
+
+    Atom positions:
+    [[-1.15270975  1.25033545  0.39460297]
+    [ 2.10225087 -2.12285757 -2.43760443]
+    [ 0.86169508 -0.77310475 -0.74742818]
+    [ 0.81255861  2.26285536  1.76611306]
+    [-0.31367217 -1.55867269 -2.71347742]]

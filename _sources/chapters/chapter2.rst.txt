@@ -369,6 +369,8 @@ Final code
     look like. For clarity, some comments and descriptions were added for each
     method.
 
+.. label:: Prepare_class
+
 .. code-block:: python
 
     import numpy as np
@@ -481,9 +483,11 @@ Test the code
 
     Let us test the *Prepare* class to make sure that it does what is expected.
 
+.. label:: test_Prepare_class
+
 .. code-block:: python
 
-from Prepare import Prepare
+    from Prepare import Prepare
 
     self = Prepare(number_atoms=[2, 3],
         epsilon=[0.1, 1.0], # kcal/mol
