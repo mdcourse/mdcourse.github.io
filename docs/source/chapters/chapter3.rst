@@ -220,6 +220,8 @@ Test the code
     print("Atom positions:")
     print(self.atoms_positions)
 
+.. label:: end_test_InitializeSimulation_class
+
 .. container:: justify
 
     Which should return:
@@ -232,5 +234,3 @@ Test the code
     [ 0.86169508 -0.77310475 -0.74742818]
     [ 0.81255861  2.26285536  1.76611306]
     [-0.31367217 -1.55867269 -2.71347742]]
-
-.. label:: end_test_InitializeSimulation_class

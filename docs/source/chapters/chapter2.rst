@@ -505,6 +505,8 @@ Test the code
     print("array_sigma_ij:")
     print(self.array_sigma_ij)
 
+.. label:: end_test_Prepare_class
+
 .. container:: justify
 
     Which should return:
@@ -519,5 +521,3 @@ Test the code
     [ 1.   5.5  5.5  5.5  5.5  5.5  5.5 10.  10.  10. ]
     array_sigma_ij:
     [1.  1.5 1.5 1.5 1.5 1.5 1.5 2.  2.  2. ]
-
-.. label:: end_test_Prepare_class
