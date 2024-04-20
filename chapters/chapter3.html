@@ -241,8 +241,8 @@ the <em>Prepare</em> class.</p>
 </div>
 <div class="justify docutils container">
 <p>Three parameters are provided to the <em>InitializeSimulation</em> class, namely
-the box dimensions which is a list of size three with parameters in units of Angstrom,
-a seed, and some initial positions for the atoms that can be provided as an array
+the box dimensions which is a list with a length corresponding to <em>dimensions</em> (default is 3)
+with parameters in units of Angstrom, a seed, and some initial positions for the atoms that can be provided as an array
 of three columns. If <em>initial_positions</em> is
 left equal to <em>None</em>, positions with be randomly attributed to the atoms.</p>
 </div>
@@ -263,6 +263,51 @@ condition to the <em>__init__()</em> method.</p>
 <div class="justify docutils container">
 <p>If a seed is provided, it is passed to the <em>random.seed()</em> function of <em>NumPy</em>.
 If the seed is left to None, the simulation will be randomized.</p>
+</div>
+</section>
+<section id="define-the-box">
+<h2>Define the box<a class="headerlink" href="#define-the-box" title="Link to this heading">¶</a></h2>
+<div class="justify docutils container">
+<p>Let us define a box from the dimensions provided as a list named <em>box_dimensions</em>.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">define_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">box_boundaries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">dim</span><span class="p">,</span> <span class="n">L</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_dimensions</span><span class="p">):</span>
+        <span class="n">box_boundaries</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">L</span><span class="o">/</span><span class="mi">2</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span> <span class="o">=</span> <span class="n">box_boundaries</span>
+    <span class="n">box_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">box_geometry</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">box_size</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="o">+</span><span class="n">box_geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="justify docutils container">
+<p>By symmetry, the box is centered in 0 for all axes. A <em>box_size</em> is also
+defined. It follows the  MDAnalysis conventions; Lx, Ly, Lz, 90, 90, 90,
+where the last three numbers are angles in degrees that are usually used to
+define triclinic (non-orthogonal) boxes, which is not a possibility of the current code.</p>
+</div>
+</section>
+<section id="populate-the-box">
+<h2>Populate the box<a class="headerlink" href="#populate-the-box" title="Link to this heading">¶</a></h2>
+<div class="justify docutils container">
+<p>Here, a number of atoms are placed within the simulation box. If initial
+positions were not provided (i.e. <em>initial_positions = None</em>), atoms
+are placed randomly within the box. If initial positions were provided
+as an array, they are used instead. Note that in that case, the array
+number be of size ‘number of atoms’ x ‘’number of dimensions’.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">populate_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
+            <span class="n">diff_box</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
+            <span class="n">random_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">)</span>
+            <span class="n">atoms_positions</span><span class="p">[:,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">random_pos</span><span class="o">*</span><span class="n">diff_box</span><span class="o">-</span><span class="n">diff_box</span><span class="o">/</span><span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">atoms_positions</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span>
+</pre></div>
 </div>
 </section>
 <section id="final-code">
@@ -378,6 +423,8 @@ method.</p>
 <li><a class="reference internal" href="#simulation-box">Simulation box</a></li>
 <li><a class="reference internal" href="#start-coding">Start coding</a></li>
 <li><a class="reference internal" href="#seed">Seed</a></li>
+<li><a class="reference internal" href="#define-the-box">Define the box</a></li>
+<li><a class="reference internal" href="#populate-the-box">Populate the box</a></li>
 <li><a class="reference internal" href="#final-code">Final code</a></li>
 </ul>
 </li>
