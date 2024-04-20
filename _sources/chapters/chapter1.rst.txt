@@ -255,8 +255,7 @@ Final code
 .. code-block:: python
 
     import numpy as np
-    from InitializeSimulation import InitializeSimulation
-    from Measurements import Measurements
+    from Outputs import Outputs
 
     class MolecularDynamics(Outputs):
         def __init__(self,
