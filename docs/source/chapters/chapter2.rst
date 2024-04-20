@@ -164,7 +164,10 @@ Calculate LJ units prefactors
 
 .. code-block:: python
 
-    self.calculate_LJunits_prefactors()
+    def __init__(self,
+        (...)
+        super().__init__(*args, **kwargs)
+        self.calculate_LJunits_prefactors()
 
 .. container:: justify
 
@@ -206,10 +209,23 @@ Nondimensionalize units
     corresponding reference value. The *zip()* function allows us to loop over
     all three lists at once.  
 
+.. container:: justify
+
+    Let us call the *nondimensionalize_units_0* from the *__init__* method:
+
 .. code-block:: python
 
+    def __init__(self,
+        (...)
+        self.calculate_LJunits_prefactors()
+        self.nondimensionalize_units_0()
 
-    self.nondimensionalize_units_0()
+.. container:: justify
+
+    
+
+
+
     self.calculate_cross_coefficients()
 
 .. code-block:: python
