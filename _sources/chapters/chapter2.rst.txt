@@ -130,16 +130,20 @@ Calculate LJ units prefactors
 .. code-block:: python
 
     def calculate_LJunits_prefactors(self):
+        # Distance, energy, and mass
         self.reference_distance = self.sigma[0]  # Angstrom
         self.reference_energy = self.epsilon[0]  # Kcal/mol
         self.reference_mass = self.atom_mass[0]  # g/mol
+        # Time
         mass_kg = self.atom_mass[0]/cst.kilo/cst.Avogadro  # kg
         epsilon_J = self.epsilon[0]*cst.calorie*cst.kilo/cst.Avogadro  # J
         sigma_m = self.sigma[0]*cst.angstrom  # m
         time_s = np.sqrt(mass_kg*sigma_m**2/epsilon_J)  # s
         self.reference_time = time_s / cst.femto  # fs
+        # Temperature
         kB = cst.Boltzmann*cst.Avogadro/cst.calorie/cst.kilo  # kCal/mol/K
         self.reference_temperature = self.epsilon[0]/kB  # K
+        # Pressure
         pressure_pa = epsilon_J/sigma_m**3  # Pa
         self.reference_pressure = pressure_pa/cst.atm  # atm
 
@@ -178,12 +182,13 @@ Nondimensionalize units
 
 .. container:: justify
 
-    Create a new method called 
+    Create a new method called *nondimensionalize_units_0* within the *Prepare*
+    class. The index *0* is used to differentiate this method from the other methods
+    that will be used to nondimensionalize units in future classes. 
 
 .. code-block:: python
 
    def nondimensionalize_units_0(self):
-        r"""Use LJ prefactors to convert units into non-dimensional."""
         # Normalize LJ properties
         epsilon, sigma, atom_mass = [], [], []
         for e0, s0, m0 in zip(self.epsilon, self.sigma, self.atom_mass):
@@ -193,6 +198,13 @@ Nondimensionalize units
         self.epsilon = epsilon
         self.sigma = sigma
         self.atom_mass = atom_mass
+
+.. container:: justify
+
+    Here, we anticipate that *epsilon*, *sigma*, and *atom_mass* may contain
+    more than one element in the future, and normalize each element with the
+    corresponding reference value. The *zip()* function allows us to loop over
+    all three lists at once.  
 
 .. code-block:: python
 
