@@ -369,7 +369,7 @@ Final code
     look like. For clarity, some comments and descriptions were added for each
     method.
 
-.. label:: Prepare_class
+.. label:: start_Prepare_class
 
 .. code-block:: python
 
@@ -476,6 +476,8 @@ Final code
             pressure_pa = epsilon_J/sigma_m**3  # Pa
             self.reference_pressure = pressure_pa/cst.atm  # atm
 
+.. label:: end_Prepare_class
+
 Test the code
 -------------
 
@@ -483,7 +485,7 @@ Test the code
 
     Let us test the *Prepare* class to make sure that it does what is expected.
 
-.. label:: test_Prepare_class
+.. label:: start_test_Prepare_class
 
 .. code-block:: python
 
@@ -517,3 +519,5 @@ Test the code
     [ 1.   5.5  5.5  5.5  5.5  5.5  5.5 10.  10.  10. ]
     array_sigma_ij:
     [1.  1.5 1.5 1.5 1.5 1.5 1.5 2.  2.  2. ]
+
+.. label:: end_test_Prepare_class
