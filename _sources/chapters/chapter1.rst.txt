@@ -277,6 +277,8 @@ Test the code
     create a new Jupyter notebook called *test.ipynb*, and copy
     the following lines into it:
 
+.. label:: start_test_First_class
+
 .. code-block:: python
 
     from MonteCarlo import MonteCarlo
@@ -286,6 +288,8 @@ Test the code
     md.run()
     mc = MonteCarlo(data_folder = "mc-output/")
     mc.run()
+
+.. label:: end_test_First_class
 
 .. container:: justify
 
