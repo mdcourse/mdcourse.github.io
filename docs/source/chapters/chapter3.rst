@@ -51,8 +51,8 @@ Start coding
 .. container:: justify
 
     Three parameters are provided to the *InitializeSimulation* class, namely
-    the box dimensions which is a list of size three with parameters in units of Angstrom, 
-    a seed, and some initial positions for the atoms that can be provided as an array
+    the box dimensions which is a list with a length corresponding to *dimensions* (default is 3)
+    with parameters in units of Angstrom, a seed, and some initial positions for the atoms that can be provided as an array
     of three columns. If *initial_positions* is
     left equal to *None*, positions with be randomly attributed to the atoms.
 
@@ -76,6 +76,56 @@ Seed
 
     If a seed is provided, it is passed to the *random.seed()* function of *NumPy*.
     If the seed is left to None, the simulation will be randomized.
+
+Define the box
+--------------
+
+.. container:: justify
+
+    Let us define a box from the dimensions provided as a list named *box_dimensions*.
+
+.. code-block:: python
+
+    def define_box(self):
+        box_boundaries = np.zeros((self.dimensions, 2))
+        for dim, L in zip(range(self.dimensions), self.box_dimensions):
+            box_boundaries[dim] = -L/2, L/2
+        self.box_boundaries = box_boundaries
+        box_size = np.diff(self.box_boundaries).reshape(3)
+        box_geometry = np.array([90, 90, 90])
+        self.box_size = np.array(box_size.tolist()+box_geometry.tolist())
+
+.. container:: justify
+
+    By symmetry, the box is centered in 0 for all axes. A *box_size* is also
+    defined. It follows the  MDAnalysis conventions; Lx, Ly, Lz, 90, 90, 90,
+    where the last three numbers are angles in degrees that are usually used to
+    define triclinic (non-orthogonal) boxes, which is not a possibility of the current code.
+
+Populate the box
+----------------
+
+.. container:: justify
+
+    Here, a number of atoms are placed within the simulation box. If initial
+    positions were not provided (i.e. *initial_positions = None*), atoms
+    are placed randomly within the box. If initial positions were provided
+    as an array, they are used instead. Note that in that case, the array
+    number be of size 'number of atoms' x ''number of dimensions'.
+
+.. code-block:: python
+
+    def populate_box(self):
+        if self.initial_positions is None:
+            atoms_positions = np.zeros((self.total_number_atoms,
+                                        self.dimensions))
+            for dim in np.arange(self.dimensions):
+                diff_box = np.diff(self.box_boundaries[dim])
+                random_pos = np.random.random(self.total_number_atoms)
+                atoms_positions[:, dim] = random_pos*diff_box-diff_box/2
+            self.atoms_positions = atoms_positions
+        else:
+            self.atoms_positions = self.initial_positions
 
 Final code
 ----------
