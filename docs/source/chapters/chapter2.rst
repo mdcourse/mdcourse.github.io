@@ -73,15 +73,21 @@ Start coding
     import numpy as np
     from scipy import constants as cst
 
-    import warnings
-    warnings.filterwarnings('ignore')
+.. container:: justify
 
+    Here, the |NumPy| library is imported, together with the constant module of |SciPy|.
 
-    class Prepare:
+.. |NumPy| raw:: html
+
+   <a href="https://numpy.org/" target="_blank">NumPy</a>
+
+.. |SciPy| raw:: html
+
+   <a href="https://scipy.org/" target="_blank">SciPy</a>
 
 .. container:: justify
 
-    Four parameters are given to the Prepare class,
+    Four parameters are given to the *Prepare* class,
     the atom masses :math:`m`, the LJ parameters
     :math:`\sigma` and :math:`\epsilon`, and the
     number of atoms. These quantities must be provided as 
@@ -90,23 +96,24 @@ Start coding
 
 .. container:: justify
 
-    Within the *Prepare* class, add the following *__init__*
-    method:  
+    Create the *Prepare* class, and add the following *__init__()*
+    method to it:  
 
 .. code-block:: python
 
-    def __init__(self,
-                number_atoms=[10],  # List
-                epsilon=[0.1],  # List - Kcal/mol
-                sigma=[1],  # List - Angstrom
-                atom_mass=[1],  # List - g/mol
-                *args,
-                **kwargs):
-        self.number_atoms = number_atoms
-        self.epsilon = epsilon
-        self.sigma = sigma
-        self.atom_mass = atom_mass
-        super().__init__(*args, **kwargs)
+    class Prepare:
+        def __init__(self,
+                    number_atoms=[10],  # List
+                    epsilon=[0.1],  # List - Kcal/mol
+                    sigma=[1],  # List - Angstrom
+                    atom_mass=[1],  # List - g/mol
+                    *args,
+                    **kwargs):
+            self.number_atoms = number_atoms
+            self.epsilon = epsilon
+            self.sigma = sigma
+            self.atom_mass = atom_mass
+            super().__init__(*args, **kwargs)
 
 .. container:: justify
 
@@ -165,7 +172,7 @@ Calculate LJ units prefactors
 .. container:: justify
 
     Finally, let us call the *calculate_LJunits_prefactors()*
-    by adding the following line to the *__init__* method:
+    by adding the following line to the *__init__()* method:
 
 .. code-block:: python
 
@@ -216,7 +223,7 @@ Nondimensionalize units
 
 .. container:: justify
 
-    Let us call the *nondimensionalize_units_0* from the *__init__* method:
+    Let us call the *nondimensionalize_units_0* from the *__init__()* method:
 
 .. code-block:: python
 
@@ -276,7 +283,7 @@ Identify atom properties
     
 .. container:: justify
 
-    Let us call the *nondimensionalize_units_0* from the *__init__* method:
+    Let us call the *nondimensionalize_units_0* from the *__init__()* method:
 
 Calculate cross coefficients
 ----------------------------
@@ -344,7 +351,7 @@ Calculate cross coefficients
 .. container:: justify
 
     Finally, let us call the *calculate_cross_coefficients* method from the
-    *__init__* method.
+    *__init__()* method.
 
 .. code-block:: python
 
