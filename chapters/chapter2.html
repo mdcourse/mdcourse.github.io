@@ -340,7 +340,10 @@ and the <em>reference_pressure</em> is atmospheres is calculated as <span class=
 <p>Finally, let us call the <em>calculate_LJunits_prefactors()</em>
 by adding the following line to the <em>__init__</em> method:</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">calculate_LJunits_prefactors</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">calculate_LJunits_prefactors</span><span class="p">()</span>
 </pre></div>
 </div>
 <div class="justify docutils container">
@@ -378,9 +381,17 @@ more than one element in the future, and normalize each element with the
 corresponding reference value. The <em>zip()</em> function allows us to loop over
 all three lists at once.</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units_0</span><span class="p">()</span>
-<span class="bp">self</span><span class="o">.</span><span class="n">calculate_cross_coefficients</span><span class="p">()</span>
+<div class="justify docutils container">
+<p>Let us call the <em>nondimensionalize_units_0</em> from the <em>__init__</em> method:</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">calculate_LJunits_prefactors</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units_0</span><span class="p">()</span>
 </pre></div>
+</div>
+<div class="justify docutils container">
+<p>self.calculate_cross_coefficients()</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">nondimensionalize_units_0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Use LJ prefactors to convert units into non-dimensional.&quot;&quot;&quot;</span>
