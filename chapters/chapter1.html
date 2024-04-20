@@ -226,97 +226,185 @@ some additional files.</p>
 <section id="start-coding">
 <h2>Start coding<a class="headerlink" href="#start-coding" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
-<p>Inside a dedicated folder, create 5 blank Python scripts named respectively:</p>
+<p>Inside a dedicated folder, create 9 blank Python scripts named respectively:</p>
 <ul class="simple">
-<li><p><em>InitializeSimulation.py</em></p></li>
-<li><p><em>Outputs.py</em></p></li>
+<li><p><em>Potentials.py</em></p></li>
+<li><p><em>Prepare.py</em></p></li>
 <li><p><em>Utilities.py</em></p></li>
+<li><p><em>InitializeSimulation.py</em></p></li>
+<li><p><em>Measurements.py</em></p></li>
+<li><p><em>Outputs.py</em></p></li>
+<li><p><em>MinimizeEnergy.py</em></p></li>
 <li><p><em>MolecularDynamics.py</em></p></li>
 <li><p><em>MonteCarlo.py</em></p></li>
 </ul>
 </div>
+</section>
+<section id="final-code">
+<h2>Final code<a class="headerlink" href="#final-code" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
-<p>Let us start by filing some parts of the <em>InitializeSimulation</em>
-class within the <em>InitializeSimulation.py</em> file:</p>
+<p>The first file name <em>Potentials.py</em> contains the potential that will be used.
+As it is now, only the Lennard-Jones potential (LJ) is implemented.</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">InitializeSimulation</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">LJ_potential</span><span class="p">(</span><span class="n">epsilon</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">derivative</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">derivative</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">48</span><span class="o">*</span><span class="n">epsilon</span><span class="o">*</span><span class="p">((</span><span class="n">sigma</span><span class="o">/</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">12</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">sigma</span><span class="o">/</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">6</span><span class="p">)</span><span class="o">/</span><span class="n">r</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">4</span><span class="o">*</span><span class="n">epsilon</span><span class="o">*</span><span class="p">((</span><span class="n">sigma</span><span class="o">/</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">12</span><span class="o">-</span><span class="p">(</span><span class="n">sigma</span><span class="o">/</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">6</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="justify docutils container">
-<p>Let us write something similar for the <em>Utilities</em> class
-within the <em>Utilities.py</em> file:</p>
+<p>Depending on the value of <em>derivative</em>, which can be either <em>False</em> or <em>True</em>,
+the <em>LJ_potential()</em> function will return the LJ force</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Utilities</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</pre></div>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[F_\text{LJ} = 48 \epsilon \left( (\sigma/r)^{12}-0.5 (\sigma/r)^6 \right) /r\]</div>
 </div>
 <div class="justify docutils container">
-<p>For the <em>Outputs</em> class, let us anticipate that the outputs
-from the code will be saved in a folder, which by default
-is named <em>results/</em>. If the folder does not exist, it will be
-created using <em>os.mkdir()</em>:</p>
+<p>of the LJ potential</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[U_\text{LJ} = 4 \epsilon \left( (sigma/r)**12-(sigma/r)**6 \right)\]</div>
+</div>
+<div class="justify docutils container">
+<p>The first class is the <em>Prepare</em> class which will serve the
+nondimensionalization of all the parameters.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
 
-<span class="k">class</span> <span class="nc">Outputs</span><span class="p">:</span>
+
+<span class="k">class</span> <span class="nc">Prepare</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                <span class="n">data_folder</span> <span class="o">=</span> <span class="s2">&quot;results/&quot;</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="justify docutils container">
+<p>The second class is named <em>Utilities</em>.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">MDAnalysis</span> <span class="k">as</span> <span class="nn">mda</span>
+<span class="kn">from</span> <span class="nn">MDAnalysis.analysis</span> <span class="kn">import</span> <span class="n">distances</span>
+<span class="kn">from</span> <span class="nn">Potentials</span> <span class="kn">import</span> <span class="n">LJ_potential</span>
+
+
+<span class="k">class</span> <span class="nc">Utilities</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="justify docutils container">
+<p>The <em>InitializeSimulation</em> class inherits the <em>Prepare</em> class.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">Prepare</span> <span class="kn">import</span> <span class="n">Prepare</span>
+
+
+<span class="k">class</span> <span class="nc">InitializeSimulation</span><span class="p">(</span><span class="n">Prepare</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="justify docutils container">
+<p>The <em>Measurements</em> class inherits both <em>InitializeSimulation</em>  and
+<em>Utilities</em> classes.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
+<span class="kn">from</span> <span class="nn">Utilities</span> <span class="kn">import</span> <span class="n">Utilities</span>
+
+
+<span class="k">class</span> <span class="nc">Measurements</span><span class="p">(</span><span class="n">InitializeSimulation</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="justify docutils container">
+<p>The <em>Outputs</em> class inherits the <em>Measurements</em> class.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">Measurements</span> <span class="kn">import</span> <span class="n">Measurements</span>
+
+
+<span class="k">class</span> <span class="nc">Outputs</span><span class="p">(</span><span class="n">Measurements</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">data_folder</span><span class="o">=</span><span class="s2">&quot;Outputs/&quot;</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">=</span> <span class="n">data_folder</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="justify docutils container">
-<p>Let us create the <em>MolecularDynamics</em> class which inherits
-the 3 previously defined classes.</p>
+<p>Here we anticipate that the outputs
+from the code will be saved in a folder, which by default
+is named <em>results/</em>. If the folder does not exist, it will be
+created using <em>os.mkdir()</em>.</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
-<span class="kn">from</span> <span class="nn">Utilities</span> <span class="kn">import</span> <span class="n">Utilities</span>
+<div class="justify docutils container">
+<p>Finally, let us create three classes, named respectively <em>MinimizeEnergy</em>,
+<em>MonteCarlo</em>, and <em>MolecularDynamics</em>. First, the <em>MinimizeEnergy</em> class inherits
+the <em>Outputs</em> class:</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">Outputs</span> <span class="kn">import</span> <span class="n">Outputs</span>
 
-<span class="k">class</span> <span class="nc">MolecularDynamics</span><span class="p">(</span><span class="n">InitializeSimulation</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">,</span> <span class="n">Outputs</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">MinimizeEnergy</span><span class="p">(</span><span class="n">Outputs</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span>
 </pre></div>
 </div>
 <div class="justify docutils container">
-<p>The <em>run</em> method will be filled later. Let us do the same for the
-<em>MonteCarlo</em> class:</p>
+<p>Similarly, the <em>MonteCarlo</em> class inherits the <em>Outputs</em> class as well:</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
-<span class="kn">from</span> <span class="nn">Utilities</span> <span class="kn">import</span> <span class="n">Utilities</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">Outputs</span> <span class="kn">import</span> <span class="n">Outputs</span>
 
-<span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">InitializeSimulation</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">,</span> <span class="n">Outputs</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span>
+<span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Outputs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="justify docutils container">
-<p>The <em>args</em> and <em>kwargs</em> arguments ensure that arguments of classes
-<em>InitializeSimulation</em>, <em>Outputs</em>, <em>Utilities</em> are inherited by
-the classes <em>MolecularDynamics</em> and <em>MonteCarlo</em>.</p>
+<p>Finally, the <em>MolecularDynamics</em> class inherits the <em>Outputs</em> class as well:</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
+<span class="kn">from</span> <span class="nn">Measurements</span> <span class="kn">import</span> <span class="n">Measurements</span>
+
+<span class="k">class</span> <span class="nc">MolecularDynamics</span><span class="p">(</span><span class="n">Outputs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
 </div>
 </section>
 <section id="test-the-code">
@@ -398,6 +486,7 @@ should appear.</p>
 <li><a class="reference internal" href="#">Code structure</a><ul>
 <li><a class="reference internal" href="#presentation">Presentation</a></li>
 <li><a class="reference internal" href="#start-coding">Start coding</a></li>
+<li><a class="reference internal" href="#final-code">Final code</a></li>
 <li><a class="reference internal" href="#test-the-code">Test the code</a></li>
 </ul>
 </li>
@@ -414,5 +503,6 @@ should appear.</p>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

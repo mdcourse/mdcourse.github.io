@@ -32,33 +32,91 @@ Start coding
 
 .. container:: justify
 
-    Inside a dedicated folder, create 5 blank Python scripts named respectively:
+    Inside a dedicated folder, create 9 blank Python scripts named respectively:
 
-    - *InitializeSimulation.py*
-    - *Outputs.py*
+    - *Potentials.py*
+    - *Prepare.py*
     - *Utilities.py*
+    - *InitializeSimulation.py*
+    - *Measurements.py*
+    - *Outputs.py*
+    - *MinimizeEnergy.py*
     - *MolecularDynamics.py*
     - *MonteCarlo.py*
 
+Final code
+----------
+
 .. container:: justify
 
-    Let us start by filing some parts of the *InitializeSimulation*
-    class within the *InitializeSimulation.py* file: 
+    The first file name *Potentials.py* contains the potential that will be used.
+    As it is now, only the Lennard-Jones potential (LJ) is implemented.
+
+.. label:: start_Potentials_class
 
 .. code-block:: python
 
-    class InitializeSimulation:
+    def LJ_potential(epsilon, sigma, r, derivative = False):
+        if derivative:
+            return 48*epsilon*((sigma/r)**12-0.5*(sigma/r)**6)/r
+        else:
+            return 4*epsilon*((sigma/r)**12-(sigma/r)**6)
+
+.. label:: end_Potentials_class
+
+.. container:: justify
+
+    Depending on the value of *derivative*, which can be either *False* or *True*,
+    the *LJ_potential()* function will return the LJ force
+
+.. math::
+
+    F_\text{LJ} = 48 \epsilon \left( (\sigma/r)^{12}-0.5 (\sigma/r)^6 \right) /r
+
+.. container:: justify
+
+    of the LJ potential
+
+.. math::
+
+    U_\text{LJ} = 4 \epsilon \left( (sigma/r)**12-(sigma/r)**6 \right)
+
+.. container:: justify
+
+    The first class is the *Prepare* class which will serve the
+    nondimensionalization of all the parameters.
+
+.. label:: start_Prepare_class
+
+.. code-block:: python
+
+    import numpy as np
+    from scipy import constants as cst
+
+
+    class Prepare:
         def __init__(self,
-                     *args,
-                     **kwargs):
-            super().__init__(*args, **kwargs) 
+                    *args,
+                    **kwargs):
+            super().__init__(*args, **kwargs)
+
+.. label:: end_Prepare_class
 
 .. container:: justify
 
-    Let us write something similar for the *Utilities* class 
-    within the *Utilities.py* file:
+    The second class is named *Utilities*.
+
+.. label:: start_Prepare_class
 
 .. code-block:: python
+
+    from scipy import constants as cst
+    import numpy as np
+
+    import MDAnalysis as mda
+    from MDAnalysis.analysis import distances
+    from Potentials import LJ_potential
+
 
     class Utilities:
         def __init__(self,
@@ -68,71 +126,146 @@ Start coding
 
 .. container:: justify
 
-    For the *Outputs* class, let us anticipate that the outputs
-    from the code will be saved in a folder, which by default
-    is named *results/*. If the folder does not exist, it will be
-    created using *os.mkdir()*:
+    The *InitializeSimulation* class inherits the *Prepare* class.
+
+.. label:: start_InitializeSimulation_class
 
 .. code-block:: python
 
-    import os
+    import numpy as np
+    from Prepare import Prepare
 
-    class Outputs:
+
+    class InitializeSimulation(Prepare):
         def __init__(self,
-                    data_folder = "results/",
                     *args,
-                    **kwargs):
-            self.data_folder = data_folder
+                    **kwargs,
+                    ):
             super().__init__(*args, **kwargs)
 
+.. label:: end_InitializeSimulation_class
+
+
+.. container:: justify
+
+    The *Measurements* class inherits both *InitializeSimulation*  and
+    *Utilities* classes.
+
+.. label:: start_Measurements_class
+
+.. code-block:: python
+
+    import numpy as np
+    from InitializeSimulation import InitializeSimulation
+    from Utilities import Utilities
+
+
+    class Measurements(InitializeSimulation, Utilities):
+        def __init__(self,
+                    *args,
+                    **kwargs):
+            super().__init__(*args, **kwargs)
+          
+.. label:: end_Measurements_class
+
+.. container:: justify
+
+    The *Outputs* class inherits the *Measurements* class.
+
+.. label:: start_Outputs_class
+
+.. code-block:: python
+
+    from scipy import constants as cst
+    import numpy as np
+    import os
+    from Measurements import Measurements
+
+
+    class Outputs(Measurements):
+        def __init__(self,
+                    data_folder="Outputs/",
+                    *args,
+                    **kwargs):
+            super().__init__(*args, **kwargs)
+            self.data_folder = data_folder
             if os.path.exists(self.data_folder) is False:
                 os.mkdir(self.data_folder)
 
+.. label:: end_Outputs_class
+
 .. container:: justify
 
-    Let us create the *MolecularDynamics* class which inherits
-    the 3 previously defined classes.
+    Here we anticipate that the outputs
+    from the code will be saved in a folder, which by default
+    is named *results/*. If the folder does not exist, it will be
+    created using *os.mkdir()*.
+
+.. container:: justify
+
+    Finally, let us create three classes, named respectively *MinimizeEnergy*,
+    *MonteCarlo*, and *MolecularDynamics*. First, the *MinimizeEnergy* class inherits
+    the *Outputs* class:
+
+.. label:: start_MinimizeEnergy_class
 
 .. code-block:: python
 
-    from InitializeSimulation import InitializeSimulation
-    from Utilities import Utilities
+    import numpy as np
+    import copy
     from Outputs import Outputs
 
-    class MolecularDynamics(InitializeSimulation, Utilities, Outputs):
+
+    class MinimizeEnergy(Outputs):
         def __init__(self,
                     *args,
                     **kwargs):
             super().__init__(*args, **kwargs)
 
-        def run(self):
-            pass
+.. label:: end_MinimizeEnergy_class
 
 .. container:: justify
 
-    The *run* method will be filled later. Let us do the same for the
-    *MonteCarlo* class:
+    Similarly, the *MonteCarlo* class inherits the *Outputs* class as well:
+
+.. label:: start_MonteCarlo_class
 
 .. code-block:: python
 
-    from InitializeSimulation import InitializeSimulation
-    from Utilities import Utilities
+    from scipy import constants as cst
+    import numpy as np
+    import copy
     from Outputs import Outputs
 
-    class MonteCarlo(InitializeSimulation, Utilities, Outputs):
+
+    class MonteCarlo(Outputs):
         def __init__(self,
-                     *args,
-                     **kwargs):
+                    *args,
+                    **kwargs):
             super().__init__(*args, **kwargs)
 
-        def run(self):
-            pass
+.. label:: end_MonteCarlo_class
 
 .. container:: justify
 
-    The *args* and *kwargs* arguments ensure that arguments of classes
-    *InitializeSimulation*, *Outputs*, *Utilities* are inherited by
-    the classes *MolecularDynamics* and *MonteCarlo*.
+    Finally, the *MolecularDynamics* class inherits the *Outputs* class as well:
+
+.. label:: start_MolecularDynamics_class
+
+.. code-block:: python
+
+    import numpy as np
+    from InitializeSimulation import InitializeSimulation
+    from Measurements import Measurements
+
+    class MolecularDynamics(Outputs):
+        def __init__(self,
+                    *args,
+                    **kwargs,
+                    ):
+            super().__init__(*args, **kwargs)
+
+.. label:: end_MolecularDynamics_class
 
 Test the code
 -------------
