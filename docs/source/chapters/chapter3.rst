@@ -136,7 +136,7 @@ Final code
     look like. For clarity, some comments and descriptions were added for each
     method.
 
-.. label:: InitializeSimulation_class
+.. label:: start_InitializeSimulation_class
 
 .. code-block:: python
 
@@ -195,6 +195,8 @@ Final code
             else:
                 self.atoms_positions = self.initial_positions
 
+.. label:: end_InitializeSimulation_class
+
 Test the code
 -------------
 
@@ -203,7 +205,7 @@ Test the code
     Let us test the *InitializeSimulation* class to make sure that it does what
     is expected.
 
-.. label:: test_InitializeSimulation_class
+.. label:: start_test_InitializeSimulation_class
 
 .. code-block:: python
 
@@ -230,3 +232,5 @@ Test the code
     [ 0.86169508 -0.77310475 -0.74742818]
     [ 0.81255861  2.26285536  1.76611306]
     [-0.31367217 -1.55867269 -2.71347742]]
+
+.. label:: end_test_InitializeSimulation_class
