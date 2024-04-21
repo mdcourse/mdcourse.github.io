@@ -71,15 +71,15 @@ Potential for inter-atomic interaction
 
 .. math::
 
-    F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left( (\sigma/r)^{12}- \frac{1}{2} (\sigma/r)^6 \right)
+    F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left[ \left( \frac{\sigma}{r} \right)^{12}- \frac{1}{2} \left( \frac{\sigma}{r} \right)^6 \right],
 
 .. container:: justify
 
-    of the LJ potential
+    or the LJ potential
 
 .. math::
 
-    U_\text{LJ} = 4 \epsilon \left( (sigma/r)^{12}-(sigma/r)^6 \right)
+    U_\text{LJ} = 4 \epsilon \left[ \left( \frac{\sigma}{r} \right)^{12}- \left( \frac{\sigma}{r} \right)^6 \right].
 
 Create the classes
 ------------------
@@ -99,10 +99,6 @@ Create the classes
 
 .. code-block:: python
 
-    import numpy as np
-    from scipy import constants as cst
-
-
     class Prepare:
         def __init__(self,
                     *args,
@@ -120,11 +116,6 @@ Create the classes
 
 .. code-block:: python
 
-    from scipy import constants as cst
-    import numpy as np
-
-    import MDAnalysis as mda
-    from MDAnalysis.analysis import distances
     from Potentials import LJ_potential
 
 
@@ -167,7 +158,6 @@ Create the classes
 
 .. code-block:: python
 
-    import numpy as np
     from InitializeSimulation import InitializeSimulation
     from Utilities import Utilities
 
@@ -189,8 +179,6 @@ Create the classes
 
 .. code-block:: python
 
-    from scipy import constants as cst
-    import numpy as np
     import os
     from Measurements import Measurements
 
@@ -212,7 +200,8 @@ Create the classes
     Here, we anticipate that the outputs
     from the code will be saved in a folder, which by default
     is named *results/*. If the folder does not exist, it will be
-    created using *os.mkdir()*.
+    created using *os.mkdir()* from the *os* module, which was previously
+    imported.
 
 .. container:: justify
 
@@ -225,8 +214,6 @@ Create the classes
 
 .. code-block:: python
 
-    import numpy as np
-    import copy
     from Outputs import Outputs
 
 
@@ -246,9 +233,6 @@ Create the classes
 
 .. code-block:: python
 
-    from scipy import constants as cst
-    import numpy as np
-    import copy
     from Outputs import Outputs
 
 
@@ -268,7 +252,6 @@ Create the classes
 
 .. code-block:: python
 
-    import numpy as np
     from Outputs import Outputs
 
     class MolecularDynamics(Outputs):
