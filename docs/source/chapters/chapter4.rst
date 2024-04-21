@@ -95,7 +95,6 @@ Test the code
         atom_mass=[1, 1], # g/mol
         box_dimensions=[20, 20, 20], # A
         )
-    print("Atom positions:")
-    print(self.atoms_positions)
+    self.run()
 
 .. label:: end_test_MinimizeEnergy_class
