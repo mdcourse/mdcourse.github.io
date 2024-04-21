@@ -44,13 +44,13 @@ Start coding
     - *MolecularDynamics.py*
     - *MonteCarlo.py*
 
-Final code
-----------
+Potential for inter-atomic interaction
+--------------------------------------
 
 .. container:: justify
 
-    The first file name *Potentials.py* contains the potential that will be used.
-    As it is now, only the Lennard-Jones potential (LJ) is implemented.
+    The first file name *Potentials.py* contains the only potential that is
+    currently implemented: the Lennard-Jones potential (LJ).
 
 .. label:: start_Potentials_class
 
@@ -71,7 +71,7 @@ Final code
 
 .. math::
 
-    F_\text{LJ} = 48 \epsilon \left( (\sigma/r)^{12}-0.5 (\sigma/r)^6 \right) /r
+    F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left( (\sigma/r)^{12}- \frac{1}{2} (\sigma/r)^6 \right)
 
 .. container:: justify
 
@@ -79,12 +79,21 @@ Final code
 
 .. math::
 
-    U_\text{LJ} = 4 \epsilon \left( (sigma/r)**12-(sigma/r)**6 \right)
+    U_\text{LJ} = 4 \epsilon \left( (sigma/r)^{12}-(sigma/r)^6 \right)
+
+Create the classes
+------------------
+
+.. container:: justify
+
+    Let us create all the classes and their inheritance. The classes will be
+    filled progressively during the following chapters.
 
 .. container:: justify
 
     The first class is the *Prepare* class which will serve the
-    nondimensionalization of all the parameters.
+    nondimensionalization of all the parameters. Within the *Prepare.py* file,
+    copy the following lines:
 
 .. label:: start_Prepare_class
 
@@ -104,7 +113,8 @@ Final code
 
 .. container:: justify
 
-    The second class is named *Utilities*.
+    The second class is named *Utilities*. Within the *Utilities.py* file,
+    copy the following lines:
 
 .. label:: start_Utilities_class
 
@@ -128,7 +138,8 @@ Final code
 
 .. container:: justify
 
-    The *InitializeSimulation* class inherits the *Prepare* class.
+    The *InitializeSimulation* class inherits the *Prepare* class. Within the
+    *InitializeSimulation.py* file, copy the following lines:
 
 .. label:: start_InitializeSimulation_class
 
@@ -147,11 +158,10 @@ Final code
 
 .. label:: end_InitializeSimulation_class
 
-
 .. container:: justify
 
     The *Measurements* class inherits both *InitializeSimulation*  and
-    *Utilities* classes.
+    *Utilities* classes. Within the *Measurements.py* file, copy the following lines:
 
 .. label:: start_Measurements_class
 
@@ -172,7 +182,8 @@ Final code
 
 .. container:: justify
 
-    The *Outputs* class inherits the *Measurements* class.
+    The *Outputs* class inherits the *Measurements* class. Within the
+    *Outputs.py* file, copy the following lines:
 
 .. label:: start_Outputs_class
 
@@ -198,16 +209,17 @@ Final code
 
 .. container:: justify
 
-    Here we anticipate that the outputs
+    Here, we anticipate that the outputs
     from the code will be saved in a folder, which by default
     is named *results/*. If the folder does not exist, it will be
     created using *os.mkdir()*.
 
 .. container:: justify
 
-    Finally, let us create three classes, named respectively *MinimizeEnergy*,
-    *MonteCarlo*, and *MolecularDynamics*. First, the *MinimizeEnergy* class inherits
-    the *Outputs* class:
+    Finally, let us create the three remaining classes, named respectively *MinimizeEnergy*,
+    *MonteCarlo*, and *MolecularDynamics*. Each class inherits
+    the *Outputs* class. Within the *MinimizeEnergy.py* file, copy the
+    following lines:
 
 .. label:: start_MinimizeEnergy_class
 
@@ -228,7 +240,7 @@ Final code
 
 .. container:: justify
 
-    Similarly, the *MonteCarlo* class inherits the *Outputs* class as well:
+    Within the *MonteCarlo.py* file, copy the following lines:
 
 .. label:: start_MonteCarlo_class
 
@@ -250,7 +262,7 @@ Final code
 
 .. container:: justify
 
-    Finally, the *MolecularDynamics* class inherits the *Outputs* class as well:
+    Finally, within the *MolecularDynamics.py* file, copy the following lines:
 
 .. label:: start_MolecularDynamics_class
 

@@ -240,11 +240,11 @@ some additional files.</p>
 </ul>
 </div>
 </section>
-<section id="final-code">
-<h2>Final code<a class="headerlink" href="#final-code" title="Link to this heading">¶</a></h2>
+<section id="potential-for-inter-atomic-interaction">
+<h2>Potential for inter-atomic interaction<a class="headerlink" href="#potential-for-inter-atomic-interaction" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
-<p>The first file name <em>Potentials.py</em> contains the potential that will be used.
-As it is now, only the Lennard-Jones potential (LJ) is implemented.</p>
+<p>The first file name <em>Potentials.py</em> contains the only potential that is
+currently implemented: the Lennard-Jones potential (LJ).</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">LJ_potential</span><span class="p">(</span><span class="n">epsilon</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">derivative</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">derivative</span><span class="p">:</span>
@@ -259,18 +259,26 @@ the <em>LJ_potential()</em> function will return the LJ force</p>
 </div>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[F_\text{LJ} = 48 \epsilon \left( (\sigma/r)^{12}-0.5 (\sigma/r)^6 \right) /r\]</div>
+\[F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left( (\sigma/r)^{12}- \frac{1}{2} (\sigma/r)^6 \right)\]</div>
 </div>
 <div class="justify docutils container">
 <p>of the LJ potential</p>
 </div>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[U_\text{LJ} = 4 \epsilon \left( (sigma/r)**12-(sigma/r)**6 \right)\]</div>
+\[U_\text{LJ} = 4 \epsilon \left( (sigma/r)^{12}-(sigma/r)^6 \right)\]</div>
+</div>
+</section>
+<section id="create-the-classes">
+<h2>Create the classes<a class="headerlink" href="#create-the-classes" title="Link to this heading">¶</a></h2>
+<div class="justify docutils container">
+<p>Let us create all the classes and their inheritance. The classes will be
+filled progressively during the following chapters.</p>
 </div>
 <div class="justify docutils container">
 <p>The first class is the <em>Prepare</em> class which will serve the
-nondimensionalization of all the parameters.</p>
+nondimensionalization of all the parameters. Within the <em>Prepare.py</em> file,
+copy the following lines:</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
@@ -284,7 +292,8 @@ nondimensionalization of all the parameters.</p>
 </pre></div>
 </div>
 <div class="justify docutils container">
-<p>The second class is named <em>Utilities</em>.</p>
+<p>The second class is named <em>Utilities</em>. Within the <em>Utilities.py</em> file,
+copy the following lines:</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -302,7 +311,8 @@ nondimensionalization of all the parameters.</p>
 </pre></div>
 </div>
 <div class="justify docutils container">
-<p>The <em>InitializeSimulation</em> class inherits the <em>Prepare</em> class.</p>
+<p>The <em>InitializeSimulation</em> class inherits the <em>Prepare</em> class. Within the
+<em>InitializeSimulation.py</em> file, copy the following lines:</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">Prepare</span> <span class="kn">import</span> <span class="n">Prepare</span>
@@ -318,7 +328,7 @@ nondimensionalization of all the parameters.</p>
 </div>
 <div class="justify docutils container">
 <p>The <em>Measurements</em> class inherits both <em>InitializeSimulation</em>  and
-<em>Utilities</em> classes.</p>
+<em>Utilities</em> classes. Within the <em>Measurements.py</em> file, copy the following lines:</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
@@ -333,7 +343,8 @@ nondimensionalization of all the parameters.</p>
 </pre></div>
 </div>
 <div class="justify docutils container">
-<p>The <em>Outputs</em> class inherits the <em>Measurements</em> class.</p>
+<p>The <em>Outputs</em> class inherits the <em>Measurements</em> class. Within the
+<em>Outputs.py</em> file, copy the following lines:</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -353,15 +364,16 @@ nondimensionalization of all the parameters.</p>
 </pre></div>
 </div>
 <div class="justify docutils container">
-<p>Here we anticipate that the outputs
+<p>Here, we anticipate that the outputs
 from the code will be saved in a folder, which by default
 is named <em>results/</em>. If the folder does not exist, it will be
 created using <em>os.mkdir()</em>.</p>
 </div>
 <div class="justify docutils container">
-<p>Finally, let us create three classes, named respectively <em>MinimizeEnergy</em>,
-<em>MonteCarlo</em>, and <em>MolecularDynamics</em>. First, the <em>MinimizeEnergy</em> class inherits
-the <em>Outputs</em> class:</p>
+<p>Finally, let us create the three remaining classes, named respectively <em>MinimizeEnergy</em>,
+<em>MonteCarlo</em>, and <em>MolecularDynamics</em>. Each class inherits
+the <em>Outputs</em> class. Within the <em>MinimizeEnergy.py</em> file, copy the
+following lines:</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">copy</span>
@@ -376,7 +388,7 @@ the <em>Outputs</em> class:</p>
 </pre></div>
 </div>
 <div class="justify docutils container">
-<p>Similarly, the <em>MonteCarlo</em> class inherits the <em>Outputs</em> class as well:</p>
+<p>Within the <em>MonteCarlo.py</em> file, copy the following lines:</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -392,7 +404,7 @@ the <em>Outputs</em> class:</p>
 </pre></div>
 </div>
 <div class="justify docutils container">
-<p>Finally, the <em>MolecularDynamics</em> class inherits the <em>Outputs</em> class as well:</p>
+<p>Finally, within the <em>MolecularDynamics.py</em> file, copy the following lines:</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">Outputs</span> <span class="kn">import</span> <span class="n">Outputs</span>
@@ -485,7 +497,8 @@ should appear.</p>
 <li><a class="reference internal" href="#">Code structure</a><ul>
 <li><a class="reference internal" href="#presentation">Presentation</a></li>
 <li><a class="reference internal" href="#start-coding">Start coding</a></li>
-<li><a class="reference internal" href="#final-code">Final code</a></li>
+<li><a class="reference internal" href="#potential-for-inter-atomic-interaction">Potential for inter-atomic interaction</a></li>
+<li><a class="reference internal" href="#create-the-classes">Create the classes</a></li>
 <li><a class="reference internal" href="#test-the-code">Test the code</a></li>
 </ul>
 </li>
