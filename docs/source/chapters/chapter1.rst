@@ -281,9 +281,9 @@ Test the code
     from MolecularDynamics import MolecularDynamics
 
     md = MolecularDynamics(data_folder = "md-output/")
-    md.run()
+    md.__init__()
     mc = MonteCarlo(data_folder = "mc-output/")
-    mc.run()
+    mc.__init__()
 
 .. label:: end_test_First_class
 
