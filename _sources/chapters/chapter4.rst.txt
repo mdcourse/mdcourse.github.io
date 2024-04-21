@@ -159,6 +159,11 @@ Build neighbor lists
     from Potentials import LJ_potential
     (...)
 
+.. container:: justify
+
+    The *update_neighbor_lists()* method generates neighbor lists that are stored
+    as Python list named *neighbor_lists*.
+
 Compute_potential
 -----------------
 
@@ -220,62 +225,68 @@ Final code
     from MDAnalysis.analysis import distances
     from Potentials import LJ_potential
 
-    def update_neighbor_lists(self):
-        """Update the neighbor lists."""
-        if (self.step % self.neighbor == 0):
+    class Utilities:
+        def __init__(self,
+                    *args,
+                    **kwargs):
+            super().__init__(*args, **kwargs)
+            
+        def update_neighbor_lists(self):
+            """Update the neighbor lists."""
+            if (self.step % self.neighbor == 0):
 
-            matrix = distances.contact_matrix(self.atoms_positions,
-                cutoff=self.cut_off, #+2,
-                returntype="numpy",
-                box=self.box_size)
+                matrix = distances.contact_matrix(self.atoms_positions,
+                    cutoff=self.cut_off, #+2,
+                    returntype="numpy",
+                    box=self.box_size)
 
-            cpt = 0
-            neighbor_lists = []
-            for array in matrix[:-1]:
-                list = np.where(array)[0].tolist()
-                list = [ele for ele in list if ele > cpt]
-                cpt += 1
-                neighbor_lists.append(list)
+                cpt = 0
+                neighbor_lists = []
+                for array in matrix[:-1]:
+                    list = np.where(array)[0].tolist()
+                    list = [ele for ele in list if ele > cpt]
+                    cpt += 1
+                    neighbor_lists.append(list)
 
-            self.neighbor_lists = neighbor_lists
+                self.neighbor_lists = neighbor_lists
 
-    def compute_potential(self, output):
-        if output == "force-vector":
-            forces = np.zeros((self.total_number_atoms,3))
-        elif output == "force-matrix":
-            forces = np.zeros((self.total_number_atoms,self.total_number_atoms,3))
-        energy_potential = 0
-        for Ni in np.arange(self.total_number_atoms-1):
-            # Read information about atom i
-            position_i = self.atoms_positions[Ni]
-            sigma_i = self.atoms_sigma[Ni]
-            epsilon_i = self.atoms_epsilon[Ni]
-            neighbor_of_i = self.neighbor_lists[Ni]
-            # Read information about neighbors j
-            positions_j = self.atoms_positions[neighbor_of_i]
-            sigma_j = self.atoms_sigma[neighbor_of_i]
-            epsilon_j = self.atoms_epsilon[neighbor_of_i]
-            # Measure distances and other cross parameters
-            rij_xyz = (np.remainder(position_i - positions_j
-                                    + self.box_size[:3]/2., self.box_size[:3])
-                                    - self.box_size[:3]/2.)
-            rij = np.linalg.norm(rij_xyz, axis=1)
-            sigma_ij = (sigma_i+sigma_j)/2
-            epsilon_ij = (epsilon_i+epsilon_j)/2
-            # Measure potential
-            if output == "potential":
-                energy_potential += np.sum(LJ_potential(epsilon_ij, sigma_ij, rij))
-            else:
-                derivative_potential = LJ_potential(epsilon_ij, sigma_ij, rij, derivative = True)
-                if output == "force-vector":
-                    forces[Ni] += np.sum((derivative_potential*rij_xyz.T/rij).T, axis=0)
-                    forces[neighbor_of_i] -= (derivative_potential*rij_xyz.T/rij).T 
-                elif output == "force-matrix":
-                    forces[Ni][neighbor_of_i] += (derivative_potential*rij_xyz.T/rij).T
-        if output=="potential":
-            return energy_potential
-        elif (output == "force-vector") | (output == "force-matrix"):
-            return forces
+        def compute_potential(self, output):
+            if output == "force-vector":
+                forces = np.zeros((self.total_number_atoms,3))
+            elif output == "force-matrix":
+                forces = np.zeros((self.total_number_atoms,self.total_number_atoms,3))
+            energy_potential = 0
+            for Ni in np.arange(self.total_number_atoms-1):
+                # Read information about atom i
+                position_i = self.atoms_positions[Ni]
+                sigma_i = self.atoms_sigma[Ni]
+                epsilon_i = self.atoms_epsilon[Ni]
+                neighbor_of_i = self.neighbor_lists[Ni]
+                # Read information about neighbors j
+                positions_j = self.atoms_positions[neighbor_of_i]
+                sigma_j = self.atoms_sigma[neighbor_of_i]
+                epsilon_j = self.atoms_epsilon[neighbor_of_i]
+                # Measure distances and other cross parameters
+                rij_xyz = (np.remainder(position_i - positions_j
+                                        + self.box_size[:3]/2., self.box_size[:3])
+                                        - self.box_size[:3]/2.)
+                rij = np.linalg.norm(rij_xyz, axis=1)
+                sigma_ij = (sigma_i+sigma_j)/2
+                epsilon_ij = (epsilon_i+epsilon_j)/2
+                # Measure potential
+                if output == "potential":
+                    energy_potential += np.sum(LJ_potential(epsilon_ij, sigma_ij, rij))
+                else:
+                    derivative_potential = LJ_potential(epsilon_ij, sigma_ij, rij, derivative = True)
+                    if output == "force-vector":
+                        forces[Ni] += np.sum((derivative_potential*rij_xyz.T/rij).T, axis=0)
+                        forces[neighbor_of_i] -= (derivative_potential*rij_xyz.T/rij).T 
+                    elif output == "force-matrix":
+                        forces[Ni][neighbor_of_i] += (derivative_potential*rij_xyz.T/rij).T
+            if output=="potential":
+                return energy_potential
+            elif (output == "force-vector") | (output == "force-matrix"):
+                return forces
 
 .. label:: end_Utilities_class
 
