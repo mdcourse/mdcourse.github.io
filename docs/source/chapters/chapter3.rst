@@ -52,7 +52,7 @@ Start coding
 
     Three parameters are provided to the *InitializeSimulation* class, namely
     the box dimensions which is a list with a length corresponding to *dimensions* (default is 3)
-    with parameters in units of Angstrom, a seed, and some initial positions for the atoms that can be provided as an array
+    with parameters in units of Ångström, a seed, and some initial positions for the atoms that can be provided as an array
     of three columns. If *initial_positions* is
     left equal to *None*, positions with be randomly attributed to the atoms.
 
