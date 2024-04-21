@@ -72,3 +72,30 @@ Final code
                 self.update_dump_file(filename="dump.min.lammpstrj")
 
 .. label:: end_MinimizeEnergy_class
+
+
+Test the code
+-------------
+
+.. container:: justify
+
+    Let us test the *MinimizeEnergy* class to make sure that it does what
+    is expected.
+
+.. label:: start_test_MinimizeEnergy_class
+
+.. code-block:: python
+
+    from MinimizeEnergy import MinimizeEnergy
+
+    self = MinimizeEnergy(maximum_steps=100,
+        number_atoms=[2, 3],
+        epsilon=[0.1, 1.0], # kcal/mol
+        sigma=[3, 6], # A
+        atom_mass=[1, 1], # g/mol
+        box_dimensions=[20, 20, 20], # A
+        )
+    print("Atom positions:")
+    print(self.atoms_positions)
+
+.. label:: end_test_MinimizeEnergy_class
