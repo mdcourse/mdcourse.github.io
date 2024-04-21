@@ -259,14 +259,14 @@ the <em>LJ_potential()</em> function will return the LJ force</p>
 </div>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left( (\sigma/r)^{12}- \frac{1}{2} (\sigma/r)^6 \right)\]</div>
+\[F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left[ \left( \frac{\sigma}{r} \right)^{12}- \frac{1}{2} \left( \frac{\sigma}{r} \right)^6 \right],\]</div>
 </div>
 <div class="justify docutils container">
-<p>of the LJ potential</p>
+<p>or the LJ potential</p>
 </div>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[U_\text{LJ} = 4 \epsilon \left( (sigma/r)^{12}-(sigma/r)^6 \right)\]</div>
+\[U_\text{LJ} = 4 \epsilon \left[ \left( \frac{\sigma}{r} \right)^{12}- \left( \frac{\sigma}{r} \right)^6 \right].\]</div>
 </div>
 </section>
 <section id="create-the-classes">
@@ -280,11 +280,7 @@ filled progressively during the following chapters.</p>
 nondimensionalization of all the parameters. Within the <em>Prepare.py</em> file,
 copy the following lines:</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
-
-
-<span class="k">class</span> <span class="nc">Prepare</span><span class="p">:</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Prepare</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -295,12 +291,7 @@ copy the following lines:</p>
 <p>The second class is named <em>Utilities</em>. Within the <em>Utilities.py</em> file,
 copy the following lines:</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
-<span class="kn">import</span> <span class="nn">MDAnalysis</span> <span class="k">as</span> <span class="nn">mda</span>
-<span class="kn">from</span> <span class="nn">MDAnalysis.analysis</span> <span class="kn">import</span> <span class="n">distances</span>
-<span class="kn">from</span> <span class="nn">Potentials</span> <span class="kn">import</span> <span class="n">LJ_potential</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Potentials</span> <span class="kn">import</span> <span class="n">LJ_potential</span>
 
 
 <span class="k">class</span> <span class="nc">Utilities</span><span class="p">:</span>
@@ -330,8 +321,7 @@ copy the following lines:</p>
 <p>The <em>Measurements</em> class inherits both <em>InitializeSimulation</em>  and
 <em>Utilities</em> classes. Within the <em>Measurements.py</em> file, copy the following lines:</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
 <span class="kn">from</span> <span class="nn">Utilities</span> <span class="kn">import</span> <span class="n">Utilities</span>
 
 
@@ -346,9 +336,7 @@ copy the following lines:</p>
 <p>The <em>Outputs</em> class inherits the <em>Measurements</em> class. Within the
 <em>Outputs.py</em> file, copy the following lines:</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">Measurements</span> <span class="kn">import</span> <span class="n">Measurements</span>
 
 
@@ -367,7 +355,8 @@ copy the following lines:</p>
 <p>Here, we anticipate that the outputs
 from the code will be saved in a folder, which by default
 is named <em>results/</em>. If the folder does not exist, it will be
-created using <em>os.mkdir()</em>.</p>
+created using <em>os.mkdir()</em> from the <em>os</em> module, which was previously
+imported.</p>
 </div>
 <div class="justify docutils container">
 <p>Finally, let us create the three remaining classes, named respectively <em>MinimizeEnergy</em>,
@@ -375,9 +364,7 @@ created using <em>os.mkdir()</em>.</p>
 the <em>Outputs</em> class. Within the <em>MinimizeEnergy.py</em> file, copy the
 following lines:</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">Outputs</span> <span class="kn">import</span> <span class="n">Outputs</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Outputs</span> <span class="kn">import</span> <span class="n">Outputs</span>
 
 
 <span class="k">class</span> <span class="nc">MinimizeEnergy</span><span class="p">(</span><span class="n">Outputs</span><span class="p">):</span>
@@ -390,10 +377,7 @@ following lines:</p>
 <div class="justify docutils container">
 <p>Within the <em>MonteCarlo.py</em> file, copy the following lines:</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">Outputs</span> <span class="kn">import</span> <span class="n">Outputs</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Outputs</span> <span class="kn">import</span> <span class="n">Outputs</span>
 
 
 <span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Outputs</span><span class="p">):</span>
@@ -406,8 +390,7 @@ following lines:</p>
 <div class="justify docutils container">
 <p>Finally, within the <em>MolecularDynamics.py</em> file, copy the following lines:</p>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">Outputs</span> <span class="kn">import</span> <span class="n">Outputs</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Outputs</span> <span class="kn">import</span> <span class="n">Outputs</span>
 
 <span class="k">class</span> <span class="nc">MolecularDynamics</span><span class="p">(</span><span class="n">Outputs</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
