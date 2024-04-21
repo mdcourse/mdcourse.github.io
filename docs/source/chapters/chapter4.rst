@@ -128,7 +128,6 @@ Build neighbor lists
 .. code-block:: python
 
     def update_neighbor_lists(self):
-        """Update the neighbor lists."""
         if (self.step % self.neighbor == 0):
 
             matrix = distances.contact_matrix(self.atoms_positions,
@@ -213,6 +212,28 @@ Compute_potential
         elif (output == "force-vector") | (output == "force-matrix"):
             return forces
 
+Wrap in box
+-----------
+
+.. container:: justify
+
+    Every time atoms are being displaced, one has to ensure that they remain in
+    the box. This is done by the *wrap_in_box()* method that must be placed
+    within the *Utilities* class:
+
+.. code-block:: python
+
+    def wrap_in_box(self):
+        for dim in np.arange(self.dimensions):
+            out_ids = self.atoms_positions[:, dim] \
+                > self.box_boundaries[dim][1]
+            self.atoms_positions[:, dim][out_ids] \
+                -= np.diff(self.box_boundaries[dim])[0]
+            out_ids = self.atoms_positions[:, dim] \
+                < self.box_boundaries[dim][0]
+            self.atoms_positions[:, dim][out_ids] \
+                += np.diff(self.box_boundaries[dim])[0]
+
 Final code
 ----------
 
@@ -231,6 +252,18 @@ Final code
                     **kwargs):
             super().__init__(*args, **kwargs)
             
+        def wrap_in_box(self):
+            """Re-wrap the atoms that are outside the box."""
+            for dim in np.arange(self.dimensions):
+                out_ids = self.atoms_positions[:, dim] \
+                    > self.box_boundaries[dim][1]
+                self.atoms_positions[:, dim][out_ids] \
+                    -= np.diff(self.box_boundaries[dim])[0]
+                out_ids = self.atoms_positions[:, dim] \
+                    < self.box_boundaries[dim][0]
+                self.atoms_positions[:, dim][out_ids] \
+                    += np.diff(self.box_boundaries[dim])[0]
+
         def update_neighbor_lists(self):
             """Update the neighbor lists."""
             if (self.step % self.neighbor == 0):
