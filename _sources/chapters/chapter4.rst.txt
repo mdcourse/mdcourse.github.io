@@ -112,8 +112,6 @@ Energy minimizer
                 Epot = init_Epot
                 self.atoms_positions = initial_positions
                 self.displacement *= 0.2
-            self.update_log_minimize(Epot, max_forces)
-            self.update_dump_file(filename="dump.min.lammpstrj")
 
 Build neighbor lists
 --------------------
@@ -374,8 +372,6 @@ Final code
                     Epot = init_Epot
                     self.atoms_positions = initial_positions
                     self.displacement *= 0.2
-                self.update_log_minimize(Epot, max_forces)
-                self.update_dump_file(filename="dump.min.lammpstrj")
 
 .. label:: end_MinimizeEnergy_class
 
