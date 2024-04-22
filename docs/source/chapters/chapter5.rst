@@ -4,14 +4,15 @@ Output the simulation state
 .. container:: justify
 
     Here, we update the *Output* class to follow the evolution of the system during
-    energy minimization is performed using *MinimizeEnergy*.
+    the energy minimization that is performed when using the *MinimizeEnergy*
+    class written during the previous chapter.
 
 Update the MinimizeEnergy class
 -------------------------------
 
 .. container:: justify
 
-    Let us start by adding two methods within the for loop of the
+    Let us start by calling two methods within the for loop of the
     *MinimizeEnergy* class, within the *run()* method.
 
 .. code-block:: python
@@ -21,12 +22,19 @@ Update the MinimizeEnergy class
         self.update_log_minimize(Epot, max_forces)
         self.update_dump_file(filename="dump.min.lammpstrj")
 
+.. container:: justify
+
+    The two methods named *update_log_minimize()* and
+    *update_dump_file()*, are used to print the information in the terminal
+    and in a LAMMPS-type data file, respectively.
+
 Improve the output class
 ------------------------
 
 .. container:: justify
 
-    Modify the beginning of the *Outputs.py* file as follow:
+    Modify the beginning of the *Outputs.py* file to import NumPy and the
+    constant module of SciPy:
 
 .. code-block:: python
         
@@ -52,8 +60,8 @@ Improve the output class
 
 .. container:: justify
 
-    Here, two additional keywords were added: *thermo_period* which controls the
-    period at which information is printed during the run, and *dumping_period*
+    Here, two additional variables were added: *thermo_period* which controls
+    the period at which information is printed during the run, and *dumping_period*
     which controls the period at which atom positions are printed in the dump
     file. 
 
