@@ -203,12 +203,13 @@
 <h1>Output the simulation state<a class="headerlink" href="#output-the-simulation-state" title="Link to this heading">¶</a></h1>
 <div class="justify docutils container">
 <p>Here, we update the <em>Output</em> class to follow the evolution of the system during
-energy minimization is performed using <em>MinimizeEnergy</em>.</p>
+the energy minimization that is performed when using the <em>MinimizeEnergy</em>
+class written during the previous chapter.</p>
 </div>
 <section id="update-the-minimizeenergy-class">
 <h2>Update the MinimizeEnergy class<a class="headerlink" href="#update-the-minimizeenergy-class" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
-<p>Let us start by adding two methods within the for loop of the
+<p>Let us start by calling two methods within the for loop of the
 <em>MinimizeEnergy</em> class, within the <em>run()</em> method.</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
@@ -217,11 +218,17 @@ energy minimization is performed using <em>MinimizeEnergy</em>.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">update_dump_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;dump.min.lammpstrj&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+<div class="justify docutils container">
+<p>The two methods named <em>update_log_minimize()</em> and
+<em>update_dump_file()</em>, are used to print the information in the terminal
+and in a LAMMPS-type data file, respectively.</p>
+</div>
 </section>
 <section id="improve-the-output-class">
 <h2>Improve the output class<a class="headerlink" href="#improve-the-output-class" title="Link to this heading">¶</a></h2>
 <div class="justify docutils container">
-<p>Modify the beginning of the <em>Outputs.py</em> file as follow:</p>
+<p>Modify the beginning of the <em>Outputs.py</em> file to import NumPy and the
+constant module of SciPy:</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -245,8 +252,8 @@ energy minimization is performed using <em>MinimizeEnergy</em>.</p>
 </pre></div>
 </div>
 <div class="justify docutils container">
-<p>Here, two additional keywords were added: <em>thermo_period</em> which controls the
-period at which information is printed during the run, and <em>dumping_period</em>
+<p>Here, two additional variables were added: <em>thermo_period</em> which controls
+the period at which information is printed during the run, and <em>dumping_period</em>
 which controls the period at which atom positions are printed in the dump
 file.</p>
 </div>
