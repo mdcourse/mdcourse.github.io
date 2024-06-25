@@ -10,7 +10,7 @@ The goal of [Learn Molecular Simulations with Python](https://mdcourse.github.io
 The target audience is people either completely new to molecular simulations, or users of user-friendly
 codes such as LAMMPS and GROMACS wanting to better understand what is hiding behind those codes.
 
-The Python code that will be written here will be used to realize some simple scientific projects. Note that the code is slow and that efficiency is not the objective of the present project.
+The Python code that will be written here will be used to realize some simple scientific projects. Note that the code is slow and that efficiency is not the objective here.
 
 Although some basic knowledge in coding, thermodynamics, and statistical physics is recommended to fully understand molecular simulations, Learning molecular simulations with Python can be followed even without deep knowledge in those fields. Annexes with key concepts and suggested readings are given when necessary.
 
