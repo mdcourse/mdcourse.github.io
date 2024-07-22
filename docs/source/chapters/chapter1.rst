@@ -1,38 +1,34 @@
-Code structure
-==============
-
-.. container:: justify
-
-    Here, the files that constitute the basis of the code
-    are created. These files will be progressively filled. 
+Description of the code structure
+=================================
 
 Presentation
 ------------
 
 .. container:: justify
 
-    The Python code performing the molecular simulations will be
-    divided into seven classes:
+    To perform the molecular simulations, three key steps will be followed here:
 
-    - *Prepare.py --* Methods preparing the non-dimensionalization of the units
-    - *Utilities --* Methods of general purpose, inherited by all the other classes
-    - *Outputs --* Methods of interest for printing information in log or data files, inherited by all the classes except *Utilities*
-    - *InitializeSimulation --* Methods necessary to set up the system and prepare the simulation, inherited by all the classes except *Outputs* and *Utilities*
-    - *MinimizeEnergy --* Methods for performing energy minimization, including 
-    - *MonteCarlo --* Methods for performing Monte Carlo simulation in different ensembles (Grand canonical, canonical)
-    - *MolecularDynamics --* Methods for performing molecular dynamics in different ensembles (NVE, NPT, NVT)
+    - First, the system will be initialized. This includes creating the simulation
+      box, placing the atoms, and choosing the potential and parameters for their
+      interactions.
+    - Second, an energy minimization of the system will be performed to place the
+      atoms in reasonable relative positions and reduce the energy of the system.
+    - Third, the main algorithm will be executed: either molecular dynamics or
+      Monte Carlo.
 
-.. container:: justify
+    In addition to these three key steps, some additional tasks will be performed, 
+    such as units non-dimensionalization, data measurements, and the outputting of 
+    thermodynamic information during the simulation.
 
-    Two additional files named *Potentials.py* and *Functions.py* will contain
-    some additional files.
+    For better readability, the present code is split into separate files, with
+    each file containing either Python funtions or Python classes.
 
-Start coding
+List of files
 -------------
 
 .. container:: justify
 
-    Inside a dedicated folder, create 9 blank Python scripts named respectively:
+    In total, 9 Python files will be written during this course:
 
     - *Potentials.py*
     - *Prepare.py*
@@ -44,13 +40,29 @@ Start coding
     - *MolecularDynamics.py*
     - *MonteCarlo.py*
 
+    Each of these files will serve to perform specific tasks. Within these files,
+    the final Python code will be divided into seven classes:
+
+    - *Prepare --* Methods preparing the non-dimensionalization of the units
+    - *Utilities --* Methods of general purpose, inherited by all the other classes
+    - *Outputs --* Methods of interest for printing information in log or data
+      files, inherited by all the classes except *Utilities*
+    - *InitializeSimulation --* Methods necessary to set up the system and prepare
+      the simulation, inherited by all the classes except *Outputs* and *Utilities*
+    - *MinimizeEnergy --* Methods for performing energy minimization, including 
+    - *MonteCarlo --* Methods for performing Monte Carlo simulation in different
+      ensembles (Grand canonical, canonical)
+    - *MolecularDynamics --* Methods for performing molecular dynamics in
+      different ensembles (NVE, NPT, NVT)
+
 Potential for inter-atomic interaction
 --------------------------------------
 
 .. container:: justify
 
-    The first file name *Potentials.py* contains the only potential that is
-    currently implemented: the Lennard-Jones potential (LJ).
+    Within a dedicated folder, create the first file named *Potentials.py*. This
+    file will contain a functon named *LJ_potential* for the Lennard-Jones
+    potential (LJ):
 
 .. label:: start_Potentials_class
 
