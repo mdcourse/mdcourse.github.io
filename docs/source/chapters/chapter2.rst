@@ -2,17 +2,18 @@ Prepare the simulation
 ======================
 
 For simplicity, all the parameters that are specified as inputs by the user
-will be normalized. This makes all the calculations much simpler. The
-normalization is done within the *Prepare* class, which is defined here.
+will be non-dimensionalized. This makes the calculations, such as force evaluation,
+much simpler. Here, the non-dimensionalization is done within the *Prepare* class
 
-Although a necessary step, this is by far the most boring part of the code. 
-Things will get more exciting in the next chapter. 
+Note: Although this is a necessary step that will make our life much easier later,
+this is by far the less exciting part of the code.
 
 Unit systems
 ------------
 
-Two separate unit systems are used. The first unit system is called
-*real*. It follows the convention from the |lammps-unit-systems|.
+In this code, two unit systems are used: *real* and *LJ*.
+
+The *real* unit system follows the convention from the |lammps-unit-systems|.
 All input parameters are to be provided to the code in *real*
 units, for which:
 
@@ -31,13 +32,13 @@ units, for which:
    <a href="https://docs.lammps.org/units.html" target="_blank">LAMMPS unit systems</a>
 
 The *real* unit system is conventional in molecular simulations. However,
-it is not practical to perform calculations with such a complex unit system,
-as it would involve complicated prefactors. Instead, the LJ (for Lennard-Jones)
-unit system will be used. With the LJ unit systems, all quantities are
-unitless. All masses, distances, and energies are specified as multiples 
+it is not practical to perform calculations with such a complex unit system. 
+It would involve complicated prefactors. Instead, the LJ (for Lennard-Jones)
+unit system will be used for all calculations. With the LJ unit
+systems, all quantities are
+unitless: all masses, distances, and energies are specified as multiples 
 of :math:`m`, :math:`\sigma`, and :math:`\epsilon`, which are the mass and LJ
-parameters of the atoms. Other quantities are specified from these 3 parameters,
-such as:
+parameters of the atoms. Other quantities are specified from these 3 parameters:
 
 - the time is in :math:`\sqrt{m \sigma^2 / \epsilon}`,
 - energies are in :math:`\epsilon`,
@@ -52,11 +53,11 @@ where :math:`k_\text{B}` is the Boltzmann constant.
 Start coding
 ------------
 
-Let us create a class named *Prepare*. To make the
-unit conversion easier, let us also import *numpy*, as
+Let us fill the previously created class named *Prepare*. To make the
+unit conversion easier, let us import *numpy*, as
 well as the *constants* library from *numpy*.
 
-In a Python file named *Prepare.py*, copy the following lines:
+In the file named *Prepare.py*, copy the following lines:
 
 .. code-block:: python
 
