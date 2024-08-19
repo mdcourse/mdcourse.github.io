@@ -1,36 +1,28 @@
 Initialize the simulation
 =========================
 
-.. container:: justify
-
-    Here the *InitializeSimulation* class is created. This class is used to
-    prepare the simulation box and populate the box with atoms.
+Here, the *InitializeSimulation* class is created. This class is used to
+prepare the simulation box and populate the box with atoms.
 
 Simulation box
 --------------
 
-.. container:: justify
-
-    In all simulations performed here, a certain number of atoms are first 
-    randomly placed in a cuboid box.
+In all simulations performed here, a certain number of atoms are first 
+randomly placed in a cuboid box.
 
 Start coding
 ------------
 
-.. container:: justify
-
-    Let us start by importing NumPy, as well as the previously created *Prepare*
-    class:
+Let us start by importing NumPy, as well as the previously created *Prepare*
+class:
 
 .. code-block:: python
 
     import numpy as np
     from Prepare import Prepare
 
-.. container:: justify
-
-    Then, let us create the *InitializeSimulation* class that is inheriting
-    the *Prepare* class.
+Then, let us create the *InitializeSimulation* class that is inheriting
+the *Prepare* class.
 
 .. code-block:: python
 
@@ -48,22 +40,18 @@ Start coding
             self.seed = seed
             self.initial_positions = initial_positions
 
-.. container:: justify
-
-    Three parameters are provided to the *InitializeSimulation* class, namely
-    the box dimensions which is a list with a length corresponding to *dimensions* (default is 3)
-    with parameters in units of Ångström, a seed, and some initial positions for the atoms that can be provided as an array
-    of three columns. If *initial_positions* is
-    left equal to *None*, positions with be randomly attributed to the atoms.
+Three parameters are provided to the *InitializeSimulation* class, namely
+the box dimensions which is a list with a length corresponding to *dimensions* (default is 3)
+with parameters in units of Ångström, a seed, and some initial positions for the
+atoms that can be provided as an array of three columns. If *initial_positions* is
+left equal to *None*, positions with be randomly attributed to the atoms.
 
 Seed
 ----
 
-.. container:: justify
-
-    The *seed* can be provided to launch the same simulations several
-    times in a row, which is useful during debugging. Add the following *if*
-    condition to the *__init__()* method.
+The *seed* can be provided to launch the same simulations several
+times in a row, which is useful during debugging. Add the following *if*
+condition to the *__init__()* method.
 
 .. code-block:: python
 
@@ -72,17 +60,13 @@ Seed
     if self.seed is not None:
         np.random.seed(self.seed)
 
-.. container:: justify
-
-    If a seed is provided, it is passed to the *random.seed()* function of *NumPy*.
-    If the seed is left to None, the simulation will be randomized.
+If a seed is provided, it is passed to the *random.seed()* function of *NumPy*.
+If the seed is left to None, the simulation will be randomized.
 
 Define the box
 --------------
 
-.. container:: justify
-
-    Let us define a box from the dimensions provided as a list named *box_dimensions*.
+Let us define a box from the dimensions provided as a list named *box_dimensions*.
 
 .. code-block:: python
 
@@ -95,23 +79,19 @@ Define the box
         box_geometry = np.array([90, 90, 90])
         self.box_size = np.array(box_size.tolist()+box_geometry.tolist())
 
-.. container:: justify
-
-    By symmetry, the box is centered in 0 for all axes. A *box_size* is also
-    defined. It follows the  MDAnalysis conventions; Lx, Ly, Lz, 90, 90, 90,
-    where the last three numbers are angles in degrees that are usually used to
-    define triclinic (non-orthogonal) boxes, which is not a possibility of the current code.
+By symmetry, the box is centered in 0 for all axes. A *box_size* is also
+defined. It follows the  MDAnalysis conventions; Lx, Ly, Lz, 90, 90, 90,
+where the last three numbers are angles in degrees that are usually used to
+define triclinic (non-orthogonal) boxes, which is not a possibility of the current code.
 
 Populate the box
 ----------------
 
-.. container:: justify
-
-    Here, a number of atoms are placed within the simulation box. If initial
-    positions were not provided (i.e. *initial_positions = None*), atoms
-    are placed randomly within the box. If initial positions were provided
-    as an array, they are used instead. Note that in that case, the array
-    number be of size 'number of atoms' x ''number of dimensions.
+Here, a number of atoms are placed within the simulation box. If initial
+positions were not provided (i.e. *initial_positions = None*), atoms
+are placed randomly within the box. If initial positions were provided
+as an array, they are used instead. Note that in that case, the array
+number be of size 'number of atoms' x ''number of dimensions.
 
 .. code-block:: python
 
@@ -130,11 +110,9 @@ Populate the box
 Final code
 ----------
 
-.. container:: justify
-
-    After following these steps, this is what the final code should
-    look like. For clarity, some comments and descriptions were added for each
-    method.
+After following these steps, this is what the final code should
+look like. For clarity, some comments and descriptions were added for each
+method.
 
 .. label:: start_InitializeSimulation_class
 
@@ -200,10 +178,8 @@ Final code
 Test the code
 -------------
 
-.. container:: justify
-
-    Let us test the *InitializeSimulation* class to make sure that it does what
-    is expected.
+Let us test the *InitializeSimulation* class to make sure that it does what
+is expected.
 
 .. label:: start_test_InitializeSimulation_class
 
@@ -222,9 +198,7 @@ Test the code
 
 .. label:: end_test_InitializeSimulation_class
 
-.. container:: justify
-
-    Which should return:
+Which should return:
 
 .. code-block:: python
 

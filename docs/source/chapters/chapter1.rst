@@ -4,65 +4,81 @@ Description of the code structure
 Presentation
 ------------
 
-.. container:: justify
+To perform the molecular simulations, three key steps will be followed here:
 
-    To perform the molecular simulations, three key steps will be followed here:
+- First, the system will be initialized. This includes creating the simulation
+  box, placing the atoms, and choosing the potential and parameters for their
+  interactions.
+- Second, an energy minimization of the system will be performed to place the
+  atoms in reasonable relative positions and reduce the energy of the system.
+- Third, the main algorithm will be executed: either molecular dynamics or
+  Monte Carlo.
 
-    - First, the system will be initialized. This includes creating the simulation
-      box, placing the atoms, and choosing the potential and parameters for their
-      interactions.
-    - Second, an energy minimization of the system will be performed to place the
-      atoms in reasonable relative positions and reduce the energy of the system.
-    - Third, the main algorithm will be executed: either molecular dynamics or
-      Monte Carlo.
+In addition to these three key steps, some additional tasks will be performed, 
+such as units non-dimensionalization, data measurements, and the outputting of 
+thermodynamic information during the simulation.
 
-    In addition to these three key steps, some additional tasks will be performed, 
-    such as units non-dimensionalization, data measurements, and the outputting of 
-    thermodynamic information during the simulation.
-
-    For better readability, the present code is split into separate files, with
-    each file containing either Python funtions or Python classes.
+For better readability, the present code is split into separate files, with
+each file containing either Python funtions or Python classes.
 
 List of files
 -------------
 
-.. container:: justify
+In total, 7 Python files containing classes will be written during this
+course, as well as 2 files containing functions:
 
-    In total, 9 Python files will be written during this course:
 
-    - *Potentials.py*
-    - *Prepare.py*
-    - *Utilities.py*
-    - *InitializeSimulation.py*
-    - *Measurements.py*
-    - *Outputs.py*
-    - *MinimizeEnergy.py*
-    - *MolecularDynamics.py*
-    - *MonteCarlo.py*
+.. list-table::
+   :widths: 40 60
+   :header-rows: 1
+   
+   * - Fine name 
+     - Content
+   * - *Prepare.py* 
+     - *Prepare* class
+   * - *Utilities.py* 
+     - *Utilities* class
+   * - *InitializeSimulation.py*
+     - *InitializeSimulation* class
+   * - *Outputs.py*
+     - *Outputs* class
+   * - *MinimizeEnergy.py* 
+     - *MinimizeEnergy* class
+   * - *MolecularDynamics.py*
+     - *MolecularDynamics* class
+   * - *MonteCarlo.py*
+     - *MonteCarlo* class
+   * - *Measurements.py* 
+     - Functions
+   * - *Potentials.py* 
+     - Functions
 
-    Each of these files will serve to perform specific tasks. Within these files,
-    the final Python code will be divided into seven classes:
+Each of these files will serve to perform specific tasks. Within these files,
+the final Python code will be divided into seven classes:
 
-    - *Prepare --* Methods preparing the non-dimensionalization of the units
-    - *Utilities --* Methods of general purpose, inherited by all the other classes
-    - *Outputs --* Methods of interest for printing information in log or data
-      files, inherited by all the classes except *Utilities*
-    - *InitializeSimulation --* Methods necessary to set up the system and prepare
-      the simulation, inherited by all the classes except *Outputs* and *Utilities*
-    - *MinimizeEnergy --* Methods for performing energy minimization, including 
-    - *MonteCarlo --* Methods for performing Monte Carlo simulation in different
-      ensembles (Grand canonical, canonical)
-    - *MolecularDynamics --* Methods for performing molecular dynamics in
-      different ensembles (NVE, NPT, NVT)
+- *Prepare --* Methods preparing the non-dimensionalization of the units
+- *Utilities --* Methods of general purpose, inherited by all the other classes
+- *Outputs --* Methods of interest for printing information in log or data
+  files, inherited by all the classes except *Utilities*
+- *InitializeSimulation --* Methods necessary to set up the system and prepare
+  the simulation, inherited by all the classes except *Outputs* and *Utilities*
+- *MinimizeEnergy --* Methods for performing energy minimization, including 
+- *MonteCarlo --* Methods for performing Monte Carlo simulation in different
+  ensembles (Grand canonical, canonical)
+- *MolecularDynamics --* Methods for performing molecular dynamics in
+  different ensembles (NVE, NPT, NVT)
 
 Potential for inter-atomic interaction
 --------------------------------------
 
-.. container:: justify
+In molecular simulations, potential functions are used to mimick the
+interaction between atoms. Although there exists some more complicated
+options, potentials are usually defined as functions of the
+distance :math:`r` between two atoms. 
 
-    Within a dedicated folder, create the first file named *Potentials.py*. This
-    file will contain a functon named *LJ_potential* for the Lennard-Jones
-    potential (LJ):
+Within a dedicated folder, create the first file named *Potentials.py*. This
+file will contain a functon named *LJ_potential* for the Lennard-Jones
+potential (LJ). Copy the following into *Potentials.py*:
 
 .. label:: start_Potentials_class
 
@@ -96,16 +112,12 @@ Potential for inter-atomic interaction
 Create the classes
 ------------------
 
-.. container:: justify
+Let us create all the classes and their inheritance. The classes will be
+filled progressively during the following chapters.
 
-    Let us create all the classes and their inheritance. The classes will be
-    filled progressively during the following chapters.
-
-.. container:: justify
-
-    The first class is the *Prepare* class which will serve the
-    nondimensionalization of all the parameters. Within the *Prepare.py* file,
-    copy the following lines:
+The first class is the *Prepare* class which will serve the
+nondimensionalization of all the parameters. Within the *Prepare.py* file,
+copy the following lines:
 
 .. label:: start_Prepare_class
 
@@ -119,10 +131,8 @@ Create the classes
 
 .. label:: end_Prepare_class
 
-.. container:: justify
-
-    The second class is named *Utilities*. Within the *Utilities.py* file,
-    copy the following lines:
+The second class is named *Utilities*. Within the *Utilities.py* file,
+copy the following lines:
 
 .. label:: start_Utilities_class
 
@@ -139,10 +149,8 @@ Create the classes
 
 .. label:: end_Utilities_class
 
-.. container:: justify
-
-    The *InitializeSimulation* class inherits the *Prepare* class. Within the
-    *InitializeSimulation.py* file, copy the following lines:
+The *InitializeSimulation* class inherits the *Prepare* class. Within the
+*InitializeSimulation.py* file, copy the following lines:
 
 .. label:: start_InitializeSimulation_class
 
@@ -161,10 +169,8 @@ Create the classes
 
 .. label:: end_InitializeSimulation_class
 
-.. container:: justify
-
-    The *Measurements* class inherits both *InitializeSimulation*  and
-    *Utilities* classes. Within the *Measurements.py* file, copy the following lines:
+The *Measurements* class inherits both *InitializeSimulation*  and
+*Utilities* classes. Within the *Measurements.py* file, copy the following lines:
 
 .. label:: start_Measurements_class
 
@@ -182,10 +188,8 @@ Create the classes
           
 .. label:: end_Measurements_class
 
-.. container:: justify
-
-    The *Outputs* class inherits the *Measurements* class. Within the
-    *Outputs.py* file, copy the following lines:
+The *Outputs* class inherits the *Measurements* class. Within the
+*Outputs.py* file, copy the following lines:
 
 .. label:: start_Outputs_class
 
@@ -207,20 +211,16 @@ Create the classes
 
 .. label:: end_Outputs_class
 
-.. container:: justify
+Here, we anticipate that the outputs
+from the code will be saved in a folder, which by default
+is named *results/*. If the folder does not exist, it will be
+created using *os.mkdir()* from the *os* module, which was previously
+imported.
 
-    Here, we anticipate that the outputs
-    from the code will be saved in a folder, which by default
-    is named *results/*. If the folder does not exist, it will be
-    created using *os.mkdir()* from the *os* module, which was previously
-    imported.
-
-.. container:: justify
-
-    Finally, let us create the three remaining classes, named respectively *MinimizeEnergy*,
-    *MonteCarlo*, and *MolecularDynamics*. Each class inherits
-    the *Outputs* class. Within the *MinimizeEnergy.py* file, copy the
-    following lines:
+Finally, let us create the three remaining classes, named respectively *MinimizeEnergy*,
+*MonteCarlo*, and *MolecularDynamics*. Each class inherits
+the *Outputs* class. Within the *MinimizeEnergy.py* file, copy the
+following lines:
 
 .. label:: start_MinimizeEnergy_class
 
@@ -237,9 +237,7 @@ Create the classes
 
 .. label:: end_MinimizeEnergy_class
 
-.. container:: justify
-
-    Within the *MonteCarlo.py* file, copy the following lines:
+Within the *MonteCarlo.py* file, copy the following lines:
 
 .. label:: start_MonteCarlo_class
 
@@ -256,9 +254,7 @@ Create the classes
 
 .. label:: end_MonteCarlo_class
 
-.. container:: justify
-
-    Finally, within the *MolecularDynamics.py* file, copy the following lines:
+Finally, within the *MolecularDynamics.py* file, copy the following lines:
 
 .. label:: start_MolecularDynamics_class
 
@@ -278,12 +274,10 @@ Create the classes
 Test the code
 -------------
 
-.. container:: justify
-
-    We can create a simple test to ensure that the classes
-    are being inherited as expected. Within the same folder,
-    create a new Jupyter notebook called *test.ipynb*, and copy
-    the following lines into it:
+We can create a simple test to ensure that the classes
+are being inherited as expected. Within the same folder,
+create a new Jupyter notebook called *test.ipynb*, and copy
+the following lines into it:
 
 .. label:: start_test_First_class
 
@@ -299,8 +293,6 @@ Test the code
 
 .. label:: end_test_First_class
 
-.. container:: justify
-
-    If everything is working well two folders named *md-output/*
-    and *mc-output/* must have been created, and no error message
-    should appear.
+If everything is working well two folders named *md-output/*
+and *mc-output/* must have been created, and no error message
+should appear.

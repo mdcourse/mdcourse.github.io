@@ -1,19 +1,15 @@
 Minimize the energy
 ===================
 
-.. container:: justify
-
-    Now that the code for placing the atoms within the box has been written,
-    let us perform an energy minimization to ensure there is no overlapping
-    between the atoms.
+Now that the code for placing the atoms within the box has been written,
+let us perform an energy minimization to ensure there is no overlapping
+between the atoms.
 
 Prepare the minimization
 ------------------------
 
-.. container:: justify
-
-    Let us start by importing NumPy and the copy libraries. Add the following
-    to the beginning of the *MinimizeEnergy.py* file:
+Let us start by importing NumPy and the copy libraries. Add the following
+to the beginning of the *MinimizeEnergy.py* file:
 
 .. code-block:: python
 
@@ -22,9 +18,7 @@ Prepare the minimization
     from Outputs import Outputs
     (...)
 
-.. container:: justify
-
-    Then, let us fill the *__init__()* method:
+Then, let us fill the *__init__()* method:
 
 .. code-block:: python
 
@@ -42,22 +36,18 @@ Prepare the minimization
             self.maximum_steps = maximum_steps
             super().__init__(*args, **kwargs)
 
-.. container:: justify
-
-    An important parameter is *maximum_steps*, which sets the maximum number of
-    steps that the energy minimization will last. A *cut_off* with a default value
-    of 9 Ångströms is also defined. The *neighbor* parameter sets the period
-    between two recalculations of the neighbor lists, and the *displacement* with
-    a default value of 0.01 Ångström sets the initial value for atom displacement.
+An important parameter is *maximum_steps*, which sets the maximum number of
+steps that the energy minimization will last. A *cut_off* with a default value
+of 9 Ångströms is also defined. The *neighbor* parameter sets the period
+between two recalculations of the neighbor lists, and the *displacement* with
+a default value of 0.01 Ångström sets the initial value for atom displacement.
 
 Nondimensionalize units
 -----------------------
 
-.. container:: justify
-
-    Two parameters from the *MinimizeEnergy* class must be nondimensionalized,
-    namely *cut_off* and *displacement*. Add the following method to the
-    *MinimizeEnergy* class:
+Two parameters from the *MinimizeEnergy* class must be nondimensionalized,
+namely *cut_off* and *displacement*. Add the following method to the
+*MinimizeEnergy* class:
 
 .. code-block:: python
 
@@ -66,10 +56,8 @@ Nondimensionalize units
             self.cut_off = self.cut_off/self.reference_distance
             self.displacement = self.displacement/self.reference_distance
 
-.. container:: justify
-
-    Let us call the *nondimensionalize_units_2()* method from the *__init__()*
-    method:
+Let us call the *nondimensionalize_units_2()* method from the *__init__()*
+method:
 
 .. code-block:: python
 
@@ -81,13 +69,11 @@ Nondimensionalize units
 Energy minimizer
 ----------------
 
-.. container:: justify
-
-    Here the steepest descent method is used. First, the initial energy of the
-    system and maximum force are measured. Then, a set of new positions for the atoms
-    is tested. The energy of the new configuration is compared to the initial
-    energy, and the new position is either accepted or rejected based on
-    energy criteria.  
+Here the steepest descent method is used. First, the initial energy of the
+system and maximum force are measured. Then, a set of new positions for the atoms
+is tested. The energy of the new configuration is compared to the initial
+energy, and the new position is either accepted or rejected based on
+energy criteria.  
 
 .. code-block:: python
 
@@ -116,12 +102,10 @@ Energy minimizer
 Build neighbor lists
 --------------------
 
-.. container:: justify
-
-    To save time, it is common in molecular simulation to detect which atoms are
-    neighbors. This way, only interactions between neighbors are recalculated.
-    This is the purpose of the *update_neighbor_lists()* method that must be
-    added to the *Utilities* class:
+To save time, it is common in molecular simulation to detect which atoms are
+neighbors. This way, only interactions between neighbors are recalculated.
+This is the purpose of the *update_neighbor_lists()* method that must be
+added to the *Utilities* class:
 
 .. code-block:: python
 
@@ -143,10 +127,8 @@ Build neighbor lists
 
             self.neighbor_lists = neighbor_lists
 
-.. container:: justify
-
-    At the start of the *Utilities.py*, the NumPy library must be imported as well
-    as the *distances* function from MDAnalysis using:
+At the start of the *Utilities.py*, the NumPy library must be imported as well
+as the *distances* function from MDAnalysis using:
 
 .. code-block:: python
 
@@ -156,19 +138,15 @@ Build neighbor lists
     from Potentials import LJ_potential
     (...)
 
-.. container:: justify
-
-    The *update_neighbor_lists()* method generates neighbor lists that are stored
-    as Python list named *neighbor_lists*.
+The *update_neighbor_lists()* method generates neighbor lists that are stored
+as Python list named *neighbor_lists*.
 
 Compute_potential
 -----------------
 
-.. container:: justify
-
-    Computing the potential is central to the energy minimizer.
-    Add the following method called *compute_potential()*  to the *Utilities*
-    class. 
+Computing the potential is central to the energy minimizer.
+Add the following method called *compute_potential()*  to the *Utilities*
+class. 
 
 .. code-block:: python
 
@@ -213,11 +191,9 @@ Compute_potential
 Wrap in box
 -----------
 
-.. container:: justify
-
-    Every time atoms are being displaced, one has to ensure that they remain in
-    the box. This is done by the *wrap_in_box()* method that must be placed
-    within the *Utilities* class:
+Every time atoms are being displaced, one has to ensure that they remain in
+the box. This is done by the *wrap_in_box()* method that must be placed
+within the *Utilities* class:
 
 .. code-block:: python
 
@@ -379,10 +355,8 @@ Final code
 Test the code
 -------------
 
-.. container:: justify
-
-    Let us test the *MinimizeEnergy* class to make sure that it does what
-    is expected.
+Let us test the *MinimizeEnergy* class to make sure that it does what
+is expected.
 
 .. label:: start_test_MinimizeEnergy_class
 
