@@ -187,7 +187,7 @@ that will be used to nondimensionalize units in future classes.
 
 .. code-block:: python
 
-   def nondimensionalize_units_0(self):
+    def nondimensionalize_units_0(self):
         # Normalize LJ properties
         epsilon, sigma, atom_mass = [], [], []
         for e0, s0, m0 in zip(self.epsilon, self.sigma, self.atom_mass):
