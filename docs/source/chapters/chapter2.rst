@@ -255,14 +255,23 @@ where:
 one expects all direct and cross coefficients to be:
 
 .. math::
-    \text{array_sigma_ij} = [\sigma_{11} \text{(between atoms 0 and 1)}, \sigma_{12} \text{(0-2)}, \sigma_{12} \text{(0-3)}, \sigma_{12} \text{(0-4)}, \\
-    \sigma_{12} \text{(1-2)}, \sigma_{12} \text{(1-3)}, \sigma_{12} \text{(1-4)}, \\
-    \sigma_{22} \text{(2-3)}, \sigma_{22} \text{(2-4)}, \\
-    \sigma_{22} \text{(3-4)}] 
 
-where it is assumed that :math:`\sigma_{12} = \sigma_{21}`. The value of the
-cross coefficients are conveniently assumed to be the arithmetic mean
-of the direct coefficients :
+    \text{array_sigma_ij} = \begin{bmatrix}
+            \sigma_{11} \text{(0-1)} & \sigma_{12} \text{(0-2)} & \sigma_{12} \text{(0-3)} & \sigma_{12} \text{(0-4)} \\
+                                     & \sigma_{12} \text{(1-2)} & \sigma_{12} \text{(1-3)} & \sigma_{12} \text{(1-4)} \\
+                                     &                          & \sigma_{22} \text{(2-3)} & \sigma_{22} \text{(2-4)} \\
+                                     &                          &                          & \sigma_{22} \text{(3-4)} \\
+        \end{bmatrix}
+
+
+where it is assumed that the matrix is symmetric, so the coefficients in the bottom
+left are not specified. The first value in the top left corner of the matrix,
+:math:`\sigma_{11} \text{(0-1)}`, indicates that the sigma value for the interaction
+between the first (0) and second atom (1) is :math:`\sigma_{11}`, as both atoms 0
+and 1 are of type 1. A similar matrix can be written for epsilon_sigma_ij.
+
+The values of the cross coefficients :math:`\sigma_{12}` and :math:`\epsilon_{12}`
+are assumed to follow the arithmetic mean :
 
 .. math::
 
