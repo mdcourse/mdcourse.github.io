@@ -126,6 +126,8 @@ unit system to the *LJ* unit system.
 
 Within the *Prepare* class, copy the following method:
 
+.. label:: start_Prepare_class
+
 .. code-block:: python
 
     def calculate_LJunits_prefactors(self):
@@ -145,6 +147,8 @@ Within the *Prepare* class, copy the following method:
         # Pressure
         pressure_pa = epsilon_J/sigma_m**3  # Pa
         self.reference_pressure = pressure_pa/cst.atm  # atm
+
+.. label:: end_Prepare_class
 
 This method defines the *reference_distance* as the first element in the
 *sigma* list, i.e. :math:`\sigma_{11}`. Therefore atoms of type one will
@@ -179,6 +183,8 @@ Create a new method called *nondimensionalize_units_0* within the *Prepare*
 class. The index *0* is used to differentiate this method from the other methods
 that will be used to nondimensionalize units in future classes. 
 
+.. label:: start_Prepare_class
+
 .. code-block:: python
 
    def nondimensionalize_units_0(self):
@@ -192,6 +198,8 @@ that will be used to nondimensionalize units in future classes.
         self.sigma = sigma
         self.atom_mass = atom_mass
 
+.. label:: end_Prepare_class
+
 Here, we anticipate that *epsilon*, *sigma*, and *atom_mass* may contain
 more than one element in the future, and normalize each element with the
 corresponding reference value. The *zip()* function allows us to loop over
@@ -199,12 +207,16 @@ all three lists at once.
 
 Let us also call the *nondimensionalize_units_0* from the *__init__()* method:
 
+.. label:: start_Prepare_class
+
 .. code-block:: python
 
     def __init__(self,
         (...)
         self.calculate_LJunits_prefactors()
         self.nondimensionalize_units_0()
+
+.. label:: end_Prepare_class
 
 Identify atom properties
 ------------------------
@@ -225,6 +237,8 @@ for future calculation of force.
 
 Create a new method called *identify_atom_properties*, and place it
 within the *Prepare* class:
+
+.. label:: start_Prepare_class
 
 .. code-block:: python
 
@@ -248,6 +262,8 @@ within the *Prepare* class:
         self.atoms_epsilon = np.array(atoms_epsilon)
         self.atoms_mass = np.array(atoms_mass)
         self.atoms_type = np.array(atoms_type)
+    
+.. label:: end_Prepare_class
     
 Let us call the *identify_atom_properties* from the *__init__()* method:
 
@@ -299,6 +315,8 @@ are assumed to follow the arithmetic mean :
 Create the following method called *calculate_cross_coefficients* within the 
 *Prepare* class:
 
+.. label:: start_Prepare_class
+
 .. code-block:: python
 
     def calculate_cross_coefficients(self):
@@ -317,6 +335,8 @@ Create the following method called *calculate_cross_coefficients* within the
                 sigma_j = self.atoms_sigma[j]
                 sigma_ij.append((sigma_i+sigma_j)/2)
         self.array_sigma_ij = np.array(sigma_ij)
+
+.. label:: end_Prepare_class
 
 After calling for the *identify_atom_properties()* method, double loops
 are performed over all direct coefficients, and the cross coefficients

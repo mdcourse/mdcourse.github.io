@@ -299,5 +299,5 @@ the following lines into it:
 .. label:: end_test_First_class
 
 If everything is working well, 3 folders named respectively *md-output/*, *mc-output/*,
-and *Outputs/* must have been created. If not, running the test will geberate an
+and *Outputs/* must have been created. If not, running the test will generate an
 error message.
