@@ -283,6 +283,7 @@ the following lines into it:
 
 .. code-block:: python
 
+    import os
     from MonteCarlo import MonteCarlo
     from MolecularDynamics import MolecularDynamics
 
@@ -291,8 +292,12 @@ the following lines into it:
     mc = MonteCarlo(data_folder = "mc-output/")
     mc.__init__()
 
+    assert os.path.exists("mc-output"), """Error, missing mc-output folder"""
+    assert os.path.exists("md-output"), """Error, missing md-output folder"""
+    assert os.path.exists("Outputs"), """Error, missing Outputs folder"""
+
 .. label:: end_test_First_class
 
-If everything is working well two folders named *md-output/*
-and *mc-output/* must have been created, and no error message
-should appear.
+If everything is working well, 3 folders named respectively *md-output/*, *mc-output/*,
+and *Outputs/* must have been created. If not, running the test will geberate an
+error message.
