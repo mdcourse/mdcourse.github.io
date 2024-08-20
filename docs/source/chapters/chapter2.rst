@@ -162,12 +162,16 @@ and the *reference_pressure* in atmospheres is calculated as :math:`\epsilon_{11
 Finally, let us make sure that the *calculate_LJunits_prefactors()* method is
 called systematically by adding the following line to the *__init__()* method:
 
+.. label:: start_Prepare_class
+
 .. code-block:: python
 
     def __init__(self,
         (...)
         super().__init__(*args, **kwargs)
         self.calculate_LJunits_prefactors()
+
+.. label:: end_Prepare_class
 
 Every time the *Prepare* class will be initialized, all reference values
 will be calculated and passed as *self*. 
@@ -267,6 +271,8 @@ within the *Prepare* class:
     
 Let us call the *identify_atom_properties* from the *__init__()* method:
 
+.. label:: start_Prepare_class
+
 .. code-block:: python
 
     def __init__(self,
@@ -274,6 +280,8 @@ Let us call the *identify_atom_properties* from the *__init__()* method:
         self.calculate_LJunits_prefactors()
         self.nondimensionalize_units_0()
         self.identify_atom_properties()
+
+.. label:: end_Prepare_class
 
 Calculate cross coefficients
 ----------------------------
@@ -345,6 +353,8 @@ are stored within *array_sigma_ij* and *array_epsilon_ij*.
 Finally, let us call the *calculate_cross_coefficients* method from the
 *__init__()* method.
 
+.. label:: start_Prepare_class
+
 .. code-block:: python
 
     def __init__(self,
@@ -353,6 +363,8 @@ Finally, let us call the *calculate_cross_coefficients* method from the
         self.nondimensionalize_units_0()
         self.identify_atom_properties()
         self.calculate_cross_coefficients()
+
+.. label:: end_Prepare_class
 
 Test the code
 -------------
