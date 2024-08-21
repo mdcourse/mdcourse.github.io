@@ -1,3 +1,6 @@
+[![DOI](https://zenodo.org/badge/443812727.svg)](https://zenodo.org/doi/10.5281/zenodo.13354423)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 # Learn Molecular Simulations with Python
 
 <img src="docs/source/_static/logo/logo-py.png" width="30%" align="right"/></a>
