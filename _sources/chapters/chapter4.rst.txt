@@ -246,7 +246,8 @@ Test the code
 -------------
 
 Let us test the *MinimizeEnergy* class to make sure that it does what
-is expected.
+is expected, i.e. that it leads to a potential energy that is small, and
+typically negative.
 
 .. label:: start_test_MinimizeEnergy_class
 
@@ -254,13 +255,15 @@ is expected.
 
     from MinimizeEnergy import MinimizeEnergy
 
-    self = MinimizeEnergy(maximum_steps=100,
+    min = MinimizeEnergy(maximum_steps=100,
         number_atoms=[2, 3],
         epsilon=[0.1, 1.0], # kcal/mol
         sigma=[3, 6], # A
         atom_mass=[1, 1], # g/mol
         box_dimensions=[20, 20, 20], # A
         )
-    self.run()
+    min.run()
+
+    assert min.compute_potential(output="potential") < 0
 
 .. label:: end_test_MinimizeEnergy_class
