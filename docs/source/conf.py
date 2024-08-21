@@ -1,9 +1,9 @@
 # Configuration file for the Sphinx documentation builder.
 
-project = 'learn-molecular-simulaion-with-python'
+project = 'learn-molecular-simulation-with-python'
 copyright = 'All source code is available under the GNU General Public License v3.0'
 author = 'Simon Gravelle'
-release = '0.0.0'
+release = '0.1.0'
 
 extensions = []
 

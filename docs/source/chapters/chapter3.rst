@@ -192,10 +192,17 @@ attribute positions to the atoms.
         seed=48031,
         )
 
-    assert np.round(init.box_size[0],3) == np.round(20/3,3)
+    for d in range(3):
+        assert np.round(init.box_size[d],3) == np.round(20/3,3)
     assert np.shape(init.atoms_positions) == (init.total_number_atoms, 3)
     for d in range(3):
         assert init.atoms_positions[0][d] >= init.box_boundaries[0][0]
         assert init.atoms_positions[0][d] <= init.box_boundaries[0][1]
 
 .. label:: end_test_InitializeSimulation_class
+
+The first assert statement ensures that the box size has the expected size along
+all 3 dimensions of space, in normalised units.
+The second assert ensures that the size of the created *atoms_positions* array
+is consistent with the anumber of atoms. The third assert ensures that the created
+atoms are located within the box boundaries along all 3 dimensions of space.
