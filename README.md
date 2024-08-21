@@ -29,9 +29,9 @@ concepts and suggested readings are given when necessary.
 - thermostats and barostats other than Berendsen,
 - energy minimization methods other than the steepest descent.
 
-### About me
+### Author
 
-I am a computer physicist in soft matter and fluids at interfaces. You can 
+- Simon Gravelle: computer physicist in soft matter and fluids at interfaces. You can 
 find more information on my [personal webpage](https://simongravelle.github.io/).
 
 ### Acknowledgments and license
