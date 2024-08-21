@@ -16,6 +16,8 @@ Start coding
 Let us improve the previously created *InitializeSimulation* class. Remember that
 the InitializeSimulation class inherits the *Prepare* class.
 
+.. label:: start_InitializeSimulation_class
+
 .. code-block:: python
 
     class InitializeSimulation(Prepare):
@@ -32,37 +34,47 @@ the InitializeSimulation class inherits the *Prepare* class.
             self.seed = seed
             self.initial_positions = initial_positions
 
+.. label:: end_InitializeSimulation_class
+
 Three parameters are provided to the *InitializeSimulation* class. THe first one
 is the box dimensions, *box_dimensions*, which is a list with a length corresponding to
 the dimension of the system. The *dimensions* is calculated as the length of *box_dimensions*.
 Each element of the list correspond to a dimension of the box in Ångström in the x, y, and
-z directions, respectively. A seed is also provided as a parameter, as well as some initial
+z directions, respectively. A seed is also provided as a parameter (an integer), as well as some initial
 positions for the atoms that can be provided as an array of length corresponding
 to the number of atoms, and a number of columns corresponding to *dimensions*. If
 *initial_positions* is left equal to *None*, positions will be randomly attributed
 to the atoms, see below.
 
-Seed
-----
+Provide a seed
+--------------
 
-The *seed* can be provided to launch the same simulations several
-times in a row, which is useful during debugging. Add the following *if*
-condition to the *__init__()* method.
+A *seed* can be provided to launch the *exact* same simulations (i.e. same atom positions,
+same atom velocities) several times in a row, which is useful during debugging. Add
+the following *if* condition to the *__init__()* method:
+
+.. label:: start_InitializeSimulation_class
 
 .. code-block:: python
 
-    (...)
-    self.initial_positions = initial_positions
-    if self.seed is not None:
-        np.random.seed(self.seed)
+    def __init__(self,
+        (...)
+        self.initial_positions = initial_positions
+        if self.seed is not None:
+            np.random.seed(self.seed)
 
-If a seed is provided, it is passed to the *random.seed()* function of *NumPy*.
-If the seed is left to None, the simulation will be randomized.
+.. label:: end_InitializeSimulation_class
+
+If a *seed* is provided, it is passed to the *random.seed()* function of *NumPy*.
+If *seed* is left to its default value of *None*, the simulation will be randomized.
 
 Define the box
 --------------
 
-Let us define a box from the dimensions provided as a list named *box_dimensions*.
+Let us define a box from the *box_dimensions* list. Add the following method
+to the InitializeSimulation class:
+
+.. label:: start_InitializeSimulation_class
 
 .. code-block:: python
 
@@ -75,19 +87,25 @@ Let us define a box from the dimensions provided as a list named *box_dimensions
         box_geometry = np.array([90, 90, 90])
         self.box_size = np.array(box_size.tolist()+box_geometry.tolist())
 
-By symmetry, the box is centered in 0 for all axes. A *box_size* is also
-defined. It follows the  MDAnalysis conventions; Lx, Ly, Lz, 90, 90, 90,
-where the last three numbers are angles in degrees that are usually used to
-define triclinic (non-orthogonal) boxes, which is not a possibility of the current code.
+.. label:: end_InitializeSimulation_class
+
+The *box_boundaries* are calculated from the *box_dimensions*. It corresponds to
+the lowest and highest coordinate in all directions. By symmetry, the box is centered
+in 0 for all axes. A *box_size* is also defined. It follows the MDAnalysis
+conventions: Lx, Ly, Lz, 90, 90, 90, where the last three numbers are angles in
+degrees. Values different from *90* for the angles would define a triclinic
+(non-orthogonal) boxe, which is not currently supported by the current code.
 
 Populate the box
 ----------------
 
-Here, a number of atoms are placed within the simulation box. If initial
+Here, the atoms are placed within the simulation box. If initial
 positions were not provided (i.e. *initial_positions = None*), atoms
 are placed randomly within the box. If initial positions were provided
-as an array, they are used instead. Note that in that case, the array
-number be of size 'number of atoms' x ''number of dimensions.
+as an array named *initial_positions*, they are used instead. Note that in that
+case, the array number be of size 'number of atoms' x ''number of dimensions.
+
+.. label:: start_InitializeSimulation_class
 
 .. code-block:: python
 
@@ -102,6 +120,15 @@ number be of size 'number of atoms' x ''number of dimensions.
             self.atoms_positions = atoms_positions
         else:
             self.atoms_positions = self.initial_positions
+
+.. label:: end_InitializeSimulation_class
+
+In case initial positions were not provided by the user, and array of size
+total_number_atoms x dimensions is created, random positions are defined
+using the random function of NumPy.
+
+Here, the newly added atoms are added randomly within the box, without taking care
+of avoiding any overlap with existing atoms.
 
 Final code
 ----------
