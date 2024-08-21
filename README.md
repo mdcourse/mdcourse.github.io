@@ -9,9 +9,9 @@ simulations, such as:
 - Molecular dynamics,
 - Monte Carlo move.
 
-The Python code that will be written here will be used to realize some simple
+The Python code that is written here is used to realize molecular
 scientific projects. Note that the code is slow and that efficiency is not the
-objective here.
+primary objective here.
 
 ### Prerequisite
 
