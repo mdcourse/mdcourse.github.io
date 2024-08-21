@@ -153,6 +153,23 @@ using the random function of NumPy.
 Here, the newly added atoms are added randomly within the box, without taking care
 of avoiding any overlap with existing atoms.
 
+Finally, let us call the methods from the *__init__* class:
+
+.. label:: start_InitializeSimulation_class
+
+.. code-block:: python
+
+    def __init__(self,
+        (...)
+        self.initial_positions = initial_positions
+        if self.seed is not None:
+            np.random.seed(self.seed)
+        self.nondimensionalize_units_1()
+        self.define_box()
+        self.populate_box()
+
+.. label:: end_InitializeSimulation_class
+
 Test the code
 -------------
 
