@@ -18,7 +18,7 @@ primary objective here.
 
 ### Automated tests
 
-The tests/ folder contains a series of tests for the Python code written in the
+The [tests/](tests/) folder contains a series of tests for the Python code written in the
 documentation. In short, the Python code is extracted from the documentation
 and executed, thus ensuring that the code from the documentation is always valid.
 
