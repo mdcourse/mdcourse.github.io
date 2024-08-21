@@ -18,13 +18,13 @@ primary objective here.
 
 ### Prerequisite
 
-The target audience is people either completely new to molecular simulations, or
-users of user-friendly codes such as LAMMPS and GROMACS wanting to better understand
-what is hiding behind those codes. Although some basic knowledge in coding,
-thermodynamics, and statistical physics is recommended to fully understand
-molecular simulations, [Learn Molecular Simulations with Python](https://mdcourse.github.io/)
-can be followed even without deep knowledge in those fields. Annexes with key
-concepts and suggested readings are given when necessary.
+The target audience includes people who are either completely new to molecular simulations
+or users of open-source codes such as LAMMPS and GROMACS who want to better understand
+what is behind those codes. Although some basic knowledge of coding, thermodynamics, and
+statistical physics is recommended for a full understanding of molecular simulations,
+[Learn Molecular Simulations with Python](https://mdcourse.github.io/) can be followed
+even without deep expertise in these fields. Annexes with key concepts and suggested
+readings are provided as needed.
 
 ### What is not (yet) in the code
 
