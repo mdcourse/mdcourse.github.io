@@ -1,10 +1,5 @@
 # Learn Molecular Simulations with Python
 
-Alternative title: 
-- Build Your Own Molecular Simulations with Python
-- Create Molecular Simulations with Python
-- Construct Molecular Simulations with Python
-
 <img src="docs/source/_static/logo/logo-py.png" width="30%" align="right"/></a>
 
 The goal of [Learn Molecular Simulations with Python](https://mdcourse.github.io/)
@@ -46,3 +41,8 @@ under the Marie Skłodowska-Curie grant agreement No 101065060.
 
 All the inputs, scripts, and data files are released under the 
 GNU general public license v3.0.
+
+### TODO
+
+- Choose a different title? (Build Your Own Molecular Simulations with Python,
+  Create Molecular Simulations with Python, Construct Molecular Simulations with Python)
