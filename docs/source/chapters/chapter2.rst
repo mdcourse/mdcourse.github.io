@@ -370,38 +370,28 @@ Test the code
 -------------
 
 Let us test the *Prepare* class to make sure that it does what is expected.
+This initiates a system with 2 atoms of type 1, and 3 atoms of type 2:
 
 .. label:: start_test_Prepare_class
 
 .. code-block:: python
 
+    import numpy as np
     from Prepare import Prepare
 
-    self = Prepare(number_atoms=[2, 3],
+    prep = Prepare(number_atoms=[2, 3],
         epsilon=[0.1, 1.0], # kcal/mol
         sigma=[3, 6], # A
-        atom_mass=[1, 1], # g/mol
+        atom_mass=[1, 9], # g/mol
         )
-    print("Reference energy:")
-    print(self.reference_energy)
-    print("Reference distance:")
-    print(self.reference_distance)
-    print("array_epsilon_ij:")
-    print(self.array_epsilon_ij)
-    print("array_sigma_ij:")
-    print(self.array_sigma_ij)
+    assert prep.reference_energy == 0.1
+    assert prep.reference_distance == 3
+    assert prep.reference_mass == 1
+    assert prep.total_number_atoms == 5
+    assert np.int32(prep.total_number_atoms*(prep.total_number_atoms-1)/2) == len(self.array_epsilon_ij)
 
 .. label:: end_test_Prepare_class
 
-Which should return:
-
-.. code-block:: python
-
-    Reference energy:
-    0.1
-    Reference distance:
-    3
-    array_epsilon_ij:
-    [ 1.   5.5  5.5  5.5  5.5  5.5  5.5 10.  10.  10. ]
-    array_sigma_ij:
-    [1.  1.5 1.5 1.5 1.5 1.5 1.5 2.  2.  2. ]
+This test assert that the reference energy, distance, and mass were properly defined,
+that the number of atoms indeed corresponds to the sum of the number of atoms of each
+type, and that the length of the array_epsilon_ij array is consistent.
