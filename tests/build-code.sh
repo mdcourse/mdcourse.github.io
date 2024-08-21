@@ -4,6 +4,5 @@ set -e
 # pull the last version
 git pull
 
-jupyter nbconvert --to script build-documentation.ipynb
+# build the code from documentation, and run the tests
 python3 build-documentation.py
-rm build-documentation.py
