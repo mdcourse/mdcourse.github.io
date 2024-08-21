@@ -10,3 +10,6 @@ docs/build
 **/log.*
 
 benchmark/*/*.data
+
+tests/generated-codes/
+tests/generated-codes/*
