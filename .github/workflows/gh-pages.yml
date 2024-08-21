@@ -35,7 +35,7 @@ jobs:
           make html
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ github.ref == 'refs/heads/develop' }}
         with:
           context: .
           github_token: ${{ secrets.GITHUB_TOKEN }}
