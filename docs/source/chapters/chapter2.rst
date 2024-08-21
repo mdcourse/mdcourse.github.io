@@ -388,7 +388,7 @@ This initiates a system with 2 atoms of type 1, and 3 atoms of type 2:
     assert prep.reference_distance == 3
     assert prep.reference_mass == 1
     assert prep.total_number_atoms == 5
-    assert np.int32(prep.total_number_atoms*(prep.total_number_atoms-1)/2) == len(self.array_epsilon_ij)
+    assert np.int32(prep.total_number_atoms*(prep.total_number_atoms-1)/2) == len(prep.array_epsilon_ij)
 
 .. label:: end_test_Prepare_class
 
