@@ -1,5 +1,10 @@
 # Learn Molecular Simulations with Python
 
+Alternative title: 
+- Build Your Own Molecular Simulations with Python
+- Create Molecular Simulations with Python
+- Construct Molecular Simulations with Python
+
 <img src="docs/source/_static/logo/logo-py.png" width="30%" align="right"/></a>
 
 The goal of [Learn Molecular Simulations with Python](https://mdcourse.github.io/)
