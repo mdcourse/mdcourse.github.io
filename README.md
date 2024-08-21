@@ -31,8 +31,7 @@ concepts and suggested readings are given when necessary.
 
 ### Author
 
-- Simon Gravelle: computer physicist in soft matter and fluids at interfaces. You can 
-find more information on my [personal webpage](https://simongravelle.github.io/).
+- [Simon Gravelle](https://simongravelle.github.io/): computer physicist in soft matter and fluids at interfaces.
 
 ### Acknowledgments and license
 
