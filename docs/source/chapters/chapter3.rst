@@ -13,16 +13,8 @@ randomly placed in a cuboid box.
 Start coding
 ------------
 
-Let us start by importing NumPy, as well as the previously created *Prepare*
-class:
-
-.. code-block:: python
-
-    import numpy as np
-    from Prepare import Prepare
-
-Then, let us create the *InitializeSimulation* class that is inheriting
-the *Prepare* class.
+Let us improve the previously created *InitializeSimulation* class. Remember that
+the InitializeSimulation class inherits the *Prepare* class.
 
 .. code-block:: python
 
@@ -40,11 +32,15 @@ the *Prepare* class.
             self.seed = seed
             self.initial_positions = initial_positions
 
-Three parameters are provided to the *InitializeSimulation* class, namely
-the box dimensions which is a list with a length corresponding to *dimensions* (default is 3)
-with parameters in units of Ångström, a seed, and some initial positions for the
-atoms that can be provided as an array of three columns. If *initial_positions* is
-left equal to *None*, positions with be randomly attributed to the atoms.
+Three parameters are provided to the *InitializeSimulation* class. THe first one
+is the box dimensions, *box_dimensions*, which is a list with a length corresponding to
+the dimension of the system. The *dimensions* is calculated as the length of *box_dimensions*.
+Each element of the list correspond to a dimension of the box in Ångström in the x, y, and
+z directions, respectively. A seed is also provided as a parameter, as well as some initial
+positions for the atoms that can be provided as an array of length corresponding
+to the number of atoms, and a number of columns corresponding to *dimensions*. If
+*initial_positions* is left equal to *None*, positions will be randomly attributed
+to the atoms, see below.
 
 Seed
 ----
