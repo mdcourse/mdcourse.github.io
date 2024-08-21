@@ -52,3 +52,4 @@ GNU general public license v3.0.
   Create Molecular Simulations with Python, Construct Molecular Simulations with Python)
 - Find a cool acronym. MS-PyLearn, LMS-py ?
 - add references
+- implement Nose-Hoover?
