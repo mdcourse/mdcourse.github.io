@@ -34,7 +34,8 @@ readings are provided as needed.
 
 ### Author
 
-- [Simon Gravelle](https://simongravelle.github.io/): computer physicist in soft matter and fluids at interfaces.
+- [Simon Gravelle](https://simongravelle.github.io/): computer physicist in soft matter
+  and fluids at interfaces.
 
 ### Acknowledgments and license
 
