@@ -181,6 +181,7 @@ attribute positions to the atoms.
 
 .. code-block:: python
 
+    import numpy as np
     from InitializeSimulation import InitializeSimulation
 
     init = InitializeSimulation(number_atoms=[2, 3],
@@ -188,6 +189,13 @@ attribute positions to the atoms.
         sigma=[3, 6], # A
         atom_mass=[1, 1], # g/mol
         box_dimensions=[20, 20, 20], # A
+        seed=48031,
         )
+
+    assert np.round(init.box_size[0],3) == np.round(20/3,3)
+    assert np.shape(init.atoms_positions) == (init.total_number_atoms, 3)
+    for d in range(3):
+        assert init.atoms_positions[0][d] >= init.box_boundaries[0][0]
+        assert init.atoms_positions[0][d] <= init.box_boundaries[0][1]
 
 .. label:: end_test_InitializeSimulation_class
