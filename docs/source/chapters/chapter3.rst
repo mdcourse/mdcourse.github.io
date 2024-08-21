@@ -7,8 +7,8 @@ prepare the simulation box and populate the box with atoms.
 Simulation box
 --------------
 
-In all simulations performed here, a certain number of atoms are first 
-randomly placed in a cuboid box.
+In all the simulations performed here, a certain number of atoms are first 
+randomly placed in a 3D cuboid box.
 
 Start coding
 ------------
