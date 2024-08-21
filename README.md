@@ -16,6 +16,12 @@ The Python code that is written here is used to realize molecular
 scientific projects. Note that the code is slow and that efficiency is not the
 primary objective here.
 
+### Automated tests
+
+The tests/ folder contains a series of tests for the Python code written in the
+documentation. In short, the Python code is extracted from the documentation
+and executed, thus ensuring that the code from the documentation is always valid.
+
 ### Prerequisite
 
 The target audience includes people who are either completely new to molecular simulations
