@@ -46,3 +46,4 @@ GNU general public license v3.0.
 
 - Choose a different title? (Build Your Own Molecular Simulations with Python,
   Create Molecular Simulations with Python, Construct Molecular Simulations with Python)
+- Find a cool accronym
