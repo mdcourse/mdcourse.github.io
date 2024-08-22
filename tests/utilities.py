@@ -50,7 +50,6 @@ def detect_block_types(block_contents):
         ISMETHOD = False
         ISCLASS = False
         ISPARTIAL = False
-        ISINIT = False
         for line in block:
             # look for "from X import Y" command
             if (("import" in line) & ("as" in line)) | (("from" in line) & ("import" in line)):
@@ -64,10 +63,7 @@ def detect_block_types(block_contents):
             # look for "(...)" line
             if ("(...)" in line):
                 ISPARTIAL = True
-            # look for __init__ in line
-            if ("def" in line) & ("__init__" in line):
-                ISINIT = True
-        block_types.append([ISIMPORT, ISMETHOD, ISCLASS, ISPARTIAL, ISINIT])
+        block_types.append([ISIMPORT, ISMETHOD, ISCLASS, ISPARTIAL])
     return block_types
 
 def create_file(block_contents, block_names, created_files, created_tests, folder):
@@ -121,6 +117,8 @@ def detect_method_boundaries(method_name, original_file_content):
         original_end_init = original_end_init[0]
     else:
         original_end_init = cpt
+    if original_end_init < original_start_init:
+        original_end_init = cpt
     return original_start_init, original_end_init
 
 def detect_unique_lines(file_content, start, end):
@@ -170,7 +168,7 @@ def detect_existing_lines(ncontent, ocontent):
 
 def append_content(folder, name, content, type):
     if "test_" not in name:
-        ISIMPORT, ISMETHOD, ISCLASS, ISPARTIAL, ISINIT = type
+        ISIMPORT, ISMETHOD, ISCLASS, ISPARTIAL = type
         if np.sum(type) == 0:
             # nothing to append
             pass

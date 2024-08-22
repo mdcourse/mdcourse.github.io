@@ -1,5 +1,5 @@
-Description of the code structure
-=================================
+Start coding
+============
 
 Presentation
 ------------
