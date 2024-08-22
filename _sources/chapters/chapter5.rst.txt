@@ -25,6 +25,7 @@ Let us start by calling two additional methods within the for loop of the
 
 The two methods named *update_log_minimize()* and *update_dump_file()*, are used
 to print the information in the terminal and in a LAMMPS-type data file, respectively.
+These two methods will be written in the following.
 
 Improve the output class
 ------------------------
