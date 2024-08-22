@@ -70,16 +70,22 @@ def detect_block_types(block_contents):
         block_types.append([ISIMPORT, ISMETHOD, ISCLASS, ISPARTIAL, ISINIT])
     return block_types
 
-def create_file(block_contents, block_names, created_files, folder, TEST=False):
+def create_file(block_contents, block_names, created_files, created_tests, folder):
     for content, name in zip(block_contents, block_names):
         if name+".py" not in created_files:
-            if (TEST is False) & ("test_" not in name):
+            if "test_" not in name:
                 created_files.append(name+".py")
                 file = open(folder+name+".py", "w")
                 for line in content:
                     file.write(line)
                 file.close()
-    return created_files
+            else:
+                created_tests.append(name+".py")
+                file = open(folder+name+".py", "w")
+                for line in content:
+                    file.write(line)
+                file.close()            
+    return created_files, created_tests
 
 def try_to_copy_file(chapter_id, created_files):
     new_folder = detect_saving_folder(chapter_id, CREATE=False)
@@ -170,7 +176,7 @@ def append_content(folder, name, content, type):
             pass
         else:
             original_file_content = return_file_content(folder+name+".py")
-            if ISIMPORT:
+            if (ISIMPORT) & (ISCLASS is False) & (ISMETHOD is False):
                 # Add the content at the start of the file
                 file = open(folder+name+".py", "w")
                 for line in content:
