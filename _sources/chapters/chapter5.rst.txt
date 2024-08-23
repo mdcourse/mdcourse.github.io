@@ -185,7 +185,7 @@ every 10 steps in the dump files, as well as in the log:
 
 When running the simulation, information must be printed in the terminal:
 
-.. code-block:: bash
+.. code-block:: bw
 
     step epot maxF
     0 13.176 34.783
