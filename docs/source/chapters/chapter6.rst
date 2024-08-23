@@ -1,5 +1,5 @@
-Monte Carlo simulation
-======================
+Monte Carlo displace
+====================
 
 Move
 ----
@@ -52,7 +52,7 @@ Let us non-dimentionalized the units, and improve the *__init__* method:
                     maximum_steps,
                     cut_off = 9,
                     displace_mc = None,
-                    neighbor = 10,
+                    neighbor = 1,
                     desired_temperature = 300,
                     *args,
                     **kwargs):
@@ -259,5 +259,5 @@ One can use a similar test as previously. Let us use a displace distance of
 
 .. label:: end_test_MonteCarlo_class
 
-The evolution of the potential energy as a function of the number of step
+The evolution of the potential energy as a function of the number of steps
 are written in the *Outputs/Epot.dat* file and can be plotted. 
