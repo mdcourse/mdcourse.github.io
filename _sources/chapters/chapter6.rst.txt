@@ -76,6 +76,8 @@ where:
     def nondimensionalize_units_3(self):
         """Use LJ prefactors to convert units into non-dimensional."""
         self.cut_off = self.cut_off/self.reference_distance
+        self.desired_temperature = self.desired_temperature \
+            /self.reference_temperature
         if self.displace_mc is not None:
             self.displace_mc /= self.reference_distance
 
@@ -107,22 +109,22 @@ Test the code
 One can use the same test as previously, and ask the code to print information
 every 10 steps in the dump files, as well as in the log:
 
-.. label:: start_test_MC_move_class
+.. label:: start_test_MonteCarlo_class
 
 .. code-block:: python
 
     import os
     from MonteCarlo import MonteCarlo
 
-    min = MonteCarlo(maximum_steps=100,
+    mc = MonteCarlo(maximum_steps=100,
         dumping_period=10,
-        displace_mc = 0.1,
+        displace_mc = 0.5,
         number_atoms=[30],
         epsilon=[0.1], # kcal/mol
         sigma=[3], # A
         atom_mass=[1], # g/mol
         box_dimensions=[20, 20, 20], # A
         )
-    min.run()
+    mc.run()
 
-.. label:: stop_test_MC_move_class
+.. label:: end_test_MonteCarlo_class
