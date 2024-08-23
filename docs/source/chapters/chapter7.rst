@@ -1,5 +1,5 @@
-Grand Canonical Monte Carlo
-===========================
+Monte Carlo insert
+==================
 
 In the Grand Canonical ensemble, the number of atom in the
 simulation box is not constant. 
@@ -94,3 +94,86 @@ and
 
 .. label:: end_MonteCarlo_class
 
+Let us non-dimentionalize desired_mu by adding:
+
+TOFIX, the line *self.desired_mu is not None:* is a doublons !!!
+
+.. label:: start_MonteCarlo_class
+
+.. code-block:: python
+
+    def nondimensionalize_units_3(self):
+        (...)
+            self.displace_mc /= self.reference_distance
+        if self.desired_mu is not None:
+            self.desired_mu /= self.reference_energy
+        (...)
+
+.. label:: end_MonteCarlo_class
+
+Finally, *monte_carlo_insert_delete* must be included in the run:
+
+.. label:: start_MonteCarlo_class
+
+.. code-block:: python
+
+    def run(self):
+        (...)
+            self.monte_carlo_displacement()
+            self.monte_carlo_insert_delete()
+            self.wrap_in_box()
+        (...)
+
+.. label:: end_MonteCarlo_class
+
+We need to calculate Lambda:
+
+.. label:: start_MonteCarlo_class
+
+.. code-block:: python
+
+    def calculate_Lambda(self, mass):
+        """Estimate the de Broglie wavelength."""
+        # Is it normal that mass is unitless ???
+        m = mass/cst.Avogadro*cst.milli  # kg
+        kB = cst.Boltzmann  # J/K
+        Na = cst.Avogadro
+        kB *= Na/cst.calorie/cst.kilo #  kCal/mol/K
+        T = self.desired_temperature  # N
+        T_K = T*self.reference_energy/kB  # K
+        Lambda = cst.h/np.sqrt(2*np.pi*kB*m*T_K)  # m
+        Lambda /= cst.angstrom  # Angstrom
+        return Lambda / self.reference_distance # dimensionless
+
+.. label:: end_MonteCarlo_class
+
+Test the code
+-------------
+
+One can use a similar test as previously. Let us use a displace distance of
+0.5 Angstrom, and make 1000 steps.
+
+.. label:: start_test_MonteCarlo_class
+
+.. code-block:: python
+
+    import os
+    from MonteCarlo import MonteCarlo
+
+    mc = MonteCarlo(maximum_steps=1000,
+        dumping_period=100,
+        thermo_period=100,
+        desired_mu = -3,
+        inserted_type = 0,
+        number_atoms=[50],
+        epsilon=[0.1], # kcal/mol
+        sigma=[3], # A
+        atom_mass=[1], # g/mol
+        box_dimensions=[20, 20, 20], # A
+        )
+    mc.run()
+
+.. label:: end_test_MonteCarlo_class
+
+The evolution of the potential energy as a function of the number of steps
+are written in the *Outputs/Epot.dat* file and can be plotted.

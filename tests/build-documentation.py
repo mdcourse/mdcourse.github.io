@@ -19,7 +19,7 @@ if os.path.exists("generated-codes/") is False:
     os.mkdir("generated-codes/")
 
 mycwd = os.getcwd()
-for chapter_id in np.arange(10):
+for chapter_id in [7]: # np.arange(10):
     filename = path_to_docs + "chapter"+str(chapter_id)+".rst"
     created_files, created_tests = [], []
     if os.path.exists(filename):

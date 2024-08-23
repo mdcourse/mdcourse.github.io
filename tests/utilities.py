@@ -208,30 +208,26 @@ def write_new_method(new_content, original_file_content, folder, name, indent, s
     file.close()
 
 def append_new_line_to_method(new_content, original_file_content, folder, name,
-                              indent, status_new_lines, original_start, LAST_TRANSITION = False):
-    if LAST_TRANSITION:
-        transition_id = np.where(status_new_lines[:,0] == 'TRANSITION')[0][-1]
-    else:
-        transition_id = np.where(status_new_lines[:,0] == 'TRANSITION')[0]
-    new_line_id = np.where(status_new_lines[:,0] == 'LINE DOESNT EXIST')[0]
+                              indent, status_new_lines, original_start):
+
+    # transition_id = np.where(status_new_lines[:,0] == 'TRANSITION')[0]
+    # new_line_id = np.where(status_new_lines[:,0] == 'LINE DOESNT EXIST')[0]
     last_exising_line = np.max(status_new_lines[status_new_lines[:,0] == 'LINE DOES EXIST'][:,2])
     last_exising_line += 1
-    if True in np.unique(new_line_id > transition_id):
-        # the new line are after the transition
-        # new content to be placed at the end of the method
-        file = open(folder+name+".py", "w")
-        for line in original_file_content[:original_start+last_exising_line]:
-            file.write(line)
-        for line, status_line in zip(new_content,
-                                    status_new_lines):
-            status, pos_new, pos_old = status_line
-            if "LINE DOESNT EXIST" in status: # only add non empty line that don't exists 
-                file.write(indent+line)
-        for line in original_file_content[original_start+last_exising_line:]:
-            file.write(line)
-        file.close()
-    else:
-        print("that possibility was not anticipated")
+    #if True in np.unique(new_line_id > transition_id):    
+    # the new line are after the transition
+    # new content to be placed at the end of the method
+    file = open(folder+name+".py", "w")
+    for line in original_file_content[:original_start+last_exising_line]:
+        file.write(line)
+    for line, status_line in zip(new_content,
+                                status_new_lines):
+        status, pos_new, pos_old = status_line
+        if "LINE DOESNT EXIST" in status: # only add non empty line that don't exists 
+            file.write(indent+line)
+    for line in original_file_content[original_start+last_exising_line:]:
+        file.write(line)
+    file.close()
 
 def append_new_line_no_transition(new_content, original_file_content, folder, name, indent, status_new_lines, original_start):
     file = open(folder+name+".py", "w")
@@ -302,9 +298,10 @@ def append_content(folder, name, new_content, type):
                             # There if no transition, but content must be added to existing method
                             append_new_line_no_transition(new_content[new_start:new_end], original_file_content,
                                                             folder, name, indent, status_new_lines, original_start)
-                        else:
+                        elif np.sum(status_new_lines[:,0] == 'TRANSITION') == 2:
                             append_new_line_to_method(new_content[new_start:new_end], original_file_content,
-                                                    folder, name, indent, status_new_lines,
-                                                    original_start, LAST_TRANSITION=True)
+                                                    folder, name, indent, status_new_lines, original_start)
+                        else:
+                            print("NOT ANTICIPATED: SEVERAL METHODS")
             else:
                 print("NOT ANTICIPATED: SEVERAL METHODS")
