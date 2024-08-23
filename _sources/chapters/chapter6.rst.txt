@@ -235,8 +235,8 @@ To output the density, let us add the following method to the *Utilities* class:
 Test the code
 -------------
 
-One can use the same test as previously, and ask the code to print information
-every 10 steps in the dump files, as well as in the log:
+One can use a similar test as previously. Let us use a displace distance of
+0.5 Angstrom, and make 1000 steps.
 
 .. label:: start_test_MonteCarlo_class
 
@@ -245,11 +245,11 @@ every 10 steps in the dump files, as well as in the log:
     import os
     from MonteCarlo import MonteCarlo
 
-    mc = MonteCarlo(maximum_steps=100,
-        dumping_period=10,
-        thermo_period=10,
+    mc = MonteCarlo(maximum_steps=1000,
+        dumping_period=100,
+        thermo_period=100,
         displace_mc = 0.5,
-        number_atoms=[30],
+        number_atoms=[50],
         epsilon=[0.1], # kcal/mol
         sigma=[3], # A
         atom_mass=[1], # g/mol
@@ -258,3 +258,6 @@ every 10 steps in the dump files, as well as in the log:
     mc.run()
 
 .. label:: end_test_MonteCarlo_class
+
+The evolution of the potential energy as a function of the number of step
+are written in the *Outputs/Epot.dat* file and can be plotted. 
