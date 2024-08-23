@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="prev" title="Output the simulation state" href="chapter5.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
-        <title>Monte Carlo simulation - </title>
+        <title>Monte Carlo displace - </title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
@@ -209,7 +209,7 @@
 <li class="toctree-l1"><a class="reference internal" href="chapter3.html">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter5.html">Output the simulation state</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Monte Carlo simulation</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Monte Carlo displace</a></li>
 </ul>
 
 </div>
@@ -250,8 +250,8 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="monte-carlo-simulation">
-<h1>Monte Carlo simulation<a class="headerlink" href="#monte-carlo-simulation" title="Link to this heading">¶</a></h1>
+          <section id="monte-carlo-displace">
+<h1>Monte Carlo displace<a class="headerlink" href="#monte-carlo-displace" title="Link to this heading">¶</a></h1>
 <section id="move">
 <h2>Move<a class="headerlink" href="#move" title="Link to this heading">¶</a></h2>
 <p>Let us add a new method callsed <em>monte_carlo_displacement</em> to the <em>MonteCarlo</em> class.
@@ -291,7 +291,7 @@ Metropolis criteria.</p>
                 <span class="n">maximum_steps</span><span class="p">,</span>
                 <span class="n">cut_off</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span>
                 <span class="n">displace_mc</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="n">neighbor</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+                <span class="n">neighbor</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
                 <span class="n">desired_temperature</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -455,7 +455,7 @@ Let us add a dump too:</p>
 <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>The evolution of the potential energy as a function of the number of step
+<p>The evolution of the potential energy as a function of the number of steps
 are written in the <em>Outputs/Epot.dat</em> file and can be plotted.</p>
 </section>
 </section>
@@ -503,7 +503,7 @@ are written in the <em>Outputs/Epot.dat</em> file and can be plotted.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Monte Carlo simulation</a><ul>
+<li><a class="reference internal" href="#">Monte Carlo displace</a><ul>
 <li><a class="reference internal" href="#move">Move</a></li>
 <li><a class="reference internal" href="#parameters">Parameters</a></li>
 <li><a class="reference internal" href="#run-method">Run method</a></li>
