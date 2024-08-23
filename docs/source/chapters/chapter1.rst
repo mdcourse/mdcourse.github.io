@@ -245,6 +245,9 @@ Within the *MonteCarlo.py* file, copy the following lines:
 
 .. code-block:: python
 
+    from scipy import constants as cst
+    import numpy as np
+    import copy
     from Outputs import Outputs
 
 
