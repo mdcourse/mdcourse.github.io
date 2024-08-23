@@ -108,22 +108,25 @@ def detect_last_matching_line(content, original_file_content):
 def detect_method_boundaries(method_name, original_file_content):
     original_start_init = None
     original_end_init = []
+    last_line = None
     for cpt, l in enumerate(original_file_content):
         if ("def" in l) & (method_name in l):
             original_start_init = cpt
         elif (":" in l) & ("def" in l) & (method_name not in l):
-            original_end_init.append(cpt)      
+            original_end_init.append(cpt)     
+        if len(l) > 1:
+            last_line = cpt
     if len(original_end_init) > 0:  
         original_end_init = original_end_init[0]
     else:
-        original_end_init = cpt
+        original_end_init = last_line
     if original_end_init < original_start_init:
-        original_end_init = cpt
+        original_end_init = last_line
     return original_start_init, original_end_init
 
 def detect_unique_lines(file_content, start, end):
     _, idx = np.unique(file_content[start:end],
-                    return_index=True)
+                       return_index=True)
     unique_lines = []
     for i in np.sort(idx):
         unique_lines.append(file_content[start:end][i])
@@ -152,7 +155,7 @@ def detect_methods(file_content):
 
 def detect_existing_lines(ncontent, ocontent):
     locations = []
-    for ncpt, nl in enumerate(ncontent):
+    for nl in ncontent:
         if len(nl) > 1:
             FOUND = False
             for ocpt, ol in enumerate(ocontent):
@@ -163,7 +166,9 @@ def detect_existing_lines(ncontent, ocontent):
         if (FOUND is False) | (len(nl) <= 1):
             # the line is new
             locations.append(-1) 
-    assert len(ncontent) == len(locations)
+    if len(ncontent) != len(locations):
+        print("WARNING")
+        print(len(ncontent), len(locations))
     return locations
 
 def append_content(folder, name, content, type):
@@ -200,10 +205,12 @@ def append_content(folder, name, content, type):
                     assert (ISMETHOD) | (ISCLASS) | (ISPARTIAL)
                     original_start, original_end = detect_method_boundaries(new_method[0], original_file_content)
                     new_start, new_end = detect_method_boundaries(new_method[0], content)
-                    location_lines= detect_existing_lines(content[new_start:new_end],
+                    # detect the line that are in both original and readded file
+                    location_lines= detect_existing_lines(content[new_start:new_end+1],
                                                         original_file_content[original_start:original_end])
-                    
-                    # if the class is not specified in the doc, the intend will be wrong
+
+                    # if the class is not specified in the doc,
+                    # the intend will be wrong
                     if ISCLASS is False:
                         indent = "    "
                     else:
@@ -211,14 +218,16 @@ def append_content(folder, name, content, type):
 
                     # Add the missing lines
                     file = open(folder+name+".py", "w")
+                    to_be_added = []
+                    # loop on the original file
                     for ocpt, line in enumerate(original_file_content):
-                        file.write(line)
+                        file.write(line) # add all the lines from the original file
                         if (ocpt-original_start in location_lines) & (ocpt-original_start > -1):
                             # this line exists in both the original and the new content
                             to_be_added = []
                             TOADD = False
                             ncpt = 0
-                            for line, location in zip(content[new_start:new_end], location_lines):
+                            for line, location in zip(content[new_start:new_end+1], location_lines):
                                 if location == ocpt-original_start:
                                     TOADD = True
                                 elif location > ocpt-original_start:
@@ -228,8 +237,23 @@ def append_content(folder, name, content, type):
                                     if location == -1:
                                         to_be_added.append(line)
                                 ncpt += 1
-                            if len(to_be_added) > 0:
-                                for new_line in to_be_added:
-                                    if "(...)" not in new_line:
-                                        file.write(indent+new_line)
+                        if (ocpt-original_end in location_lines) & (ocpt-original_end > -1) & (len(to_be_added) > 0):
+                            for new_line in to_be_added:
+                                if "(...)" not in new_line:
+                                    file.write(indent+new_line)
                     file.close()
+
+                    # make sure there is no doublons
+                    # original_file_content = return_file_content(folder+name+".py")
+                    # original_start, original_end = detect_method_boundaries(new_method[0], original_file_content)
+                    # unique_line = detect_unique_lines(original_file_content, original_start, original_end)
+                    # file = open(folder+name+".py", "w")
+                    # for cpt, line in enumerate(original_file_content):
+                    #     if cpt <= original_start:
+                    #         file.write(line)
+                    # for line in unique_line:
+                    #     file.write(line)
+                    # for cpt, line in enumerate(original_file_content):
+                    #     if cpt >= original_end:
+                    #         file.write(line)
+
