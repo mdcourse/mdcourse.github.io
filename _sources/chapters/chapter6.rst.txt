@@ -260,4 +260,4 @@ One can use a similar test as previously. Let us use a displace distance of
 .. label:: end_test_MonteCarlo_class
 
 The evolution of the potential energy as a function of the number of steps
-are written in the *Outputs/Epot.dat* file and can be plotted. 
+are written in the *Outputs/Epot.dat* file and can be plotted.

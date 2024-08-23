@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="prev" title="Monte Carlo displace" href="chapter6.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
-        <title>Grand Canonical Monte Carlo - </title>
+        <title>Monte Carlo insert - </title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
@@ -179,7 +179,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -203,13 +203,14 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Chapters</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="chapter1.html">Start coding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter2.html">Prepare the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter3.html">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter5.html">Output the simulation state</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter6.html">Monte Carlo displace</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Monte Carlo insert</a></li>
 </ul>
 
 </div>
@@ -244,14 +245,14 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="grand-canonical-monte-carlo">
-<h1>Grand Canonical Monte Carlo<a class="headerlink" href="#grand-canonical-monte-carlo" title="Link to this heading">¶</a></h1>
+          <section id="monte-carlo-insert">
+<h1>Monte Carlo insert<a class="headerlink" href="#monte-carlo-insert" title="Link to this heading">¶</a></h1>
 <p>In the Grand Canonical ensemble, the number of atom in the
 simulation box is not constant.</p>
 <p>Let us add the following method to the MonteCarlo class:</p>
@@ -326,6 +327,64 @@ simulation box is not constant.</p>
         <span class="p">(</span><span class="o">...</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Let us non-dimentionalize desired_mu by adding:</p>
+<p>TOFIX, the line <em>self.desired_mu is not None:</em> is a doublons !!!</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">nondimensionalize_units_3</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_mu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desired_mu</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span>
+    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, <em>monte_carlo_insert_delete</em> must be included in the run:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_displacement</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_insert_delete</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_box</span><span class="p">()</span>
+    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We need to calculate Lambda:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_Lambda</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mass</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Estimate the de Broglie wavelength.&quot;&quot;&quot;</span>
+    <span class="c1"># Is it normal that mass is unitless ???</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">mass</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">milli</span>  <span class="c1"># kg</span>
+    <span class="n">kB</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span>  <span class="c1"># J/K</span>
+    <span class="n">Na</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span>
+    <span class="n">kB</span> <span class="o">*=</span> <span class="n">Na</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span> <span class="c1">#  kCal/mol/K</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span>  <span class="c1"># N</span>
+    <span class="n">T_K</span> <span class="o">=</span> <span class="n">T</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span><span class="o">/</span><span class="n">kB</span>  <span class="c1"># K</span>
+    <span class="n">Lambda</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">h</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">kB</span><span class="o">*</span><span class="n">m</span><span class="o">*</span><span class="n">T_K</span><span class="p">)</span>  <span class="c1"># m</span>
+    <span class="n">Lambda</span> <span class="o">/=</span> <span class="n">cst</span><span class="o">.</span><span class="n">angstrom</span>  <span class="c1"># Angstrom</span>
+    <span class="k">return</span> <span class="n">Lambda</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span> <span class="c1"># dimensionless</span>
+</pre></div>
+</div>
+<section id="test-the-code">
+<h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
+<p>One can use a similar test as previously. Let us use a displace distance of
+0.5 Angstrom, and make 1000 steps.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
+
+<span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">dumping_period</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">thermo_period</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">desired_mu</span> <span class="o">=</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">inserted_type</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">50</span><span class="p">],</span>
+    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="c1"># g/mol</span>
+    <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="p">)</span>
+<span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The evolution of the potential energy as a function of the number of steps
+are written in the <em>Outputs/Epot.dat</em> file and can be plotted.</p>
+</section>
 </section>
 
         </article>
@@ -334,7 +393,17 @@ simulation box is not constant.</p>
         
         <div class="related-pages">
           
-          
+          <a class="prev-page" href="chapter6.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Monte Carlo displace</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -349,8 +418,27 @@ simulation box is not constant.</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Monte Carlo insert</a><ul>
+<li><a class="reference internal" href="#test-the-code">Test the code</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
