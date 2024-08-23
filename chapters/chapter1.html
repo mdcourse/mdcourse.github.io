@@ -209,6 +209,7 @@
 <li class="toctree-l1"><a class="reference internal" href="chapter3.html">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter5.html">Output the simulation state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter6.html">Monte Carlo simulation</a></li>
 </ul>
 
 </div>
@@ -455,7 +456,10 @@ following lines:</p>
 </pre></div>
 </div>
 <p>Within the <em>MonteCarlo.py</em> file, copy the following lines:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Outputs</span> <span class="kn">import</span> <span class="n">Outputs</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">Outputs</span> <span class="kn">import</span> <span class="n">Outputs</span>
 
 
 <span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Outputs</span><span class="p">):</span>
