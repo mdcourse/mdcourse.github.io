@@ -195,6 +195,8 @@ The *Outputs* class inherits the *Measurements* class. Within the
 
 .. code-block:: python
 
+    from scipy import constants as cst
+    import numpy as np
     import os
     from Measurements import Measurements
 
@@ -215,7 +217,7 @@ Here, we anticipate that the outputs
 from the code will be saved in a folder, which by default
 is named *results/*. If the folder does not exist, it will be
 created using *os.mkdir()* from the *os* module, which was previously
-imported.
+imported. NumPy and the *constants* module of SciPy were also imported.
 
 Finally, let us create the three remaining classes, named respectively *MinimizeEnergy*,
 *MonteCarlo*, and *MolecularDynamics*. Each class inherits

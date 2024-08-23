@@ -18,6 +18,7 @@ Let us start by calling two additional methods within the for loop of the
         (...)
         for self.step in range(0, self.maximum_steps+1):
             (...)
+                self.displacement *= 0.2
             self.update_log_minimize(Epot, max_forces)
             self.update_dump_file(filename="dump.min.lammpstrj")
 
@@ -30,8 +31,9 @@ These two methods will be written in the following.
 Improve the output class
 ------------------------
 
-Modify the beginning of the *Outputs.py* file to import NumPy and the
-constant module of SciPy:
+Modify the *__init__* class of the *Outputs.py* file:
+
+.. label:: start_Outputs_class
 
 .. code-block:: python
         
@@ -55,7 +57,9 @@ constant module of SciPy:
             if os.path.exists(self.data_folder) is False:
                 os.mkdir(self.data_folder)
 
-Here, two additional variables were added: *thermo_period* which controls
+.. label:: end_Outputs_class
+
+Here, two additional variables have been added: *thermo_period* which controls
 the period at which information is printed during the run, and *dumping_period*
 which controls the period at which atom positions are printed in the dump
 file. 
@@ -63,8 +67,10 @@ file.
 Update the dump file
 --------------------
 
-Finally, add the following method named *update_dump_file()* to the
+Add the following method named *update_dump_file()* to the
 *Output* class. 
+
+.. label:: start_Outputs_class
 
 .. code-block:: python
 
@@ -114,10 +120,18 @@ Finally, add the following method named *update_dump_file()* to the
                         cpt += 1
                 f.close()
 
+.. label:: end_Outputs_class
+
+Here, some variable are being printed in a file, such as box dimension and atom positions.
+All quantities are dimensionalized before getting outputed, and the file follows
+a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.
+
 Update the log file
 --------------------
 
 Finally, add the following method to the *Output* class. 
+
+.. label:: start_Outputs_class
 
 .. code-block:: python
 
@@ -137,3 +151,45 @@ Finally, add the following method to the *Output* class.
                 print(characters % (self.step,
                                     epot_kcalmol,
                                     max_force_kcalmolA))
+
+.. label:: end_Outputs_class
+
+Test the code
+-------------
+
+One can use the same test as previously, and ask the code to print information
+every 10 steps in the dump files, as well as in the log:
+
+
+.. label:: start_test_Outputs_class
+
+.. code-block:: python
+
+    import os
+    from MinimizeEnergy import MinimizeEnergy
+
+    min = MinimizeEnergy(maximum_steps=100,
+        thermo_period=10,
+        dumping_period=10,
+        number_atoms=[2, 3],
+        epsilon=[0.1, 1.0], # kcal/mol
+        sigma=[3, 6], # A
+        atom_mass=[1, 1], # g/mol
+        box_dimensions=[20, 20, 20], # A
+        )
+    min.run()
+
+    assert os.path.exists("Outputs/dump.min.lammpstrj")
+
+.. label:: end_test_Outputs_class
+
+When running the simulation, information must be printed in the terminal:
+
+.. code-block:: bash
+
+    step epot maxF
+    0 13.176 34.783
+    10 -0.157 5.138
+    (...)
+
+and a file named *dump.min.lammpstrj* must have appeared in the *Outputs/* folder.

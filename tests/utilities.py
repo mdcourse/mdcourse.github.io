@@ -116,13 +116,15 @@ def detect_method_boundaries(method_name, original_file_content):
             original_end_init.append(cpt)     
         if len(l) > 1:
             last_line = cpt
+        if (len(l) > 1) & (original_start_init is None):
+            original_start_init = cpt-1
     if len(original_end_init) > 0:  
         original_end_init = original_end_init[0]
     else:
         original_end_init = last_line
     if original_end_init < original_start_init:
         original_end_init = last_line
-    return original_start_init, original_end_init
+    return original_start_init, original_end_init+1
 
 def detect_unique_lines(file_content, start, end):
     _, idx = np.unique(file_content[start:end],
@@ -154,106 +156,155 @@ def detect_methods(file_content):
     return existing_methods
 
 def detect_existing_lines(ncontent, ocontent):
-    locations = []
-    for nl in ncontent:
-        if len(nl) > 1:
+    list_of_empty_line = ["\n"]
+    for _ in np.arange(20):
+        list_of_empty_line.append(" "+list_of_empty_line[-1])
+    status = []
+    for ncpt, nl in enumerate(ncontent):
+        if nl in list_of_empty_line:
+            status.append(["LINE IS EMPTY", ncpt, None])
+        else:
             FOUND = False
             for ocpt, ol in enumerate(ocontent):
                 if len(ol) > 1:
                     if nl in ol:
                         FOUND = True
-                        locations.append(ocpt)
-        if (FOUND is False) | (len(nl) <= 1):
-            # the line is new
-            locations.append(-1) 
-    if len(ncontent) != len(locations):
-        print("WARNING")
-        print(len(ncontent), len(locations))
-    return locations
+                        oloc = ocpt
+            if FOUND:
+                status.append(["LINE DOES EXIST", ncpt, oloc])
+            else:
+                if "(...)" in nl:
+                    status.append(["TRANSITION", ncpt, None])
+                else:
+                    status.append(["LINE DOESNT EXIST", ncpt, None])
 
-def append_content(folder, name, content, type):
+    return np.array(status)
+
+def write_non_method(new_content, original_file_content, folder, name, indent):
+    # check if the new lines are new or not
+    status_new_lines = detect_existing_lines(new_content,
+                                             original_file_content)   
+    # The new content is "import" function, to be added at the
+    # beginning of the file
+    file = open(folder+name+".py", "w")
+    for line, status_line in zip(new_content, status_new_lines):
+        status, pos_new, pos_old = status_line
+        if "LINE DOESNT EXIST" in status: # only add non empty line that don't exists 
+            file.write(indent+line)
+    for line in original_file_content:
+        file.write(line)
+    file.close()
+
+def write_new_method(new_content, original_file_content, folder, name, indent, status_new_lines):
+
+    file = open(folder+name+".py", "w")
+    for line in original_file_content:
+        file.write(line)
+    file.write("\n")
+    for line, status_line in zip(new_content, status_new_lines):
+        status, pos_new, pos_old = status_line
+        if "LINE DOESNT EXIST" in status: # only add non empty line that don't exists 
+            file.write(indent+line)
+    file.close()
+
+def append_new_line_to_method(new_content, original_file_content, folder, name,
+                              indent, status_new_lines, original_start, LAST_TRANSITION = False):
+    if LAST_TRANSITION:
+        transition_id = np.where(status_new_lines[:,0] == 'TRANSITION')[0][-1]
+    else:
+        transition_id = np.where(status_new_lines[:,0] == 'TRANSITION')[0]
+    new_line_id = np.where(status_new_lines[:,0] == 'LINE DOESNT EXIST')[0]
+    last_exising_line = np.max(status_new_lines[status_new_lines[:,0] == 'LINE DOES EXIST'][:,2])
+    last_exising_line += 1
+    if True in np.unique(new_line_id > transition_id):
+        # the new line are after the transition
+        # new content to be placed at the end of the method
+        file = open(folder+name+".py", "w")
+        for line in original_file_content[:original_start+last_exising_line]:
+            file.write(line)
+        for line, status_line in zip(new_content,
+                                    status_new_lines):
+            status, pos_new, pos_old = status_line
+            if "LINE DOESNT EXIST" in status: # only add non empty line that don't exists 
+                file.write(indent+line)
+        for line in original_file_content[original_start+last_exising_line:]:
+            file.write(line)
+        file.close()
+    else:
+        print("that possibility was not anticipated")
+
+def append_new_line_no_transition(new_content, original_file_content, folder, name, indent, status_new_lines, original_start):
+    file = open(folder+name+".py", "w")
+    for cpt, line in enumerate(original_file_content):
+        file.write(line)
+        if cpt-original_start in status_new_lines[:,2]:
+            STOP = True
+            for new_line, status_line in zip(new_content, status_new_lines):
+                status, pos_new, pos_old = status_line
+                try:
+                    if pos_old == cpt-original_start:
+                        STOP = False
+                    elif pos_old > cpt-original_start:
+                        STOP = True
+                except:
+                    assert pos_old is None
+                if ("LINE DOESNT EXIST" in status) & (pos_old is None) & (STOP is False): # only add non empty line that don't exists 
+                    file.write(indent+new_line)
+    file.close()
+
+def append_content(folder, name, new_content, type):
     if "test_" not in name:
         ISIMPORT, ISMETHOD, ISCLASS, ISPARTIAL = type
-        if np.sum(type) == 0:
-            # nothing to append
-            pass
-        else:
+        indent = ""
+        if np.sum(type) > 0: # nothing to append
             original_file_content = return_file_content(folder+name+".py")
-            if (ISIMPORT) & (ISCLASS is False) & (ISMETHOD is False):
-                # Add the content at the start of the file
-                file = open(folder+name+".py", "w")
-                for line in content:
-                    file.write(line)
-                for line in original_file_content:
-                    file.write(line)
-                file.close()
+            existing_methods = detect_methods(original_file_content)
+            new_method = detect_methods(new_content)
+
+            if len(new_method) == 0: # the added block is not a method
+                assert ISIMPORT
+                write_non_method(new_content, original_file_content,
+                                 folder, name, indent)
+            elif len(new_method) == 1: # the added block is a method
+
+                # if the class is not specified in the doc,
+                # the intend will be wrong
+                if ISCLASS is False:
+                    indent = "    "
+
+                original_start, original_end = detect_method_boundaries(new_method[0],
+                                                                        original_file_content)
+                new_start, new_end = detect_method_boundaries(new_method[0],
+                                                              new_content)
+                # detect the line that are in both original and readded file
+                status_new_lines = detect_existing_lines(new_content[new_start:new_end],
+                                                         original_file_content[original_start:original_end])   
+                
+                NOTHING_TO_ADD = False
+                if (len(np.unique(status_new_lines[:,0])) == 1):
+                    if ("LINE DOES EXIST" in status_new_lines[:,0]) | ("LINE IS EMPTY" in status_new_lines[:,0]):
+                        NOTHING_TO_ADD = True
+                if (len(np.unique(status_new_lines[:,0])) == 2):
+                    if ("LINE DOES EXIST" in status_new_lines[:,0]) & ("LINE IS EMPTY" in status_new_lines[:,0]):
+                        NOTHING_TO_ADD = True
+
+                if NOTHING_TO_ADD == False:
+                    if new_method[0] not in existing_methods:
+                        # this is a new method, to be added at the end
+                        write_new_method(new_content[new_start:new_end], original_file_content,
+                                        folder, name, indent, status_new_lines)
+                    else:                            
+                        if np.sum(status_new_lines[:,0] == 'TRANSITION') == 1:
+                            # there is one transition (...) in new_content
+                            append_new_line_to_method(new_content[new_start:new_end], original_file_content,
+                                                    folder, name, indent, status_new_lines, original_start)
+                        elif np.sum(status_new_lines[:,0] == 'TRANSITION') == 0:
+                            # There if no transition, but content must be added to existing method
+                            append_new_line_no_transition(new_content[new_start:new_end], original_file_content,
+                                                            folder, name, indent, status_new_lines, original_start)
+                        else:
+                            append_new_line_to_method(new_content[new_start:new_end], original_file_content,
+                                                    folder, name, indent, status_new_lines,
+                                                    original_start, LAST_TRANSITION=True)
             else:
-                existing_methods = detect_methods(original_file_content)
-                new_method = detect_methods(content)
-                if new_method[0] not in existing_methods:
-                    # the method does not exists, it will be appened
-                    assert ISPARTIAL is False
-                    assert ISMETHOD
-                    # Add the content at the end of the file, with an indentation
-                    file = open(folder+name+".py", "w")
-                    for line in original_file_content:
-                        file.write(line)
-                    for line in content:
-                        file.write("    "+line)
-                    file.close()
-                elif new_method[0] in existing_methods:
-                    assert (ISMETHOD) | (ISCLASS) | (ISPARTIAL)
-                    original_start, original_end = detect_method_boundaries(new_method[0], original_file_content)
-                    new_start, new_end = detect_method_boundaries(new_method[0], content)
-                    # detect the line that are in both original and readded file
-                    location_lines= detect_existing_lines(content[new_start:new_end+1],
-                                                        original_file_content[original_start:original_end])
-
-                    # if the class is not specified in the doc,
-                    # the intend will be wrong
-                    if ISCLASS is False:
-                        indent = "    "
-                    else:
-                        indent = ""
-
-                    # Add the missing lines
-                    file = open(folder+name+".py", "w")
-                    to_be_added = []
-                    # loop on the original file
-                    for ocpt, line in enumerate(original_file_content):
-                        file.write(line) # add all the lines from the original file
-                        if (ocpt-original_start in location_lines) & (ocpt-original_start > -1):
-                            # this line exists in both the original and the new content
-                            to_be_added = []
-                            TOADD = False
-                            ncpt = 0
-                            for line, location in zip(content[new_start:new_end+1], location_lines):
-                                if location == ocpt-original_start:
-                                    TOADD = True
-                                elif location > ocpt-original_start:
-                                    TOADD = False
-                                if TOADD:
-                                    #if len(line) > 1:
-                                    if location == -1:
-                                        to_be_added.append(line)
-                                ncpt += 1
-                        if (ocpt-original_end in location_lines) & (ocpt-original_end > -1) & (len(to_be_added) > 0):
-                            for new_line in to_be_added:
-                                if "(...)" not in new_line:
-                                    file.write(indent+new_line)
-                    file.close()
-
-                    # make sure there is no doublons
-                    # original_file_content = return_file_content(folder+name+".py")
-                    # original_start, original_end = detect_method_boundaries(new_method[0], original_file_content)
-                    # unique_line = detect_unique_lines(original_file_content, original_start, original_end)
-                    # file = open(folder+name+".py", "w")
-                    # for cpt, line in enumerate(original_file_content):
-                    #     if cpt <= original_start:
-                    #         file.write(line)
-                    # for line in unique_line:
-                    #     file.write(line)
-                    # for cpt, line in enumerate(original_file_content):
-                    #     if cpt >= original_end:
-                    #         file.write(line)
-
+                print("NOT ANTICIPATED: SEVERAL METHODS")
