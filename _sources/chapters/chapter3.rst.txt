@@ -84,10 +84,10 @@ parameters, here the box_dimensions.
     def nondimensionalize_units_1(self):
         """Use LJ prefactors to convert units into non-dimensional."""
         # Normalize box dimensions
-        box_dimensions = []
+        norm_box_dimensions = []
         for L in self.box_dimensions:
-            box_dimensions.append(L/self.reference_distance)
-        self.box_dimensions = box_dimensions
+            norm_box_dimensions.append(L/self.reference_distance)
+        self.box_dimensions = norm_box_dimensions
 
 .. label:: end_InitializeSimulation_class
 

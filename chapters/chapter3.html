@@ -309,10 +309,10 @@ parameters, here the box_dimensions.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">nondimensionalize_units_1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Use LJ prefactors to convert units into non-dimensional.&quot;&quot;&quot;</span>
     <span class="c1"># Normalize box dimensions</span>
-    <span class="n">box_dimensions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">norm_box_dimensions</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">L</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_dimensions</span><span class="p">:</span>
-        <span class="n">box_dimensions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">box_dimensions</span> <span class="o">=</span> <span class="n">box_dimensions</span>
+        <span class="n">norm_box_dimensions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">box_dimensions</span> <span class="o">=</span> <span class="n">norm_box_dimensions</span>
 </pre></div>
 </div>
 </section>

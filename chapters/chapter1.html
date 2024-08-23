@@ -418,7 +418,9 @@ copy the following lines:</p>
 </div>
 <p>The <em>Outputs</em> class inherits the <em>Measurements</em> class. Within the
 <em>Outputs.py</em> file, copy the following lines:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">Measurements</span> <span class="kn">import</span> <span class="n">Measurements</span>
 
 
@@ -437,7 +439,7 @@ copy the following lines:</p>
 from the code will be saved in a folder, which by default
 is named <em>results/</em>. If the folder does not exist, it will be
 created using <em>os.mkdir()</em> from the <em>os</em> module, which was previously
-imported.</p>
+imported. NumPy and the <em>constants</em> module of SciPy were also imported.</p>
 <p>Finally, let us create the three remaining classes, named respectively <em>MinimizeEnergy</em>,
 <em>MonteCarlo</em>, and <em>MolecularDynamics</em>. Each class inherits
 the <em>Outputs</em> class. Within the <em>MinimizeEnergy.py</em> file, copy the

@@ -261,6 +261,7 @@ during the simulation. To do so, the <em>Output</em> class is modified.</p>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
     <span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
         <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">displacement</span> <span class="o">*=</span> <span class="mf">0.2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_log_minimize</span><span class="p">(</span><span class="n">Epot</span><span class="p">,</span> <span class="n">max_forces</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_dump_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;dump.min.lammpstrj&quot;</span><span class="p">)</span>
 </pre></div>
@@ -271,8 +272,7 @@ These two methods will be written in the following.</p>
 </section>
 <section id="improve-the-output-class">
 <h2>Improve the output class<a class="headerlink" href="#improve-the-output-class" title="Link to this heading">¶</a></h2>
-<p>Modify the beginning of the <em>Outputs.py</em> file to import NumPy and the
-constant module of SciPy:</p>
+<p>Modify the <em>__init__</em> class of the <em>Outputs.py</em> file:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -294,14 +294,14 @@ constant module of SciPy:</p>
             <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Here, two additional variables were added: <em>thermo_period</em> which controls
+<p>Here, two additional variables have been added: <em>thermo_period</em> which controls
 the period at which information is printed during the run, and <em>dumping_period</em>
 which controls the period at which atom positions are printed in the dump
 file.</p>
 </section>
 <section id="update-the-dump-file">
 <h2>Update the dump file<a class="headerlink" href="#update-the-dump-file" title="Link to this heading">¶</a></h2>
-<p>Finally, add the following method named <em>update_dump_file()</em> to the
+<p>Add the following method named <em>update_dump_file()</em> to the
 <em>Output</em> class.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">update_dump_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dumping_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -350,6 +350,9 @@ file.</p>
             <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
+<p>Here, some variable are being printed in a file, such as box dimension and atom positions.
+All quantities are dimensionalized before getting outputed, and the file follows
+a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.</p>
 </section>
 <section id="update-the-log-file">
 <h2>Update the log file<a class="headerlink" href="#update-the-log-file" title="Link to this heading">¶</a></h2>
@@ -372,6 +375,36 @@ file.</p>
                                 <span class="n">max_force_kcalmolA</span><span class="p">))</span>
 </pre></div>
 </div>
+</section>
+<section id="test-the-code">
+<h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
+<p>One can use the same test as previously, and ask the code to print information
+every 10 steps in the dump files, as well as in the log:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">MinimizeEnergy</span> <span class="kn">import</span> <span class="n">MinimizeEnergy</span>
+
+<span class="nb">min</span> <span class="o">=</span> <span class="n">MinimizeEnergy</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">thermo_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">dumping_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="c1"># g/mol</span>
+    <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="p">)</span>
+<span class="nb">min</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/dump.min.lammpstrj&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When running the simulation, information must be printed in the terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>step<span class="w"> </span>epot<span class="w"> </span>maxF
+<span class="m">0</span><span class="w"> </span><span class="m">13</span>.176<span class="w"> </span><span class="m">34</span>.783
+<span class="m">10</span><span class="w"> </span>-0.157<span class="w"> </span><span class="m">5</span>.138
+<span class="o">(</span>...<span class="o">)</span>
+</pre></div>
+</div>
+<p>and a file named <em>dump.min.lammpstrj</em> must have appeared in the <em>Outputs/</em> folder.</p>
 </section>
 </section>
 
@@ -423,6 +456,7 @@ file.</p>
 <li><a class="reference internal" href="#improve-the-output-class">Improve the output class</a></li>
 <li><a class="reference internal" href="#update-the-dump-file">Update the dump file</a></li>
 <li><a class="reference internal" href="#update-the-log-file">Update the log file</a></li>
+<li><a class="reference internal" href="#test-the-code">Test the code</a></li>
 </ul>
 </li>
 </ul>
