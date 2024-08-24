@@ -31,7 +31,8 @@ Let us add the following method to the MonteCarlo class:
                 self.calculate_cross_coefficients()
                 trial_Epot = self.compute_potential(output="potential")
                 Lambda = self.calculate_Lambda(self.atom_mass[self.inserted_type])
-                acceptation_probability = np.min([1, volume/(Lambda**self.dimensions*(self.total_number_atoms))*np.exp(self.beta*(self.desired_mu-trial_Epot+initial_Epot))])
+                beta =  1/self.desired_temperature
+                acceptation_probability = np.min([1, volume/(Lambda**self.dimensions*(self.total_number_atoms))*np.exp(beta*(self.desired_mu-trial_Epot+initial_Epot))])
             else:
                 # Pick one atom to delete randomly
                 atom_id = np.random.randint(self.number_atoms[self.inserted_type])
@@ -45,7 +46,8 @@ Let us add the following method to the MonteCarlo class:
                     self.calculate_cross_coefficients()
                     trial_Epot = self.compute_potential(output="potential")
                     Lambda = self.calculate_Lambda(self.atom_mass[self.inserted_type])
-                    acceptation_probability = np.min([1, (Lambda**self.dimensions*(self.total_number_atoms-1)/volume)*np.exp(-self.beta*(self.desired_mu+trial_Epot-initial_Epot))])
+                    beta =  1/self.desired_temperature
+                    acceptation_probability = np.min([1, (Lambda**self.dimensions*(self.total_number_atoms-1)/volume)*np.exp(-beta*(self.desired_mu+trial_Epot-initial_Epot))])
                 else:
                     acceptation_probability = 0
             if np.random.random() < acceptation_probability:
