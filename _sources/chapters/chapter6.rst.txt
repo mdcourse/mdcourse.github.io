@@ -22,7 +22,8 @@ Metropolis criteria.
             # Test a new position
             self.atoms_positions[atom_id] += (np.random.random(3)-0.5)*self.displace_mc
             trial_Epot = self.compute_potential(output="potential")
-            acceptation_probability = np.min([1, np.exp(-self.beta*(trial_Epot-initial_Epot))])
+            beta =  1/self.desired_temperature
+            acceptation_probability = np.min([1, np.exp(-beta*(trial_Epot-initial_Epot))])
             if np.random.random() <= acceptation_probability: # Accept new position
                 pass
             else: # Reject new position
@@ -61,7 +62,6 @@ Let us non-dimentionalized the units, and improve the *__init__* method:
             self.displace_mc = displace_mc
             self.neighbor = neighbor
             self.desired_temperature = desired_temperature
-            self.beta =  1/self.desired_temperature
             super().__init__(*args, **kwargs)
             self.nondimensionalize_units_3()
 
