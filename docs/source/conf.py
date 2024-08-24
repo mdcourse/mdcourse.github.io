@@ -5,7 +5,7 @@ copyright = 'All source code is available under the GNU General Public License v
 author = 'Simon Gravelle'
 release = '0.1.0'
 
-extensions = []
+extensions = ['sphinxcontrib.bibtex']
 
 templates_path = ['_templates']
 exclude_patterns = []
@@ -21,3 +21,5 @@ html_logo = "_static/logo/logo-py.png"
 html_show_copyright = False
 html_show_sphinx = False
 html_short_title = "True"
+
+bibtex_bibfiles = ['journal-article.bib']
