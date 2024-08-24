@@ -50,3 +50,9 @@ Indices and tables
     :hidden:
 
     projects/project1
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Extra content
+
+    divers/bibliography.rst
