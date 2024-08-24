@@ -1,6 +1,8 @@
 import os
 import numpy as np
 import shutil
+import subprocess
+
 
 def detect_saving_folder(chapter_id, CREATE=True):
     folder = "generated-codes/chapter"+str(chapter_id)+"/"
@@ -305,3 +307,29 @@ def append_content(folder, name, new_content, type):
                             print("NOT ANTICIPATED: SEVERAL METHODS")
             else:
                 print("NOT ANTICIPATED: SEVERAL METHODS")
+
+def sphinx_to_python(path_to_docs, chapter_id):
+    filename = path_to_docs + "chapter"+str(chapter_id)+".rst"
+    RST_EXISTS = os.path.exists(filename)
+    created_files, created_tests = [], []
+    if RST_EXISTS:  
+        folder = detect_saving_folder(chapter_id)
+        created_files = try_to_copy_file(chapter_id, created_files)
+        file_content = return_file_content(filename)
+        block_contents, block_names = detect_block_code(file_content)
+        block_types = detect_block_types(block_contents)
+        created_files, created_tests = create_file(block_contents, block_names,
+                                                    created_files, created_tests, folder)
+        for new_content, name, type in zip(block_contents, block_names, block_types):
+            append_content(folder, name, new_content, type)
+        return RST_EXISTS, created_tests, folder
+    else:
+        return RST_EXISTS, created_files, None
+
+def run_the_test(folder, created_tests, chapter_id):
+    mycwd = os.getcwd() # initial path
+    os.chdir(folder)
+    for test_file in created_tests:
+        print("TEST --", "chapter"+str(chapter_id)+".rst", "--", test_file)
+        subprocess.call(["python3", test_file])
+    os.chdir(mycwd)

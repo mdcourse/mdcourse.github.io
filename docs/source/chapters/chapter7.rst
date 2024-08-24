@@ -11,7 +11,7 @@ Let us add the following method to the MonteCarlo class:
 .. code-block:: python
 
     def monte_carlo_insert_delete(self):
-        if self.desired_mu is not None:
+        if self.desired_mu is not None: # trigger method if desired_mu was entered
             initial_Epot = self.compute_potential(output="potential")
             initial_positions = copy.deepcopy(self.atoms_positions)
             initial_number_atoms = copy.deepcopy(self.number_atoms)
@@ -96,8 +96,6 @@ and
 
 Let us non-dimentionalize desired_mu by adding:
 
-TOFIX, the line *self.desired_mu is not None:* is a doublons !!!
-
 .. label:: start_MonteCarlo_class
 
 .. code-block:: python
@@ -175,5 +173,6 @@ One can use a similar test as previously. Let us use a displace distance of
 
 .. label:: end_test_MonteCarlo_class
 
-The evolution of the potential energy as a function of the number of steps
-are written in the *Outputs/Epot.dat* file and can be plotted.
+The evolution of the potential energy as a function of the
+number of steps are written in the *Outputs/Epot.dat* file
+and can be plotted.

@@ -265,7 +265,9 @@ Finally, within the *MolecularDynamics.py* file, copy the following lines:
 
 .. code-block:: python
 
+    import numpy as np
     from Outputs import Outputs
+
 
     class MolecularDynamics(Outputs):
         def __init__(self,

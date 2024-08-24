@@ -33,7 +33,7 @@ Indices and tables
 
 .. toctree::
     :maxdepth: 2
-    :caption: Chapters
+    :caption: Code
     :hidden:
 
     chapters/chapter1
@@ -43,3 +43,10 @@ Indices and tables
     chapters/chapter5
     chapters/chapter6
     chapters/chapter7
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Illustration
+    :hidden:
+
+    projects/project1
