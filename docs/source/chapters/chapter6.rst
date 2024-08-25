@@ -124,19 +124,21 @@ method to the Outputs class:
                 if velocity:
                     self.calculate_temperature()
                     self.calculate_kinetic_energy()
-                    self.calculate_pressure()
                 # convert the units
                 if velocity:
                     temperature = self.temperature \
                         * self.reference_temperature  # K
-                    pressure = self.pressure \
-                        * self.reference_pressure  # Atm
                     Ekin = self.Ekin*self.reference_energy  # kcal/mol
                 else:
                     temperature = self.desired_temperature \
                         * self.reference_temperature  # K
-                    pressure = 0.0
                     Ekin = 0.0
+                try: # will be usefull later
+                    self.calculate_pressure()
+                    pressure = self.pressure \
+                        * self.reference_pressure  # Atm
+                except:
+                    pressure = 0.0
                 volume = np.prod(self.box_size[:3]) \
                     *self.reference_distance**3  # A3
                 try:

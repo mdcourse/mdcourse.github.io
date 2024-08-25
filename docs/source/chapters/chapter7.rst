@@ -1,157 +1,54 @@
-Monte Carlo insert
-==================
+Pressure measurement
+====================
 
-In the Grand Canonical ensemble, the number of atom in the
-simulation box is not constant. 
+Extract the pressure
+--------------------
 
-Let us add the following method to the MonteCarlo class:
+Let us also measure the pressure. 
 
-.. label:: start_MonteCarlo_class
-
-.. code-block:: python
-
-    def monte_carlo_insert_delete(self):
-        if self.desired_mu is not None: # trigger method if desired_mu was entered
-            initial_Epot = self.compute_potential(output="potential")
-            initial_positions = copy.deepcopy(self.atoms_positions)
-            initial_number_atoms = copy.deepcopy(self.number_atoms)
-            initial_neighbor_lists = copy.deepcopy(self.neighbor_lists)
-            volume = np.prod(np.diff(self.box_boundaries))
-            if np.random.random() < 0.5:
-                # Try adding an atom
-                self.number_atoms[self.inserted_type] += 1
-                atom_position = np.zeros((1, self.dimensions))
-                for dim in np.arange(self.dimensions):
-                    atom_position[:, dim] = np.random.random(1)*np.diff(self.box_boundaries[dim]) - np.diff(self.box_boundaries[dim])/2
-                shift_id = 0
-                for N in self.number_atoms[:self.inserted_type]:
-                    shift_id += N
-                self.atoms_positions = np.vstack([self.atoms_positions[:shift_id], atom_position, self.atoms_positions[shift_id:]])
-                self.update_neighbor_lists()
-                self.calculate_cross_coefficients()
-                trial_Epot = self.compute_potential(output="potential")
-                Lambda = self.calculate_Lambda(self.atom_mass[self.inserted_type])
-                beta =  1/self.desired_temperature
-                acceptation_probability = np.min([1, volume/(Lambda**self.dimensions*(self.total_number_atoms))*np.exp(beta*(self.desired_mu-trial_Epot+initial_Epot))])
-            else:
-                # Pick one atom to delete randomly
-                atom_id = np.random.randint(self.number_atoms[self.inserted_type])
-                self.number_atoms[self.inserted_type] -= 1
-                if self.number_atoms[self.inserted_type] > 0:
-                    shift_id = 0
-                    for N in self.number_atoms[:self.inserted_type]:
-                        shift_id += N
-                    self.atoms_positions = np.delete(self.atoms_positions, shift_id+atom_id, axis=0)
-                    self.update_neighbor_lists()
-                    self.calculate_cross_coefficients()
-                    trial_Epot = self.compute_potential(output="potential")
-                    Lambda = self.calculate_Lambda(self.atom_mass[self.inserted_type])
-                    beta =  1/self.desired_temperature
-                    acceptation_probability = np.min([1, (Lambda**self.dimensions*(self.total_number_atoms-1)/volume)*np.exp(-beta*(self.desired_mu+trial_Epot-initial_Epot))])
-                else:
-                    acceptation_probability = 0
-            if np.random.random() < acceptation_probability:
-                # Accept the new position
-                pass
-            else:
-                # Reject the new position
-                self.neighbor_lists = initial_neighbor_lists
-                self.atoms_positions = initial_positions
-                self.number_atoms = initial_number_atoms
-                self.calculate_cross_coefficients()
-
-.. label:: end_MonteCarlo_class
-
-Complete the *__init__* method as follows:
-
-.. label:: start_MonteCarlo_class
+.. label:: start_Utilities_class
 
 .. code-block:: python
 
-    class MonteCarlo(Outputs):
-        def __init__(self,
-                    (...)
-                    displace_mc = None,
-                    desired_mu = None,
-                    inserted_type = 0,
-                    desired_temperature = 300,
-                    (...)
+    def calculate_pressure(self):
+        """Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smith 2002)"""
+        Ndof = self.dimensions*self.total_number_atoms-self.dimensions    
+        volume = np.prod(self.box_size)
+        try:
+            self.calculate_temperature() # this is for later on, when velocities are computed
+        except:
+            self.temperature = self.desired_temperature # for MC, simply use the desired temperature
+        p_ideal = (Ndof/self.dimensions)*self.temperature/volume
+        p_non_ideal = 1/(volume*self.dimensions)*np.sum(self.compute_potential(output="force-matrix")*self.evaluate_rij_matrix())
+        self.pressure = (p_ideal+p_non_ideal)
 
-.. label:: end_MonteCarlo_class
+.. label:: end_Utilities_class
 
-and
+One needs to evaluate the vector between all the particles.
 
-.. label:: start_MonteCarlo_class
-
-.. code-block:: python
-
-    class MonteCarlo(Outputs):
-        def __init__(self,
-            (...)
-            self.displace_mc = displace_mc
-            self.desired_mu = desired_mu
-            self.inserted_type = inserted_type
-            self.desired_temperature = desired_temperature
-            (...)
-
-.. label:: end_MonteCarlo_class
-
-Let us non-dimentionalize desired_mu by adding:
-
-.. label:: start_MonteCarlo_class
+.. label:: start_Utilities_class
 
 .. code-block:: python
 
-    def nondimensionalize_units_3(self):
-        (...)
-            self.displace_mc /= self.reference_distance
-        if self.desired_mu is not None:
-            self.desired_mu /= self.reference_energy
-        (...)
+    def evaluate_rij_matrix(self):
+        """Matrix of vectors between all particles."""
+        rij_matrix = np.zeros((self.total_number_atoms,self.total_number_atoms,3))
+        for Ni in range(self.total_number_atoms-1):
+            position_i = self.atoms_positions[Ni]
+            positions_j = self.atoms_positions
+            rij_xyz = (np.remainder(position_i - positions_j
+                                    + self.box_size[:3]/2., self.box_size[:3])
+                                    - self.box_size[:3]/2.)
+            rij_matrix[Ni] = rij_xyz
+        return rij_matrix
 
-.. label:: end_MonteCarlo_class
-
-Finally, *monte_carlo_insert_delete* must be included in the run:
-
-.. label:: start_MonteCarlo_class
-
-.. code-block:: python
-
-    def run(self):
-        (...)
-            self.monte_carlo_displacement()
-            self.monte_carlo_insert_delete()
-            self.wrap_in_box()
-        (...)
-
-.. label:: end_MonteCarlo_class
-
-We need to calculate Lambda:
-
-.. label:: start_MonteCarlo_class
-
-.. code-block:: python
-
-    def calculate_Lambda(self, mass):
-        """Estimate the de Broglie wavelength."""
-        # Is it normal that mass is unitless ???
-        m = mass/cst.Avogadro*cst.milli  # kg
-        kB = cst.Boltzmann  # J/K
-        Na = cst.Avogadro
-        kB *= Na/cst.calorie/cst.kilo #  kCal/mol/K
-        T = self.desired_temperature  # N
-        T_K = T*self.reference_energy/kB  # K
-        Lambda = cst.h/np.sqrt(2*np.pi*kB*m*T_K)  # m
-        Lambda /= cst.angstrom  # Angstrom
-        return Lambda / self.reference_distance # dimensionless
-
-.. label:: end_MonteCarlo_class
+.. label:: end_Utilities_class
 
 Test the code
 -------------
 
 One can use a similar test as previously. Let us use a displace distance of
-0.5 Angstrom, and make 1000 steps.
+0.5 Angstrom, and make 1000 steps. The pressure will be written in *pressure.dat*.
 
 .. label:: start_test_MonteCarlo_class
 
@@ -163,8 +60,7 @@ One can use a similar test as previously. Let us use a displace distance of
     mc = MonteCarlo(maximum_steps=1000,
         dumping_period=100,
         thermo_period=100,
-        desired_mu = -3,
-        inserted_type = 0,
+        displace_mc = 0.5,
         number_atoms=[50],
         epsilon=[0.1], # kcal/mol
         sigma=[3], # A
@@ -174,7 +70,3 @@ One can use a similar test as previously. Let us use a displace distance of
     mc.run()
 
 .. label:: end_test_MonteCarlo_class
-
-The evolution of the potential energy as a function of the
-number of steps are written in the *Outputs/Epot.dat* file
-and can be plotted.
