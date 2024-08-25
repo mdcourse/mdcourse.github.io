@@ -18,7 +18,7 @@ if os.path.exists("generated-codes/") is False:
     os.mkdir("generated-codes/")
 
 # loop on the different chapter
-for chapter_id in np.arange(10):
+for chapter_id in [1, 2, 3, 4, 5, 6]:
     # for each chapter, create the corresponding code
     RST_EXISTS, created_tests, folder = sphinx_to_python(path_to_docs, chapter_id)
     if RST_EXISTS:

@@ -16,7 +16,10 @@ Metropolis criteria.
 
     def monte_carlo_displacement(self):
         if self.displace_mc is not None:
-            initial_Epot = self.compute_potential(output="potential")
+            try: # try using the last saved Epot
+                initial_Epot = self.Epot
+            except: # If no Epot was saved yet, recalculate it
+                initial_Epot = self.compute_potential(output="potential")
             initial_positions = copy.deepcopy(self.atoms_positions)
             atom_id = np.random.randint(self.total_number_atoms)
             # Test a new position
@@ -25,8 +28,9 @@ Metropolis criteria.
             beta =  1/self.desired_temperature
             acceptation_probability = np.min([1, np.exp(-beta*(trial_Epot-initial_Epot))])
             if np.random.random() <= acceptation_probability: # Accept new position
-                pass
+                self.Epot = trial_Epot
             else: # Reject new position
+                self.Epot = initial_Epot
                 self.atoms_positions = initial_positions
 
 .. label:: end_MonteCarlo_class
@@ -135,8 +139,11 @@ method to the Outputs class:
                     Ekin = 0.0
                 volume = np.prod(self.box_size[:3]) \
                     *self.reference_distance**3  # A3
-                Epot = self.compute_potential(output="potential") \
-                    * self.reference_energy  # kcal/mol
+                try:
+                    Epot = self.Epot * self.reference_energy  # kcal/mol
+                except:
+                    Epot = self.compute_potential(output="potential") \
+                        * self.reference_energy  # kcal/mol
                 density = self.calculate_density()  # Unitless
                 density *= self.reference_mass \
                     /self.reference_distance**3  # g/mol/A3
