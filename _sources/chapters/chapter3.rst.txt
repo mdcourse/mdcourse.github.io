@@ -86,7 +86,7 @@ parameters, here the box_dimensions.
             norm_box_dimensions.append(L/self.reference_distance)
         self.box_dimensions = norm_box_dimensions
         if self.initial_positions is not None:
-            self.initial_positions /= self.reference_distance
+            self.initial_positions = self.initial_positions/self.reference_distance
 
 .. label:: end_InitializeSimulation_class
 
