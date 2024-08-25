@@ -74,9 +74,6 @@ Nondimensionalize units
 Just like we did in the pervious chapter, let us nondimensionalize the provided
 parameters, here the box_dimensions.
 
-..
-    (S.G. TOFIX: what about initial_positions? It should be nondimensionalized too.
-
 .. label:: start_InitializeSimulation_class
 
 .. code-block:: python
@@ -88,6 +85,8 @@ parameters, here the box_dimensions.
         for L in self.box_dimensions:
             norm_box_dimensions.append(L/self.reference_distance)
         self.box_dimensions = norm_box_dimensions
+        if self.initial_positions is not None:
+            self.initial_positions /= self.reference_distance
 
 .. label:: end_InitializeSimulation_class
 

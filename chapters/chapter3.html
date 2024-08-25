@@ -323,6 +323,8 @@ parameters, here the box_dimensions.</p>
     <span class="k">for</span> <span class="n">L</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_dimensions</span><span class="p">:</span>
         <span class="n">norm_box_dimensions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">box_dimensions</span> <span class="o">=</span> <span class="n">norm_box_dimensions</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span>
 </pre></div>
 </div>
 </section>
