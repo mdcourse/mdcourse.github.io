@@ -42,7 +42,6 @@ Indices and tables
     chapters/chapter4
     chapters/chapter5
     chapters/chapter6
-    chapters/chapter7
 
 .. toctree::
     :maxdepth: 2
@@ -54,5 +53,6 @@ Indices and tables
 .. toctree::
     :maxdepth: 2
     :caption: Extra content
+    :hidden:
 
     divers/bibliography.rst
