@@ -269,7 +269,10 @@ of the system is re-measured, and the move is either accepted or rejected, based
 Metropolis criteria.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">monte_carlo_displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">initial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span> <span class="c1"># try using the last saved Epot</span>
+            <span class="n">initial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span>
+        <span class="k">except</span><span class="p">:</span> <span class="c1"># If no Epot was saved yet, recalculate it</span>
+            <span class="n">initial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span>
         <span class="n">initial_positions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span>
         <span class="n">atom_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">)</span>
         <span class="c1"># Test a new position</span>
@@ -278,8 +281,9 @@ Metropolis criteria.</p>
         <span class="n">beta</span> <span class="o">=</span>  <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span>
         <span class="n">acceptation_probability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">beta</span><span class="o">*</span><span class="p">(</span><span class="n">trial_Epot</span><span class="o">-</span><span class="n">initial_Epot</span><span class="p">))])</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">acceptation_probability</span><span class="p">:</span> <span class="c1"># Accept new position</span>
-            <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="n">trial_Epot</span>
         <span class="k">else</span><span class="p">:</span> <span class="c1"># Reject new position</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="n">initial_Epot</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">initial_positions</span>
 </pre></div>
 </div>
@@ -364,8 +368,11 @@ method to the Outputs class:</p>
                 <span class="n">Ekin</span> <span class="o">=</span> <span class="mf">0.0</span>
             <span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span> \
                 <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="o">**</span><span class="mi">3</span>  <span class="c1"># A3</span>
-            <span class="n">Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span> \
-                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span> \
+                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
             <span class="n">density</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_density</span><span class="p">()</span>  <span class="c1"># Unitless</span>
             <span class="n">density</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_mass</span> \
                 <span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="o">**</span><span class="mi">3</span>  <span class="c1"># g/mol/A3</span>

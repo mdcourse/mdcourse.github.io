@@ -134,21 +134,32 @@ added to the *Utilities* class:
 
     def update_neighbor_lists(self):
         if (self.step % self.neighbor == 0):
-
             matrix = distances.contact_matrix(self.atoms_positions,
                 cutoff=self.cut_off, #+2,
                 returntype="numpy",
                 box=self.box_size)
-
-            cpt = 0
             neighbor_lists = []
-            for array in matrix[:-1]:
+            for cpt, array in enumerate(matrix[:-1]):
                 list = np.where(array)[0].tolist()
                 list = [ele for ele in list if ele > cpt]
-                cpt += 1
                 neighbor_lists.append(list)
-
             self.neighbor_lists = neighbor_lists
+            # Precalculte LJ cross-coefficients
+            sigma_ij_list = []
+            epsilon_ij_list = []
+            for Ni in np.arange(self.total_number_atoms-1): # tofix error for GCMC
+                # Read information about atom i
+                sigma_i = self.atoms_sigma[Ni]
+                epsilon_i = self.atoms_epsilon[Ni]
+                neighbor_of_i = self.neighbor_lists[Ni]
+                # Read information about neighbors j
+                sigma_j = self.atoms_sigma[neighbor_of_i]
+                epsilon_j = self.atoms_epsilon[neighbor_of_i]
+                # Calculare cross parameters
+                sigma_ij_list.append((sigma_i+sigma_j)/2)
+                epsilon_ij_list.append((epsilon_i+epsilon_j)/2)
+            self.sigma_ij_list = sigma_ij_list
+            self.epsilon_ij_list = epsilon_ij_list
 
 .. label:: end_Utilities_class
 
@@ -184,23 +195,19 @@ class.
         elif output == "force-matrix":
             forces = np.zeros((self.total_number_atoms,self.total_number_atoms,3))
         energy_potential = 0
+        box_size = self.box_size[:3]
+        half_box_size = self.box_size[:3]/2.0
         for Ni in np.arange(self.total_number_atoms-1):
             # Read information about atom i
             position_i = self.atoms_positions[Ni]
-            sigma_i = self.atoms_sigma[Ni]
-            epsilon_i = self.atoms_epsilon[Ni]
             neighbor_of_i = self.neighbor_lists[Ni]
-            # Read information about neighbors j
+            # Read information about neighbors j and cross coefficient
             positions_j = self.atoms_positions[neighbor_of_i]
-            sigma_j = self.atoms_sigma[neighbor_of_i]
-            epsilon_j = self.atoms_epsilon[neighbor_of_i]
-            # Measure distances and other cross parameters
-            rij_xyz = (np.remainder(position_i - positions_j
-                                    + self.box_size[:3]/2., self.box_size[:3])
-                                    - self.box_size[:3]/2.)
+            sigma_ij = self.sigma_ij_list[Ni]
+            epsilon_ij = self.epsilon_ij_list[Ni]
+            # Measure distances
+            rij_xyz = (np.remainder(position_i - positions_j + half_box_size, box_size) - half_box_size)
             rij = np.linalg.norm(rij_xyz, axis=1)
-            sigma_ij = (sigma_i+sigma_j)/2
-            epsilon_ij = (epsilon_i+epsilon_j)/2
             # Measure potential
             if output == "potential":
                 energy_potential += np.sum(LJ_potential(epsilon_ij, sigma_ij, rij))

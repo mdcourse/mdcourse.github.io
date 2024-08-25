@@ -354,21 +354,32 @@ This is the purpose of the <em>update_neighbor_lists()</em> method that must be
 added to the <em>Utilities</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">update_neighbor_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighbor</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-
         <span class="n">matrix</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">contact_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">,</span>
             <span class="n">cutoff</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cut_off</span><span class="p">,</span> <span class="c1">#+2,</span>
             <span class="n">returntype</span><span class="o">=</span><span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
             <span class="n">box</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">)</span>
-
-        <span class="n">cpt</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">neighbor_lists</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">array</span> <span class="ow">in</span> <span class="n">matrix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">cpt</span><span class="p">,</span> <span class="n">array</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">matrix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
             <span class="nb">list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">array</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
             <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="n">ele</span> <span class="k">for</span> <span class="n">ele</span> <span class="ow">in</span> <span class="nb">list</span> <span class="k">if</span> <span class="n">ele</span> <span class="o">&gt;</span> <span class="n">cpt</span><span class="p">]</span>
-            <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">neighbor_lists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_lists</span> <span class="o">=</span> <span class="n">neighbor_lists</span>
+        <span class="c1"># Precalculte LJ cross-coefficients</span>
+        <span class="n">sigma_ij_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">epsilon_ij_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">Ni</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span> <span class="c1"># tofix error for GCMC</span>
+            <span class="c1"># Read information about atom i</span>
+            <span class="n">sigma_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
+            <span class="n">epsilon_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
+            <span class="n">neighbor_of_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_lists</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
+            <span class="c1"># Read information about neighbors j</span>
+            <span class="n">sigma_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">neighbor_of_i</span><span class="p">]</span>
+            <span class="n">epsilon_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">[</span><span class="n">neighbor_of_i</span><span class="p">]</span>
+            <span class="c1"># Calculare cross parameters</span>
+            <span class="n">sigma_ij_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">sigma_i</span><span class="o">+</span><span class="n">sigma_j</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">epsilon_ij_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">epsilon_i</span><span class="o">+</span><span class="n">epsilon_j</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma_ij_list</span> <span class="o">=</span> <span class="n">sigma_ij_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_ij_list</span> <span class="o">=</span> <span class="n">epsilon_ij_list</span>
 </pre></div>
 </div>
 <p>The <em>update_neighbor_lists()</em> method generates neighbor lists that are stored
@@ -392,23 +403,19 @@ class.</p>
     <span class="k">elif</span> <span class="n">output</span> <span class="o">==</span> <span class="s2">&quot;force-matrix&quot;</span><span class="p">:</span>
         <span class="n">forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
     <span class="n">energy_potential</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">box_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">half_box_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="mf">2.0</span>
     <span class="k">for</span> <span class="n">Ni</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
         <span class="c1"># Read information about atom i</span>
         <span class="n">position_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
-        <span class="n">sigma_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
-        <span class="n">epsilon_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
         <span class="n">neighbor_of_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_lists</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
-        <span class="c1"># Read information about neighbors j</span>
+        <span class="c1"># Read information about neighbors j and cross coefficient</span>
         <span class="n">positions_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="n">neighbor_of_i</span><span class="p">]</span>
-        <span class="n">sigma_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">neighbor_of_i</span><span class="p">]</span>
-        <span class="n">epsilon_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">[</span><span class="n">neighbor_of_i</span><span class="p">]</span>
-        <span class="c1"># Measure distances and other cross parameters</span>
-        <span class="n">rij_xyz</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">position_i</span> <span class="o">-</span> <span class="n">positions_j</span>
-                                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
-                                <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span>
+        <span class="n">sigma_ij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_ij_list</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
+        <span class="n">epsilon_ij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_ij_list</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
+        <span class="c1"># Measure distances</span>
+        <span class="n">rij_xyz</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">position_i</span> <span class="o">-</span> <span class="n">positions_j</span> <span class="o">+</span> <span class="n">half_box_size</span><span class="p">,</span> <span class="n">box_size</span><span class="p">)</span> <span class="o">-</span> <span class="n">half_box_size</span><span class="p">)</span>
         <span class="n">rij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">rij_xyz</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">sigma_ij</span> <span class="o">=</span> <span class="p">(</span><span class="n">sigma_i</span><span class="o">+</span><span class="n">sigma_j</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
-        <span class="n">epsilon_ij</span> <span class="o">=</span> <span class="p">(</span><span class="n">epsilon_i</span><span class="o">+</span><span class="n">epsilon_j</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
         <span class="c1"># Measure potential</span>
         <span class="k">if</span> <span class="n">output</span> <span class="o">==</span> <span class="s2">&quot;potential&quot;</span><span class="p">:</span>
             <span class="n">energy_potential</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">LJ_potential</span><span class="p">(</span><span class="n">epsilon_ij</span><span class="p">,</span> <span class="n">sigma_ij</span><span class="p">,</span> <span class="n">rij</span><span class="p">))</span>
