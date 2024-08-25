@@ -421,9 +421,9 @@ class.</p>
             <span class="k">elif</span> <span class="n">output</span> <span class="o">==</span> <span class="s2">&quot;force-matrix&quot;</span><span class="p">:</span>
                 <span class="n">forces</span><span class="p">[</span><span class="n">Ni</span><span class="p">][</span><span class="n">neighbor_of_i</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">derivative_potential</span><span class="o">*</span><span class="n">rij_xyz</span><span class="o">.</span><span class="n">T</span><span class="o">/</span><span class="n">rij</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
     <span class="k">if</span> <span class="n">output</span><span class="o">==</span><span class="s2">&quot;potential&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">energy_potential</span>
+        <span class="k">return</span> <span class="n">energy_potential</span><span class="o">/</span><span class="mi">2</span> <span class="c1"># avoid counting energy twice # weird, should it be accounted for by the neighbor list system ?</span>
     <span class="k">elif</span> <span class="p">(</span><span class="n">output</span> <span class="o">==</span> <span class="s2">&quot;force-vector&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">output</span> <span class="o">==</span> <span class="s2">&quot;force-matrix&quot;</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">forces</span>
+        <span class="k">return</span> <span class="n">forces</span> <span class="c1"># tocheck</span>
 </pre></div>
 </div>
 </section>

@@ -212,9 +212,9 @@ class.
                 elif output == "force-matrix":
                     forces[Ni][neighbor_of_i] += (derivative_potential*rij_xyz.T/rij).T
         if output=="potential":
-            return energy_potential
+            return energy_potential/2 # avoid counting energy twice # weird, should it be accounted for by the neighbor list system ?
         elif (output == "force-vector") | (output == "force-matrix"):
-            return forces
+            return forces # tocheck
 
 .. label:: end_Utilities_class
 
