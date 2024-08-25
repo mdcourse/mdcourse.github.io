@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
-        <title>Pressure measurement - </title>
+        <title>&lt;no title&gt; - </title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
@@ -179,7 +179,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -238,7 +238,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/chapters/chapter7.rst.txt" title="View this page">
+  <a class="muted-link" href="../_sources/chapters/chapter9.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -252,67 +252,16 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="pressure-measurement">
-<h1>Pressure measurement<a class="headerlink" href="#pressure-measurement" title="Link to this heading">¶</a></h1>
-<section id="extract-the-pressure">
-<h2>Extract the pressure<a class="headerlink" href="#extract-the-pressure" title="Link to this heading">¶</a></h2>
-<p>Let us also measure the pressure.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smith 2002)&quot;&quot;&quot;</span>
-    <span class="n">Ndof</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span>
-    <span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">calculate_temperature</span><span class="p">()</span> <span class="c1"># this is for later on, when velocities are computed</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span> <span class="c1"># for MC, simply use the desired temperature</span>
-    <span class="n">p_ideal</span> <span class="o">=</span> <span class="p">(</span><span class="n">Ndof</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="o">/</span><span class="n">volume</span>
-    <span class="n">p_non_ideal</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">volume</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;force-matrix&quot;</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluate_rij_matrix</span><span class="p">())</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pressure</span> <span class="o">=</span> <span class="p">(</span><span class="n">p_ideal</span><span class="o">+</span><span class="n">p_non_ideal</span><span class="p">)</span>
+          <hr class="docutils" />
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
-<p>One needs to evaluate the vector between all the particles.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">evaluate_rij_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Matrix of vectors between all particles.&quot;&quot;&quot;</span>
-    <span class="n">rij_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">Ni</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-        <span class="n">position_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
-        <span class="n">positions_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span>
-        <span class="n">rij_xyz</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">position_i</span> <span class="o">-</span> <span class="n">positions_j</span>
-                                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
-                                <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span>
-        <span class="n">rij_matrix</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">rij_xyz</span>
-    <span class="k">return</span> <span class="n">rij_matrix</span>
-</pre></div>
-</div>
-</section>
-<section id="test-the-code">
-<h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
-<p>One can use a similar test as previously. Let us use a displace distance of
-0.5 Angstrom, and make 1000 steps. The pressure will be written in <em>pressure.dat</em>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
-
-<span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
-    <span class="n">dumping_period</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-    <span class="n">thermo_period</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-    <span class="n">displace_mc</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
-    <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">50</span><span class="p">],</span>
-    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
-    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="c1"># A</span>
-    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="c1"># g/mol</span>
-    <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># A</span>
-    <span class="p">)</span>
-<span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</pre></div>
-</div>
-</section>
-</section>
 
         </article>
       </div>
@@ -335,28 +284,8 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer">
+    <aside class="toc-drawer no-toc">
       
-      
-      <div class="toc-sticky toc-scroll">
-        <div class="toc-title-container">
-          <span class="toc-title">
-            On this page
-          </span>
-        </div>
-        <div class="toc-tree-container">
-          <div class="toc-tree">
-            <ul>
-<li><a class="reference internal" href="#">Pressure measurement</a><ul>
-<li><a class="reference internal" href="#extract-the-pressure">Extract the pressure</a></li>
-<li><a class="reference internal" href="#test-the-code">Test the code</a></li>
-</ul>
-</li>
-</ul>
-
-          </div>
-        </div>
-      </div>
       
       
     </aside>

@@ -353,19 +353,21 @@ method to the Outputs class:</p>
             <span class="k">if</span> <span class="n">velocity</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">calculate_temperature</span><span class="p">()</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">calculate_kinetic_energy</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">calculate_pressure</span><span class="p">()</span>
             <span class="c1"># convert the units</span>
             <span class="k">if</span> <span class="n">velocity</span><span class="p">:</span>
                 <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> \
                     <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_temperature</span>  <span class="c1"># K</span>
-                <span class="n">pressure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pressure</span> \
-                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_pressure</span>  <span class="c1"># Atm</span>
                 <span class="n">Ekin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ekin</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span> \
                     <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_temperature</span>  <span class="c1"># K</span>
-                <span class="n">pressure</span> <span class="o">=</span> <span class="mf">0.0</span>
                 <span class="n">Ekin</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="k">try</span><span class="p">:</span> <span class="c1"># will be usefull later</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">calculate_pressure</span><span class="p">()</span>
+                <span class="n">pressure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pressure</span> \
+                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_pressure</span>  <span class="c1"># Atm</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">pressure</span> <span class="o">=</span> <span class="mf">0.0</span>
             <span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span> \
                 <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="o">**</span><span class="mi">3</span>  <span class="c1"># A3</span>
             <span class="k">try</span><span class="p">:</span>
