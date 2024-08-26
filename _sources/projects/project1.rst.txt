@@ -19,8 +19,9 @@ for a large range of density.
     :class: only-light
 
 In 1957, Wood and Parker reported the first numerical study of a 3D fluid that was
-using an attractive Lennard-Jones potential (previous studies by Metropolis et al.
-only used repultive hard-sphere potentials :cite:`metropolis1953equation, metropolis1953simulated`).
+using an attractive Lennard-Jones potential :cite:`woodMonteCarloEquation1957` (before
+them, Metropolis et al. used repultive hard-sphere
+potentials only :cite:`metropolis1953equation, metropolis1953simulated`).
 In their study, Wood and Parker used a Monte Carlo algorithm to predit the 
 Equation of State (EoS) of neutral particles interacting with Lennard-Jones potential,
 whose parameters were chosen to match those of argon gas. Their results show
@@ -70,3 +71,16 @@ statistical mechanics that describes how the state variables of a system, such a
 pressure :math:`p`, volume :math:`V`, and temperature :math:`T`, are interrelated.
 
 Here, let us extract the pressure of a simple fluid for different density values.
+
+.. figure:: project1/pv-nrt.png
+    :alt: Equation of state of argon as calculated using monte carlo simulation
+    :class: only-light
+
+.. figure:: project1/pv-nrt-dm.png
+    :alt: Equation of state of argon as calculated using monte carlo simulation
+    :class: only-dark
+
+Figure: Equation of state of the argon fluid as calculated using the Monte
+carlo code (disks), and compared with the results from Ref. :cite:`woodMonteCarloEquation1957`.
+Normalised pressure, :math:`p V / RT` as a function of the normalised volume,
+:math:`V / V^*`, where :math:`V^*` is the molar volume.

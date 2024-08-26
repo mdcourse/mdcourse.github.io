@@ -272,12 +272,13 @@ for a large range of density.</p>
 </a>
 </figure>
 <p>In 1957, Wood and Parker reported the first numerical study of a 3D fluid that was
-using an attractive Lennard-Jones potential (previous studies by Metropolis et al.
-only used repultive hard-sphere potentials <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id5" title="Nicholas Metropolis, Arianna W Rosenbluth, Marshall N Rosenbluth, Augusta H Teller, and Edward Teller. Equation of state calculations by fast computing machines. The journal of chemical physics, 21(6):1087–1092, 1953.">3</a>, <a class="reference internal" href="../divers/bibliography.html#id6" title="Nicholas Metropolis, AWRMN Rosenbluth, M Rosenbluth, A Teller, and E Teller. Simulated annealing. Journal of Chemical Physics, 21(161-162):1087–1092, 1953.">4</a>]</span>).
+using an attractive Lennard-Jones potential <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">2</a>]</span> (before
+them, Metropolis et al. used repultive hard-sphere
+potentials only <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id5" title="Nicholas Metropolis, Arianna W Rosenbluth, Marshall N Rosenbluth, Augusta H Teller, and Edward Teller. Equation of state calculations by fast computing machines. The journal of chemical physics, 21(6):1087–1092, 1953.">3</a>, <a class="reference internal" href="../divers/bibliography.html#id6" title="Nicholas Metropolis, AWRMN Rosenbluth, M Rosenbluth, A Teller, and E Teller. Simulated annealing. Journal of Chemical Physics, 21(161-162):1087–1092, 1953.">4</a>]</span>).
 In their study, Wood and Parker used a Monte Carlo algorithm to predit the
 Equation of State (EoS) of neutral particles interacting with Lennard-Jones potential,
 whose parameters were chosen to match those of argon gas. Their results show
-good agreement with experimental measurements of Michels on argon <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id3" title="A Michels, Hub Wijker, and HK Wijker. Isotherms of argon between 0 c and 150 c and pressures up to 2900 atmospheres. Physica, 15(7):627–633, 1949.">5</a>]</span>.</p>
+good agreement with experimental measurements of Michels on argon <span id="id3">[<a class="reference internal" href="../divers/bibliography.html#id3" title="A Michels, Hub Wijker, and HK Wijker. Isotherms of argon between 0 c and 150 c and pressures up to 2900 atmospheres. Physica, 15(7):627–633, 1949.">5</a>]</span>.</p>
 <p>Here, we take advantage of our code and try to reproduce the results of Wood and Parker
 for varying density. To follow this project, only Monte Carlo move are needed,
 and all the chapters up to <a class="reference internal" href="../chapters/chapter7.html#chapter7-label"><span class="std std-ref">Pressure measurement</span></a> must have been followed.</p>
@@ -313,6 +314,16 @@ is the molar volume.</p>
 statistical mechanics that describes how the state variables of a system, such as
 pressure <span class="math notranslate nohighlight">\(p\)</span>, volume <span class="math notranslate nohighlight">\(V\)</span>, and temperature <span class="math notranslate nohighlight">\(T\)</span>, are interrelated.</p>
 <p>Here, let us extract the pressure of a simple fluid for different density values.</p>
+<figure class="align-default">
+<img alt="Equation of state of argon as calculated using monte carlo simulation" class="only-light" src="../_images/pv-nrt.png" />
+</figure>
+<figure class="align-default">
+<img alt="Equation of state of argon as calculated using monte carlo simulation" class="only-dark" src="../_images/pv-nrt-dm.png" />
+</figure>
+<p>Figure: Equation of state of the argon fluid as calculated using the Monte
+carlo code (disks), and compared with the results from Ref. <span id="id4">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">2</a>]</span>.
+Normalised pressure, <span class="math notranslate nohighlight">\(p V / RT\)</span> as a function of the normalised volume,
+<span class="math notranslate nohighlight">\(V / V^*\)</span>, where <span class="math notranslate nohighlight">\(V^*\)</span> is the molar volume.</p>
 </section>
 </section>
 
