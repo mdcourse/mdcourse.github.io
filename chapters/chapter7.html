@@ -261,11 +261,34 @@
         <article role="main" id="furo-main-content">
           <section id="pressure-measurement">
 <h1>Pressure measurement<a class="headerlink" href="#pressure-measurement" title="Link to this heading">¶</a></h1>
-<section id="extract-the-pressure">
-<h2>Extract the pressure<a class="headerlink" href="#extract-the-pressure" title="Link to this heading">¶</a></h2>
-<p>Let us also measure the pressure.</p>
+<p>In order to extract the equation of state in our simulation, we need to measure the
+pressure of the system, <span class="math notranslate nohighlight">\(p\)</span>. The pressure in a molecular simulation can be
+calculated from the interactions between particles. The pressure can be measured as
+the sum of the ideal contribution, <span class="math notranslate nohighlight">\(p_\text{ideal} = N_\text{DOF} k_\text{B} T / V d\)</span>,
+which comes from the ideal gas law, and a Virial term which accounts for the
+pressure contribution from the forces between particles,
+<span class="math notranslate nohighlight">\(p_\text{non_ideal} = \left&lt; \sum_i r_i \cdot F_i \right&gt; / V d\)</span>. The final
+expression reads:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[p = \dfrac{1}{V d} \left[ N_\text{DOF} k_\text{B} T +  \left&lt; \sum_i r_i \cdot F_i \right&gt; \right]\]</div>
+</div>
+<p><span class="math notranslate nohighlight">\(N_\text{DOF}\)</span> is the number of degrees-of-freedom, which can be calculated
+from the number of particles, <span class="math notranslate nohighlight">\(N\)</span>, and the dimension of the system, <span class="math notranslate nohighlight">\(d\)</span>, as
+<span class="math notranslate nohighlight">\(N_\text{DOF} = d N - d\)</span> <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id4" title="Daan Frenkel and Berend Smit. Understanding molecular simulation: from algorithms to applications. Elsevier, 2002.">1</a>]</span>.</p>
+<p>The calculation of <span class="math notranslate nohighlight">\(p_\text{ideal}\)</span> is straighforward. For Monte Carlo simulation,
+as atoms do not have temperature, the <em>imposed</em> temperature will be used instead.
+The calculation of <span class="math notranslate nohighlight">\(p_\text{non_ideal}\)</span> requires the measurement of all the
+force and distance between the atoms. The calculation of the forces was already
+implemented in a previous chapter, but a new function that returns all the
+vector direction between atoms pairs will have to be written here.</p>
+<section id="implement-the-virial-equation">
+<h2>Implement the Virial equation<a class="headerlink" href="#implement-the-virial-equation" title="Link to this heading">¶</a></h2>
+<p>Let us add the following method to the <em>Utilities</em> class.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smith 2002)&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smit,</span>
+<span class="sd">    Understanding molecular simulation: from algorithms to applications, 2002)&quot;&quot;&quot;</span>
+    <span class="c1"># Ideal contribution</span>
     <span class="n">Ndof</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span>
     <span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
     <span class="k">try</span><span class="p">:</span>
@@ -273,21 +296,25 @@
         <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span> <span class="c1"># for MC, simply use the desired temperature</span>
-    <span class="n">p_ideal</span> <span class="o">=</span> <span class="p">(</span><span class="n">Ndof</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span><span class="o">*</span><span class="n">temperature</span><span class="o">/</span><span class="n">volume</span>
-    <span class="n">p_non_ideal</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">volume</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;force-matrix&quot;</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluate_rij_matrix</span><span class="p">())</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pressure</span> <span class="o">=</span> <span class="p">(</span><span class="n">p_ideal</span><span class="o">+</span><span class="n">p_non_ideal</span><span class="p">)</span>
+    <span class="n">p_ideal</span> <span class="o">=</span> <span class="n">Ndof</span><span class="o">*</span><span class="n">temperature</span><span class="o">/</span><span class="p">(</span><span class="n">volume</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+    <span class="c1"># Non-ideal contribution</span>
+    <span class="n">distances_forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;force-matrix&quot;</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluate_rij_matrix</span><span class="p">())</span>
+    <span class="n">p_nonideal</span> <span class="o">=</span> <span class="n">distances_forces</span><span class="o">/</span><span class="p">(</span><span class="n">volume</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+    <span class="c1"># Final pressure</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pressure</span> <span class="o">=</span> <span class="n">p_ideal</span><span class="o">+</span><span class="n">p_nonideal</span>
 </pre></div>
 </div>
-<p>One needs to evaluate the vector between all the particles.</p>
+<p>To evaluate all the vectors between all the particles, let us also add the
+<em>evaluate_rij_matrix</em> method to the <em>Utilities</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">evaluate_rij_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Matrix of vectors between all particles.&quot;&quot;&quot;</span>
+    <span class="n">box_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">half_box_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="mf">2.0</span>
     <span class="n">rij_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">positions_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span>
     <span class="k">for</span> <span class="n">Ni</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
         <span class="n">position_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
-        <span class="n">positions_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span>
-        <span class="n">rij_xyz</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">position_i</span> <span class="o">-</span> <span class="n">positions_j</span>
-                                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
-                                <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span>
+        <span class="n">rij_xyz</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">position_i</span> <span class="o">-</span> <span class="n">positions_j</span> <span class="o">+</span> <span class="n">half_box_size</span><span class="p">,</span> <span class="n">box_size</span><span class="p">)</span> <span class="o">-</span> <span class="n">half_box_size</span><span class="p">)</span>
         <span class="n">rij_matrix</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">rij_xyz</span>
     <span class="k">return</span> <span class="n">rij_matrix</span>
 </pre></div>
@@ -368,7 +395,7 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Pressure measurement</a><ul>
-<li><a class="reference internal" href="#extract-the-pressure">Extract the pressure</a></li>
+<li><a class="reference internal" href="#implement-the-virial-equation">Implement the Virial equation</a></li>
 <li><a class="reference internal" href="#test-the-code">Test the code</a></li>
 </ul>
 </li>
@@ -385,5 +412,6 @@
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>
