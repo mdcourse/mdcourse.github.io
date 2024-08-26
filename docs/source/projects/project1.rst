@@ -1,3 +1,5 @@
+.. _project1-label:
+
 Equation of state
 =================
 
