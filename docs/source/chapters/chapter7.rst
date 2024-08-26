@@ -13,12 +13,13 @@ Let us also measure the pressure.
     def calculate_pressure(self):
         """Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smith 2002)"""
         Ndof = self.dimensions*self.total_number_atoms-self.dimensions    
-        volume = np.prod(self.box_size)
+        volume = np.prod(self.box_size[:3])
         try:
             self.calculate_temperature() # this is for later on, when velocities are computed
+            temperature = self.temperature
         except:
-            self.temperature = self.desired_temperature # for MC, simply use the desired temperature
-        p_ideal = (Ndof/self.dimensions)*self.temperature/volume
+            temperature = self.desired_temperature # for MC, simply use the desired temperature
+        p_ideal = (Ndof/self.dimensions)*temperature/volume
         p_non_ideal = 1/(volume*self.dimensions)*np.sum(self.compute_potential(output="force-matrix")*self.evaluate_rij_matrix())
         self.pressure = (p_ideal+p_non_ideal)
 
