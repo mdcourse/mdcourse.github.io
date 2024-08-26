@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Bibliography" href="../divers/bibliography.html" /><link rel="prev" title="Pressure measurement" href="../chapters/chapter7.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
-        <title>Equation of state - </title>
+        <title>A study of argon - </title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
@@ -179,7 +179,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -214,7 +214,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Illustration</span></p>
 <ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Equation of state</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">A study of argon</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extra content</span></p>
 <ul>
@@ -253,23 +253,57 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="equation-of-state">
-<span id="project1-label"></span><h1>Equation of state<a class="headerlink" href="#equation-of-state" title="Link to this heading">¶</a></h1>
-<p>To create this project, the code should have been followed until the Monte Carlo
-displace part.</p>
+          <section id="a-study-of-argon">
+<span id="project1-label"></span><h1>A study of argon<a class="headerlink" href="#a-study-of-argon" title="Link to this heading">¶</a></h1>
+<p>In 1957, Wood and Parker reported the first numerical study of a 3D fluid that was
+using an attractive Lennard-Jones potential (previous studies by Metropolis et al.
+only used repultive hard-sphere potentials <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id5" title="Nicholas Metropolis, Arianna W Rosenbluth, Marshall N Rosenbluth, Augusta H Teller, and Edward Teller. Equation of state calculations by fast computing machines. The journal of chemical physics, 21(6):1087–1092, 1953.">3</a>, <a class="reference internal" href="../divers/bibliography.html#id6" title="Nicholas Metropolis, AWRMN Rosenbluth, M Rosenbluth, A Teller, and E Teller. Simulated annealing. Journal of Chemical Physics, 21(161-162):1087–1092, 1953.">4</a>]</span>).
+In their study, Wood and Parker used a Monte Carlo algorithm to predit the
+Equation of State (EoS) of neutral particles interacting with Lennard-Jones potential,
+whose parameters were chosen to match those of argon gas. Their results show
+good agreement with experimental measurements of Michels on argon <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id3" title="A Michels, Hub Wijker, and HK Wijker. Isotherms of argon between 0 c and 150 c and pressures up to 2900 atmospheres. Physica, 15(7):627–633, 1949.">5</a>]</span>.</p>
+<p>Here, we take advantage of our code and try to reproduce the results of Wood and Parker
+for varying density. To follow this project, only Monte Carlo move are needed,
+and all the chapters up to <a class="reference internal" href="../chapters/chapter7.html#chapter7-label"><span class="std std-ref">Pressure measurement</span></a> must have been followed.</p>
+<section id="parameters-choice">
+<h2>Parameters choice<a class="headerlink" href="#parameters-choice" title="Link to this heading">¶</a></h2>
+<p>Some parameters are taken <em>exactly</em> the same as those from Wood and Parker:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\sigma = 3.405~\text{Å}\)</span> (calculated as <span class="math notranslate nohighlight">\(\sigma = r^*  2^{-1/6}\)</span>
+where <span class="math notranslate nohighlight">\(r^*  = 3.822~\text{Å}\)</span>),</p></li>
+<li><p><span class="math notranslate nohighlight">\(\epsilon = 0.238~\text{kcal/mol}\)</span>,</p></li>
+<li><p><span class="math notranslate nohighlight">\(m = 39.948~\text{g/mol}\)</span>,</p></li>
+<li><p><span class="math notranslate nohighlight">\(T = 328.15~\text{K}\)</span> (or <span class="math notranslate nohighlight">\(T = 55~^\circ\text{C}\)</span>).</p></li>
+</ul>
+<p>In addition, some parameters that are not specified by Wood and Parker are
+freely chosen, but it should not impact the result too much, except may be
+for the cut-off:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(d_\text{mc} = \sigma/5\)</span>,</p></li>
+<li><p><span class="math notranslate nohighlight">\(r_\text{c} = 2.5 \sigma\)</span>.</p></li>
+</ul>
+<p>Finally, since an average modern laptop is much faster than Wood and Parker’s
+IBM 701 calculators (if you are curious, here is the <a href="https://en.wikipedia.org/wiki/IBM_701" target="_blank">wikipedia</a> page of the IBM 701),
+let us choose a number of atoms that is slightly larger
+than theirs, i.e. <span class="math notranslate nohighlight">\(N_\text{atom} = 200\)</span>.</p>
+<p>In order to cover the same density range as Wood and Parker, let us vary the volume
+of the box, <span class="math notranslate nohighlight">\(V\)</span>, so that <span class="math notranslate nohighlight">\(V/V^* \in [0.75, 7.6]\)</span>, where
+<span class="math notranslate nohighlight">\(V^* = 2^{-1/2} N_\text{A} r^{*3} = 23.77 \text{centimeter}^3/\text{mole}\)</span>
+is the molar volume.</p>
+</section>
+<section id="equation-of-state">
+<h2>Equation of State<a class="headerlink" href="#equation-of-state" title="Link to this heading">¶</a></h2>
 <p>The Equation of State (EoS) is a fundamental relationship in thermodynamics and
 statistical mechanics that describes how the state variables of a system, such as
-pressure p, volume V, and temperature T, are interrelated.</p>
-<p>Here, the results obtained by Wood and Parker in one of the first article
-published on Monte Carlo simulations <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">2</a>]</span>. Just like
-Wood and Parker, our results will be compared to experimental observations of
-Michels on argon gas <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id3" title="A Michels, Hub Wijker, and HK Wijker. Isotherms of argon between 0 c and 150 c and pressures up to 2900 atmospheres. Physica, 15(7):627–633, 1949.">3</a>]</span>.</p>
+pressure <span class="math notranslate nohighlight">\(p\)</span>, volume <span class="math notranslate nohighlight">\(V\)</span>, and temperature <span class="math notranslate nohighlight">\(T\)</span>, are interrelated.</p>
+<p>Here, let us extract the pressure of a simple fluid for different density values.</p>
+</section>
 </section>
 
         </article>
@@ -311,8 +345,28 @@ Michels on argon gas <span id="id2">[<a class="reference internal" href="../dive
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">A study of argon</a><ul>
+<li><a class="reference internal" href="#parameters-choice">Parameters choice</a></li>
+<li><a class="reference internal" href="#equation-of-state">Equation of State</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
@@ -321,5 +375,6 @@ Michels on argon gas <span id="id2">[<a class="reference internal" href="../dive
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

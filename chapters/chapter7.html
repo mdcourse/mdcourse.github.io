@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Equation of state" href="../projects/project1.html" /><link rel="prev" title="Monte Carlo displace" href="chapter6.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="A study of argon" href="../projects/project1.html" /><link rel="prev" title="Monte Carlo displace" href="chapter6.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
         <title>Pressure measurement - </title>
@@ -214,7 +214,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Illustration</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../projects/project1.html">Equation of state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../projects/project1.html">A study of argon</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extra content</span></p>
 <ul>
@@ -260,7 +260,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="pressure-measurement">
-<h1>Pressure measurement<a class="headerlink" href="#pressure-measurement" title="Link to this heading">¶</a></h1>
+<span id="chapter7-label"></span><h1>Pressure measurement<a class="headerlink" href="#pressure-measurement" title="Link to this heading">¶</a></h1>
 <p>In order to extract the equation of state in our simulation, we need to measure the
 pressure of the system, <span class="math notranslate nohighlight">\(p\)</span>. The pressure in a molecular simulation can be
 calculated from the interactions between particles. The pressure can be measured as
@@ -327,7 +327,7 @@ our code with some data from the litterature. Let us used the same parameters
 as in Ref. <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">2</a>]</span>, where Monte Carlo simulations
 are used to simulate argon bulk phase. All we have to do is to apply our current
 code using their parameters, i.e. <span class="math notranslate nohighlight">\(\sigma = 3.405~\text{Å}\)</span>, <span class="math notranslate nohighlight">\(\epsilon = 0.238~\text{kcal/mol}\)</span>,
-and <span class="math notranslate nohighlight">\(T = 55~^\circ\text{C}\)</span>. More details are given in the first illustration, <a class="reference internal" href="../projects/project1.html#project1-label"><span class="std std-ref">Equation of state</span></a>.</p>
+and <span class="math notranslate nohighlight">\(T = 55~^\circ\text{C}\)</span>. More details are given in the first illustration, <a class="reference internal" href="../projects/project1.html#project1-label"><span class="std std-ref">A study of argon</span></a>.</p>
 <p>On the side note, a relatively small cut-off as well as a small number of atoms were
 chosen to make the calculation faster.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -379,12 +379,13 @@ chosen to make the calculation faster.</p>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;p v / R T =&quot;</span><span class="p">,</span> <span class="n">pV_over_RT</span><span class="p">,</span> <span class="s2">&quot; --- (The expected value from Wood1957 is 1.5)&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Which should return a value for <span class="math notranslate nohighlight">\(p v / R T\)</span> that is close to the expected 1.5
-reported in Ref. <span id="id3">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">2</a>]</span>, e.g.:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<span class="n">p</span> <span class="n">v</span> <span class="o">/</span> <span class="n">R</span> <span class="n">T</span> <span class="o">=</span> <span class="mf">1.56</span>  <span class="o">---</span> <span class="p">(</span><span class="n">The</span> <span class="n">expected</span> <span class="n">value</span> <span class="kn">from</span> <span class="nn">Wood1957</span> <span class="ow">is</span> <span class="mf">1.5</span><span class="p">)</span>
+<p>Which should return a value for <span class="math notranslate nohighlight">\(p V / R T\)</span> that is close to the expected value
+of 1.5 by Wood and Parker for <span class="math notranslate nohighlight">\(\tau = V/V^* = 2\)</span> (see Fig. 4 in Ref. <span id="id3">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">2</a>]</span>):</p>
+<div class="highlight-bw notranslate"><div class="highlight"><pre><span></span>(...)
+p v / R T = 1.56  --- (The expected value from Wood1957 is 1.5)
 </pre></div>
 </div>
+<p>The exact value will varie from one simulation to the other due to noise.</p>
 </section>
 </section>
 
@@ -398,7 +399,7 @@ reported in Ref. <span id="id3">[<a class="reference internal" href="../divers/b
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Equation of state</div>
+                <div class="title">A study of argon</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
