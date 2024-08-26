@@ -322,22 +322,67 @@ vector direction between atoms pairs will have to be written here.</p>
 </section>
 <section id="test-the-code">
 <h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
-<p>One can use a similar test as previously. Let us use a displace distance of
-0.5 Angstrom, and make 1000 steps. The pressure will be written in <em>pressure.dat</em>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<p>Let us test the outputed pressure. An interesting test is to contront the output from
+our code with some data from the litterature. Let us used the same parameters
+as in Ref. <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">2</a>]</span>, where Monte Carlo simulations
+are used to simulate argon bulk phase. All we have to do is to apply our current
+code using their parameters, i.e. <span class="math notranslate nohighlight">\(\sigma = 3.405~\text{Å}\)</span>, <span class="math notranslate nohighlight">\(\epsilon = 0.238~\text{kcal/mol}\)</span>,
+and <span class="math notranslate nohighlight">\(T = 55~^\circ\text{C}\)</span>. More details are given in the first illustration, <a class="reference internal" href="../projects/project1.html#project1-label"><span class="std std-ref">Equation of state</span></a>.</p>
+<p>On the side note, a relatively small cut-off as well as a small number of atoms were
+chosen to make the calculation faster.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
 
-<span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
-    <span class="n">dumping_period</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-    <span class="n">thermo_period</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-    <span class="n">displace_mc</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
-    <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">50</span><span class="p">],</span>
-    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
-    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="c1"># A</span>
-    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="c1"># g/mol</span>
-    <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># A</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
+<span class="kn">from</span> <span class="nn">pint</span> <span class="kn">import</span> <span class="n">UnitRegistry</span>
+<span class="n">ureg</span> <span class="o">=</span> <span class="n">UnitRegistry</span><span class="p">()</span>
+
+<span class="c1"># Constants</span>
+<span class="n">kB</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">J</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span> <span class="c1"># boltzman constant</span>
+<span class="n">Na</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mole</span> <span class="c1"># avogadro</span>
+<span class="n">R</span> <span class="o">=</span> <span class="n">kB</span><span class="o">*</span><span class="n">Na</span> <span class="c1"># gas constant</span>
+
+<span class="c1"># Parameters taken from Wood1957</span>
+<span class="n">tau</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># ratio between volume / reduced volume</span>
+<span class="n">epsilon</span> <span class="o">=</span> <span class="p">(</span><span class="mf">119.76</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="o">*</span><span class="n">kB</span><span class="o">*</span><span class="n">Na</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span><span class="p">)</span> <span class="c1"># kcal/mol</span>
+<span class="n">r_star</span> <span class="o">=</span> <span class="mf">3.822</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span> <span class="c1"># angstrom</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="n">r_star</span> <span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">6</span><span class="p">)</span> <span class="c1"># angstrom</span>
+<span class="n">N_atom</span> <span class="o">=</span> <span class="mi">50</span> <span class="c1"># no units</span>
+<span class="n">m_argon</span> <span class="o">=</span> <span class="mf">39.948</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">gram</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span> <span class="c1"># g/mol</span>
+<span class="n">T</span> <span class="o">=</span>  <span class="mf">328.15</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">degK</span> <span class="c1"># 328 K or 55°C</span>
+<span class="n">volume_star</span> <span class="o">=</span> <span class="n">r_star</span><span class="o">**</span><span class="mi">3</span> <span class="o">*</span> <span class="n">Na</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">cut_off</span> <span class="o">=</span> <span class="n">sigma</span><span class="o">*</span><span class="mf">2.5</span> <span class="c1"># angstrom</span>
+<span class="n">displace_mc</span> <span class="o">=</span> <span class="n">sigma</span><span class="o">/</span><span class="mi">5</span> <span class="c1"># angstrom</span>
+<span class="n">volume</span> <span class="o">=</span> <span class="n">N_atom</span><span class="o">*</span><span class="n">volume_star</span><span class="o">*</span><span class="n">tau</span><span class="o">/</span><span class="n">Na</span> <span class="c1"># angstrom**3</span>
+<span class="n">box_size</span> <span class="o">=</span> <span class="n">volume</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># angstrom</span>
+
+<span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">15000</span><span class="p">,</span>
+    <span class="n">dumping_period</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">thermo_period</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">neighbor</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="n">N_atom</span><span class="p">],</span>
+    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">epsilon</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="n">sigma</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
+    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="n">m_argon</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
+    <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
+    <span class="n">displace_mc</span> <span class="o">=</span> <span class="n">displace_mc</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+    <span class="n">desired_temperature</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+    <span class="n">cut_off</span> <span class="o">=</span> <span class="n">cut_off</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
     <span class="p">)</span>
 <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="c1"># Import the data and calculate p V / R T</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;Outputs/pressure.dat&quot;</span><span class="p">)[:,</span><span class="mi">1</span><span class="p">][</span><span class="mi">10</span><span class="p">:])</span>
+<span class="n">pressure</span> <span class="o">=</span> <span class="p">(</span><span class="n">output</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">atm</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">pascal</span><span class="p">)</span>
+<span class="n">volume</span> <span class="o">=</span> <span class="p">(</span><span class="n">volume_star</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">/</span> <span class="n">Na</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">meter</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">pressure_normalized</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">pressure</span> <span class="o">*</span> <span class="n">volume</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">Na</span><span class="p">)</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;p v / R T =&quot;</span><span class="p">,</span> <span class="n">pressure_normalized</span><span class="p">,</span> <span class="s2">&quot; --- expected (Wood1957): 1.5&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Which should return a value for <span class="math notranslate nohighlight">\(p v / R T\)</span> that is close to the expected 1.5
+reported in Ref. <span id="id3">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">2</a>]</span>, e.g.:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">p</span> <span class="n">v</span> <span class="o">/</span> <span class="n">R</span> <span class="n">T</span> <span class="o">=</span> <span class="mf">1.56</span>  <span class="o">---</span> <span class="n">expected</span> <span class="p">(</span><span class="n">Wood1957</span><span class="p">):</span> <span class="mf">1.5</span>
 </pre></div>
 </div>
 </section>

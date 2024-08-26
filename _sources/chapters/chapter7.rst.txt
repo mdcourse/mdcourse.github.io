@@ -78,26 +78,74 @@ To evaluate all the vectors between all the particles, let us also add the
 Test the code
 -------------
 
-One can use a similar test as previously. Let us use a displace distance of
-0.5 Angstrom, and make 1000 steps. The pressure will be written in *pressure.dat*.
+Let us test the outputed pressure. An interesting test is to contront the output from
+our code with some data from the litterature. Let us used the same parameters
+as in Ref. :cite:`woodMonteCarloEquation1957`, where Monte Carlo simulations
+are used to simulate argon bulk phase. All we have to do is to apply our current
+code using their parameters, i.e. :math:`\sigma = 3.405~\text{Å}`, :math:`\epsilon = 0.238~\text{kcal/mol}`,
+and :math:`T = 55~^\circ\text{C}`. More details are given in the first illustration, :ref:`project1-label`.
 
-.. label:: start_test_MonteCarlo_class
+On the side note, a relatively small cut-off as well as a small number of atoms were
+chosen to make the calculation faster. 
+
+.. label:: start_test_MonteCarloPressure_class
 
 .. code-block:: python
 
-    import os
+    import numpy as np
     from MonteCarlo import MonteCarlo
 
-    mc = MonteCarlo(maximum_steps=1000,
-        dumping_period=100,
-        thermo_period=100,
-        displace_mc = 0.5,
-        number_atoms=[50],
-        epsilon=[0.1], # kcal/mol
-        sigma=[3], # A
-        atom_mass=[1], # g/mol
-        box_dimensions=[20, 20, 20], # A
+    from scipy import constants as cst
+    from pint import UnitRegistry
+    ureg = UnitRegistry()
+
+    # Constants
+    kB = cst.Boltzmann*ureg.J/ureg.kelvin # boltzman constant
+    Na = cst.Avogadro/ureg.mole # avogadro
+    R = kB*Na # gas constant
+
+    # Parameters taken from Wood1957
+    tau = 2 # ratio between volume / reduced volume
+    epsilon = (119.76*ureg.kelvin*kB*Na).to(ureg.kcal/ureg.mol) # kcal/mol
+    r_star = 3.822*ureg.angstrom # angstrom
+    sigma = r_star / 2**(1/6) # angstrom
+    N_atom = 50 # no units
+    m_argon = 39.948*ureg.gram/ureg.mol # g/mol
+    T =  328.15 * ureg.degK # 328 K or 55°C
+    volume_star = r_star**3 * Na * 2**(-0.5)
+    cut_off = sigma*2.5 # angstrom
+    displace_mc = sigma/5 # angstrom
+    volume = N_atom*volume_star*tau/Na # angstrom**3
+    box_size = volume**(1/3) # angstrom
+
+    mc = MonteCarlo(maximum_steps=15000,
+        dumping_period=1000,
+        thermo_period=1000,
+        neighbor=50,
+        number_atoms=[N_atom],
+        epsilon=[epsilon.magnitude],
+        sigma=[sigma.magnitude],
+        atom_mass=[m_argon.magnitude],
+        box_dimensions=[box_size.magnitude, box_size.magnitude, box_size.magnitude],
+        displace_mc = displace_mc.magnitude,
+        desired_temperature = T.magnitude,
+        cut_off = cut_off.magnitude,
         )
     mc.run()
 
-.. label:: end_test_MonteCarlo_class
+    # Import the data and calculate p V / R T
+    output = np.mean(np.loadtxt("Outputs/pressure.dat")[:,1][10:])
+    pressure = (output*ureg.atm).to(ureg.pascal)
+    volume = (volume_star * tau / Na).to(ureg.meter**3)
+    pressure_normalized = np.round((pressure * volume / (R * T) * Na).magnitude,2)
+    print("p v / R T =", pressure_normalized, " --- expected (Wood1957): 1.5")
+
+.. label:: end_test_MonteCarloPressure_class
+
+Which should return a value for :math:`p v / R T` that is close to the expected 1.5 
+reported in Ref. :cite:`woodMonteCarloEquation1957`, e.g.:
+
+.. code-block:: python
+
+    (...)
+    p v / R T = 1.56  --- expected (Wood1957): 1.5
