@@ -3,6 +3,21 @@
 A study of argon
 ================
 
+Using Monte Carlo simulations, the equation of state of 3D fluid of argon is simulated
+for a large range of density.
+
+.. figure:: project1/avatar-dm.webp
+    :alt: The fluid made of argon atoms and simulated using monte carlo and python.
+    :height: 200
+    :align: right
+    :class: only-dark
+
+.. figure:: project1/avatar.webp
+    :alt: The fluid made of argon atoms and simulated using monte carlo and python
+    :height: 200
+    :align: right
+    :class: only-light
+
 In 1957, Wood and Parker reported the first numerical study of a 3D fluid that was
 using an attractive Lennard-Jones potential (previous studies by Metropolis et al.
 only used repultive hard-sphere potentials :cite:`metropolis1953equation, metropolis1953simulated`).
