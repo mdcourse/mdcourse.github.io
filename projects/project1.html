@@ -312,8 +312,131 @@ is the molar volume.</p>
 <h2>Equation of State<a class="headerlink" href="#equation-of-state" title="Link to this heading">¶</a></h2>
 <p>The Equation of State (EoS) is a fundamental relationship in thermodynamics and
 statistical mechanics that describes how the state variables of a system, such as
-pressure <span class="math notranslate nohighlight">\(p\)</span>, volume <span class="math notranslate nohighlight">\(V\)</span>, and temperature <span class="math notranslate nohighlight">\(T\)</span>, are interrelated.</p>
-<p>Here, let us extract the pressure of a simple fluid for different density values.</p>
+pressure <span class="math notranslate nohighlight">\(p\)</span>, volume <span class="math notranslate nohighlight">\(V\)</span>, and temperature <span class="math notranslate nohighlight">\(T\)</span>, are interrelated.
+Here, let us extract the pressure of the fluid for different density values.</p>
+<p>In a Python script, let us start by import the <em>constants</em> module of <em>SciPy</em>, and
+the UnitRegistry of <em>Pint</em>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
+<span class="kn">from</span> <span class="nn">pint</span> <span class="kn">import</span> <span class="n">UnitRegistry</span>
+<span class="n">ureg</span> <span class="o">=</span> <span class="n">UnitRegistry</span><span class="p">()</span>
+<span class="n">ureg</span> <span class="o">=</span> <span class="n">UnitRegistry</span><span class="p">(</span><span class="n">autoconvert_offset_to_baseunit</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let up also import <em>NumPy</em>, <em>sys</em>, and <em>multiprocessing</em> to launch multiple
+simulations in parallel.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<p>Provide the full path to the code. If the code was written in the same folder
+as the current Python script, then <em>path_to_code = “./”</em>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">path_to_code</span> <span class="o">=</span> <span class="s2">&quot;./&quot;</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path_to_code</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then, let us import the <em>MinimizeEnergy</em> and <em>MonteCarlo</em> classes:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MinimizeEnergy</span> <span class="kn">import</span> <span class="n">MinimizeEnergy</span>
+<span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
+</pre></div>
+</div>
+<p>Let us take advantage of the <em>constants</em> module to define a few units, and assign
+the right units to these variable using the UnitRegistry:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">kB</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">J</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span> <span class="c1"># boltzman constant</span>
+<span class="n">Na</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mole</span> <span class="c1"># avogadro</span>
+<span class="n">R</span> <span class="o">=</span> <span class="n">kB</span><span class="o">*</span><span class="n">Na</span> <span class="c1"># gas constant</span>
+</pre></div>
+</div>
+<p>Then, let us write a function called <em>launch_MC_code</em> that will be used to call
+our Monte Carlo script with a chosen value of <span class="math notranslate nohighlight">\(\tau = v / v^*\)</span>. As a first
+step, all the required variables are being defined, and the <em>box_size</em> is calculated
+according to the chosen value of <span class="math notranslate nohighlight">\(\tau\)</span>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">launch_MC_code</span><span class="p">(</span><span class="n">tau</span><span class="p">):</span>
+
+    <span class="n">epsilon</span> <span class="o">=</span> <span class="p">(</span><span class="mf">119.76</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="o">*</span><span class="n">kB</span><span class="o">*</span><span class="n">Na</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span><span class="p">)</span> <span class="c1"># kcal/mol</span>
+    <span class="n">r_star</span> <span class="o">=</span> <span class="mf">3.822</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span> <span class="c1"># angstrom</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">r_star</span> <span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">6</span><span class="p">)</span> <span class="c1"># angstrom</span>
+    <span class="n">N_atom</span> <span class="o">=</span> <span class="mi">200</span> <span class="c1"># no units</span>
+    <span class="n">m_argon</span> <span class="o">=</span> <span class="mf">39.948</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">gram</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="p">(</span><span class="mi">55</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">degC</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">degK</span><span class="p">)</span> <span class="c1"># 55°C</span>
+    <span class="c1"># volume_star = (23.79 * ureg.centimeter**3/ureg.mole).to(ureg.angstrom**3/ureg.mole)</span>
+    <span class="n">volume_star</span> <span class="o">=</span> <span class="n">r_star</span><span class="o">**</span><span class="mi">3</span> <span class="o">*</span> <span class="n">Na</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">cut_off</span> <span class="o">=</span> <span class="n">sigma</span><span class="o">*</span><span class="mf">2.5</span>
+    <span class="n">displace_mc</span> <span class="o">=</span> <span class="n">sigma</span><span class="o">/</span><span class="mi">5</span> <span class="c1"># angstrom</span>
+    <span class="n">volume</span> <span class="o">=</span> <span class="n">N_atom</span><span class="o">*</span><span class="n">volume_star</span><span class="o">*</span><span class="n">tau</span><span class="o">/</span><span class="n">Na</span>
+    <span class="n">box_size</span> <span class="o">=</span> <span class="n">volume</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="s2">&quot;outputs_tau&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">tau</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;/&quot;</span>
+</pre></div>
+</div>
+<p>Then, let us call the <em>MinimizeEnergy</em> class, just to create and relax the
+system, and avoid starting the Monte Carlo simulation with too much overlap
+between the atoms:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">launch_MC_code</span><span class="p">(</span><span class="n">tau</span><span class="p">):</span>
+    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="s2">&quot;outputs_tau&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">tau</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;/&quot;</span>
+
+    <span class="n">em</span> <span class="o">=</span> <span class="n">MinimizeEnergy</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                        <span class="n">thermo_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                        <span class="n">dumping_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="n">N_atom</span><span class="p">],</span>
+        <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">epsilon</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
+        <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="n">sigma</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
+        <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="n">m_argon</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
+        <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+                        <span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+                        <span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
+        <span class="n">cut_off</span><span class="o">=</span><span class="n">cut_off</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+        <span class="n">data_folder</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">em</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Then, let us start the Monte carlo simulation. As initial positions for the atoms,
+let us use the last positions from the <em>em</em> run,
+i.e. <em>initial_positions = em.atoms_positions*em.reference_distance</em>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">launch_MC_code</span><span class="p">(</span><span class="n">tau</span><span class="p">):</span>
+    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="n">em</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+    <span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span>
+        <span class="n">dumping_period</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">thermo_period</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">neighbor</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+        <span class="n">displace_mc</span> <span class="o">=</span> <span class="n">displace_mc</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+        <span class="n">desired_temperature</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+        <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="n">N_atom</span><span class="p">],</span>
+        <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">epsilon</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
+        <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="n">sigma</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
+        <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="n">m_argon</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
+        <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+                        <span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+                        <span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
+        <span class="n">initial_positions</span> <span class="o">=</span> <span class="n">em</span><span class="o">.</span><span class="n">atoms_positions</span><span class="o">*</span><span class="n">em</span><span class="o">.</span><span class="n">reference_distance</span><span class="p">,</span>
+        <span class="n">cut_off</span><span class="o">=</span><span class="n">cut_off</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+        <span class="n">data_folder</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Finally, it is possible to call the <em>launch_MC_code</em> function using
+<em>multiprocessing</em>, and perform the simulation for multiple value of <span class="math notranslate nohighlight">\(\tau\)</span>
+at the same time (if your computer has enough CPU core, if not, perform these calculation
+in serial):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">tau_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.126</span><span class="p">,</span> <span class="mf">0.882</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">()</span>
+    <span class="n">squared_numbers</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">launch_MC_code</span><span class="p">,</span> <span class="n">tau_values</span><span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Here, the 10 requested values of <span class="math notranslate nohighlight">\(\tau\)</span> are 0.75, 0.97, 1.25, 1.62, 2.1,
+2.72, 3.52, 4.55, 5.89, and 7.62. Run the script using Python.</p>
+<p>When the simulation is done, extract the values of <em>Epot.dat</em> within each
+folder named <em>outputs_tau0.75/</em>, where <em>0.75</em> is the corresponding value of <span class="math notranslate nohighlight">\(\tau\)</span>.
+Disregard the first values of Epot, and only keep the last part of the Monte Carlo simulation.
+Then, plot <em>p V / RT</em> as a function of <em>V/V^</em>. The results are in good aggreement
+with those of Ref. <span id="id4">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">2</a>]</span>:</p>
 <figure class="align-default">
 <img alt="Equation of state of argon as calculated using monte carlo simulation" class="only-light" src="../_images/pv-nrt.png" />
 </figure>
@@ -321,9 +444,10 @@ pressure <span class="math notranslate nohighlight">\(p\)</span>, volume <span c
 <img alt="Equation of state of argon as calculated using monte carlo simulation" class="only-dark" src="../_images/pv-nrt-dm.png" />
 </figure>
 <p>Figure: Equation of state of the argon fluid as calculated using the Monte
-carlo code (disks), and compared with the results from Ref. <span id="id4">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">2</a>]</span>.
+carlo code (disks), and compared with the results from Ref. <span id="id5">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">2</a>]</span>.
 Normalised pressure, <span class="math notranslate nohighlight">\(p V / RT\)</span> as a function of the normalised volume,
-<span class="math notranslate nohighlight">\(V / V^*\)</span>, where <span class="math notranslate nohighlight">\(V^*\)</span> is the molar volume.</p>
+<span class="math notranslate nohighlight">\(V / V^*\)</span>, where <span class="math notranslate nohighlight">\(V^*\)</span> is the molar volume. For benchmark purpose,
+the data obtained using LAMMPS were also added.</p>
 </section>
 </section>
 
