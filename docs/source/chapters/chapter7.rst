@@ -1,3 +1,5 @@
+.. _chapter7-label:
+
 Pressure measurement
 ====================
 
@@ -142,10 +144,12 @@ chosen to make the calculation faster.
 
 .. label:: end_test_MonteCarloPressure_class
 
-Which should return a value for :math:`p v / R T` that is close to the expected 1.5 
-reported in Ref. :cite:`woodMonteCarloEquation1957`, e.g.:
+Which should return a value for :math:`p V / R T` that is close to the expected value
+of 1.5 by Wood and Parker for :math:`\tau = V/V^* = 2` (see Fig. 4 in Ref. :cite:`woodMonteCarloEquation1957`):
 
-.. code-block:: python
+.. code-block:: bw
 
     (...)
     p v / R T = 1.56  --- (The expected value from Wood1957 is 1.5)
+
+The exact value will varie from one simulation to the other due to noise.
