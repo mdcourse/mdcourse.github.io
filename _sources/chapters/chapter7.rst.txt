@@ -137,8 +137,8 @@ chosen to make the calculation faster.
     output = np.mean(np.loadtxt("Outputs/pressure.dat")[:,1][10:])
     pressure = (output*ureg.atm).to(ureg.pascal)
     volume = (volume_star * tau / Na).to(ureg.meter**3)
-    pressure_normalized = np.round((pressure * volume / (R * T) * Na).magnitude,2)
-    print("p v / R T =", pressure_normalized, " --- expected (Wood1957): 1.5")
+    pV_over_RT = np.round((pressure * volume / (R * T) * Na).magnitude,2)
+    print("p v / R T =", pV_over_RT, " --- (The expected value from Wood1957 is 1.5)")
 
 .. label:: end_test_MonteCarloPressure_class
 
@@ -148,4 +148,4 @@ reported in Ref. :cite:`woodMonteCarloEquation1957`, e.g.:
 .. code-block:: python
 
     (...)
-    p v / R T = 1.56  --- expected (Wood1957): 1.5
+    p v / R T = 1.56  --- (The expected value from Wood1957 is 1.5)
