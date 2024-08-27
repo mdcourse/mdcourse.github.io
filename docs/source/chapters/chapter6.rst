@@ -15,8 +15,8 @@ simulation is the following:
   
   - If :math:`\Delta E < 0`, then the move is automatically accepted. 
   - If :math:`\Delta E > 0`, then the move is accepted with a probability given
-    by the Boltzmann factor :math:`\exp{- \beta \Delta E`, where
-    :math:`\beta = 1 / k_\text{B} T}` and :math:`T` is the imposed temperature.
+    by the Boltzmann factor :math:`\exp{- \beta \Delta E}`, where
+    :math:`\beta = 1 / k_\text{B} T` and :math:`T` is the imposed temperature.
 
 - 5) Steps 1-4 are repeated a large number of times, generating a broad range of
      possible configurations.
