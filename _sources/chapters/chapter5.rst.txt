@@ -28,38 +28,6 @@ The two methods named *update_log_minimize()* and *update_dump_file()*, are used
 to print the information in the terminal and in a LAMMPS-type data file, respectively.
 These two methods will be written in the following.
 
-Improve the output class
-------------------------
-
-Modify the *__init__* class of the *Outputs.py* file:
-
-.. label:: start_Outputs_class
-
-.. code-block:: python
-        
-    from scipy import constants as cst
-    import numpy as np
-    import os
-    from Measurements import Measurements
-
-
-    class Outputs(Measurements):
-        def __init__(self,
-                    data_folder="Outputs/",
-                    *args,
-                    **kwargs):
-            self.data_folder = data_folder
-            super().__init__(*args, **kwargs)
-            if os.path.exists(self.data_folder) is False:
-                os.mkdir(self.data_folder)
-
-.. label:: end_Outputs_class
-
-Here, two additional variables have been added: *thermo_period* which controls
-the period at which information is printed during the run, and *dumping_period*
-which controls the period at which atom positions are printed in the dump
-file. 
-
 Update the dump and log
 -----------------------
 
@@ -79,6 +47,20 @@ a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.
         level=logging.INFO,
         format='%(message)s'
     )
+
+    # Create a custom logger
+    logger = logging.getLogger('simulation_logger')
+    logger.setLevel(logging.INFO)
+    # Disable propagation to prevent double logging
+    logger.propagate = False
+
+    console_handler = logging.StreamHandler()  # To log to the terminal
+    file_handler = logging.FileHandler('simulation.log')  # To log to a file
+    formatter = logging.Formatter('%(message)s')
+    console_handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
 
     def update_dump_file(code, filename, velocity=False):
         if code.dumping_period is not None:
@@ -138,20 +120,20 @@ a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.
                         * code.reference_energy  # kcal/mol
                 if code.step == 0:
                     if code.thermo_outputs == "Epot":
-                        logging.info(f"step Epot (kcal/mol)")
-                    elif code.thermo_outputs == "MaxF":
-                        logging.info(f"step Epot (kcal/mol) MaxF (kcal/A/mol)")
-                    elif code.thermo_outputs == "press":
-                        logging.info(f"step Epot (kcal/mol) press (atm)")
+                        logger.info(f"step Epot")
+                    elif code.thermo_outputs == "Epot-MaxF":
+                        logger.info(f"step Epot MaxF")
+                    elif code.thermo_outputs == "Epot-press":
+                        logger.info(f"step Epot press")
                 if code.thermo_outputs == "Epot":
-                    logging.info(f"{code.step}, {Epot:.2f}")
-                elif code.thermo_outputs == "MaxF":
-                    logging.info(f"{code.step}, {Epot:.2f}, {code.MaxF:.2f}")
-                elif code.thermo_outputs == "press":
+                    logger.info(f"{code.step} {Epot:.2f}")
+                elif code.thermo_outputs == "Epot-MaxF":
+                    logger.info(f"{code.step} {Epot:.2f} {code.MaxF:.2f}")
+                elif code.thermo_outputs == "Epot-press":
                     code.calculate_pressure()
                     press = code.pressure \
                         * code.reference_pressure  # Atm
-                    logging.info(f"{code.step}, {Epot:.2f}, {press:.2f}")        
+                    logger.info(f"{code.step} {Epot:.2f} {press:.2f}")    
 
 .. label:: end_tools_class
 
@@ -194,11 +176,13 @@ every 10 steps in the dump files, as well as in the log:
     min = MinimizeEnergy(maximum_steps=100,
         thermo_period=10,
         dumping_period=10,
+        thermo_outputs = "Epot-MaxF",
         number_atoms=[2, 3],
         epsilon=[0.1, 1.0], # kcal/mol
         sigma=[3, 6], # A
         atom_mass=[1, 1], # g/mol
         box_dimensions=[20, 20, 20], # A
+        data_folder="Outputs/",
         )
     min.run()
 
@@ -210,10 +194,11 @@ When running the simulation, information must be printed in the terminal:
 
 .. code-block:: bw
 
-    step epot maxF
-    0 -1.683 2.080
-    10 -2.264 0.211
-    20 -2.748 0.063
+    step Epot (kcal/mol) MaxF (kcal/A/mol)
+    0, -1.40, 14.19
+    10, -1.80, 17.98
+    20, -2.37, 2.65
+    30, -2.50, 4.00
     (...)
 
 and a file named *dump.min.lammpstrj* must have appeared in the *Outputs/* folder.

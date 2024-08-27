@@ -26,13 +26,14 @@ Then, let us fill the *__init__()* method:
 
 .. code-block:: python
 
-    class MinimizeEnergy(Outputs):
+    class MinimizeEnergy(Measurements):
         def __init__(self,
                     maximum_steps,
                     cut_off=9,
                     neighbor=1,
                     displacement=0.01,
                     thermo_outputs="MaxF",
+                    data_folder=None,
                     *args,
                     **kwargs):
             self.neighbor = neighbor
@@ -40,6 +41,10 @@ Then, let us fill the *__init__()* method:
             self.displacement = displacement
             self.maximum_steps = maximum_steps
             self.thermo_outputs = thermo_outputs
+            self.data_folder = data_folder
+            if self.data_folder is not None:
+                if os.path.exists(self.data_folder) is False:
+                    os.mkdir(self.data_folder)
             super().__init__(*args, **kwargs)
 
 .. label:: end_MinimizeEnergy_class

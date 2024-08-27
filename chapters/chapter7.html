@@ -359,6 +359,7 @@ chosen to make the calculation faster.</p>
 <span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">15000</span><span class="p">,</span>
     <span class="n">dumping_period</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
     <span class="n">thermo_period</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">thermo_outputs</span> <span class="o">=</span> <span class="s2">&quot;Epot-press&quot;</span><span class="p">,</span>
     <span class="n">neighbor</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
     <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="n">N_atom</span><span class="p">],</span>
     <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">epsilon</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
@@ -368,6 +369,7 @@ chosen to make the calculation faster.</p>
     <span class="n">displace_mc</span> <span class="o">=</span> <span class="n">displace_mc</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
     <span class="n">desired_temperature</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
     <span class="n">cut_off</span> <span class="o">=</span> <span class="n">cut_off</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+    <span class="n">data_folder</span> <span class="o">=</span> <span class="s2">&quot;Outputs/&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 

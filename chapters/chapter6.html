@@ -327,7 +327,7 @@ possible configurations.</p></li>
 users, such as <em>displace_mc</em> (<span class="math notranslate nohighlight">\(d_\text{mc}\)</span>), the maximum number of steps,
 and the desired temperature (<span class="math notranslate nohighlight">\(T\)</span>). Let us add these parameters to the
 <em>__init__</em> method:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Outputs</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Measurements</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">maximum_steps</span><span class="p">,</span>
                 <span class="n">cut_off</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span>
@@ -335,6 +335,7 @@ and the desired temperature (<span class="math notranslate nohighlight">\(T\)</s
                 <span class="n">neighbor</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
                 <span class="n">desired_temperature</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span>
                 <span class="n">thermo_outputs</span> <span class="o">=</span> <span class="s2">&quot;press&quot;</span><span class="p">,</span>
+                <span class="n">data_folder</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span> <span class="o">=</span> <span class="n">maximum_steps</span>
@@ -343,6 +344,10 @@ and the desired temperature (<span class="math notranslate nohighlight">\(T\)</s
         <span class="bp">self</span><span class="o">.</span><span class="n">neighbor</span> <span class="o">=</span> <span class="n">neighbor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span> <span class="o">=</span> <span class="n">desired_temperature</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">=</span> <span class="n">thermo_outputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">=</span> <span class="n">data_folder</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units_3</span><span class="p">()</span>
 </pre></div>
@@ -376,99 +381,6 @@ perform a loop over the desired number of steps <em>maximum_steps</em>:</p>
 methods <em>update_neighbor_lists</em> and <em>wrap_in_box</em> are also called to ensure that
 the neighbor lists are kept up to date despite the motion of the atoms, and that
 the atoms remain inside the box, respectively.</p>
-</section>
-<section id="output">
-<h2>Output<a class="headerlink" href="#output" title="Link to this heading">¶</a></h2>
-<p>To follow the simulation, let us create a new update function. Add the following
-method to the Outputs class:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">update_log_md_mc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update the log file during MD or MC simulations&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thermo_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">thermo_period</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> \
-                <span class="o">|</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thermo_period</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="c1"># refresh values</span>
-            <span class="k">if</span> <span class="n">velocity</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">calculate_temperature</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">calculate_kinetic_energy</span><span class="p">()</span>
-            <span class="c1"># convert the units</span>
-            <span class="k">if</span> <span class="n">velocity</span><span class="p">:</span>
-                <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span> \
-                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_temperature</span>  <span class="c1"># K</span>
-                <span class="n">Ekin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Ekin</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span> \
-                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_temperature</span>  <span class="c1"># K</span>
-                <span class="n">Ekin</span> <span class="o">=</span> <span class="mf">0.0</span>
-            <span class="k">try</span><span class="p">:</span> <span class="c1"># will be usefull later</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">calculate_pressure</span><span class="p">()</span>
-                <span class="n">pressure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pressure</span> \
-                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_pressure</span>  <span class="c1"># Atm</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">pressure</span> <span class="o">=</span> <span class="mf">0.0</span>
-            <span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span> \
-                <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="o">**</span><span class="mi">3</span>  <span class="c1"># A3</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span> \
-                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
-            <span class="n">density</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_density</span><span class="p">()</span>  <span class="c1"># Unitless</span>
-            <span class="n">density</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_mass</span> \
-                <span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="o">**</span><span class="mi">3</span>  <span class="c1"># g/mol/A3</span>
-            <span class="n">Na</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span>
-            <span class="n">density</span> <span class="o">*=</span> <span class="p">(</span><span class="n">cst</span><span class="o">.</span><span class="n">centi</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">angstrom</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span> <span class="o">/</span> <span class="n">Na</span>  <span class="c1"># g/cm3</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">characters</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{:&lt;5}</span><span class="s1"> </span><span class="si">{:&lt;5}</span><span class="s1"> </span><span class="si">{:&lt;9}</span><span class="s1"> </span><span class="si">{:&lt;9}</span><span class="s1"> </span><span class="si">{:&lt;9}</span><span class="s1"> </span><span class="si">{:&lt;13}</span><span class="s1"> </span><span class="si">{:&lt;13}</span><span class="s1"> </span><span class="si">{:&lt;13}</span><span class="s1">&#39;</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">characters</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;step&quot;</span><span class="p">),</span>
-                    <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;N&quot;</span><span class="p">),</span>
-                    <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;T (K)&quot;</span><span class="p">),</span>
-                    <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;p (atm)&quot;</span><span class="p">),</span>
-                    <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;V (A3)&quot;</span><span class="p">),</span>
-                    <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;Ep (kcal/mol)&quot;</span><span class="p">),</span>
-                    <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;Ek (kcal/mol)&quot;</span><span class="p">),</span>
-                    <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;dens (g/cm3)&quot;</span><span class="p">),</span>
-                    <span class="p">))</span>
-            <span class="n">characters</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{:&lt;5}</span><span class="s1"> </span><span class="si">{:&lt;5}</span><span class="s1"> </span><span class="si">{:&lt;9}</span><span class="s1"> </span><span class="si">{:&lt;9}</span><span class="s1"> </span><span class="si">{:&lt;9}</span><span class="s1"> </span><span class="si">{:&lt;13}</span><span class="s1"> </span><span class="si">{:&lt;13}</span><span class="s1"> </span><span class="si">{:&lt;13}</span><span class="s1">&#39;</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">characters</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">),</span>
-                <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">),</span>
-                <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">temperature</span><span class="si">:</span><span class="s2">.3</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
-                <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pressure</span><span class="si">:</span><span class="s2">.3</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
-                <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">volume</span><span class="si">:</span><span class="s2">.3</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
-                <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.3</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
-                <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Ekin</span><span class="si">:</span><span class="s2">.3</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
-                <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">density</span><span class="si">:</span><span class="s2">.3</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
-                <span class="p">))</span>
-            <span class="k">for</span> <span class="n">output_value</span><span class="p">,</span> <span class="n">filename</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">,</span>
-                                               <span class="n">Epot</span><span class="p">,</span>
-                                               <span class="n">Ekin</span><span class="p">,</span>
-                                               <span class="n">pressure</span><span class="p">,</span>
-                                               <span class="n">temperature</span><span class="p">,</span>
-                                               <span class="n">density</span><span class="p">,</span>
-                                               <span class="n">volume</span><span class="p">],</span>
-                                              <span class="p">[</span><span class="s2">&quot;atom_number.dat&quot;</span><span class="p">,</span>
-                                               <span class="s2">&quot;Epot.dat&quot;</span><span class="p">,</span>
-                                               <span class="s2">&quot;Ekin.dat&quot;</span><span class="p">,</span>
-                                               <span class="s2">&quot;pressure.dat&quot;</span><span class="p">,</span>
-                                               <span class="s2">&quot;temperature.dat&quot;</span><span class="p">,</span>
-                                               <span class="s2">&quot;density.dat&quot;</span><span class="p">,</span>
-                                               <span class="s2">&quot;volume.dat&quot;</span><span class="p">]):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">update_data_file</span><span class="p">(</span><span class="n">output_value</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>As well as</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">update_data_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_value</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">+</span> <span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">+</span> <span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
-    <span class="n">characters</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> </span><span class="si">%.3f</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
-    <span class="n">v</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">,</span> <span class="n">output_value</span><span class="p">]</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">characters</span> <span class="o">%</span> <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</pre></div>
-</div>
 <p>Let us call <em>update_log_md_mc</em> from the run method of the MonteCarlo class.
 Let us add a dump too:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -480,7 +392,8 @@ Let us add a dump too:</p>
         <span class="n">update_dump_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;dump.mc.lammpstrj&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>To output the density, let us add the following method to the <em>Utilities</em> class:</p>
+<p>To output the density, let us add the following method to the <em>Utilities</em> class:
+# TOFIX: not used yet</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the mass density.&quot;&quot;&quot;</span>
     <span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>  <span class="c1"># Unitless</span>
@@ -506,6 +419,7 @@ Let us add a dump too:</p>
     <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="c1"># A</span>
     <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="c1"># g/mol</span>
     <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">data_folder</span><span class="o">=</span><span class="s2">&quot;Outputs/&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
@@ -570,7 +484,6 @@ are written in the <em>Outputs/Epot.dat</em> file and can be plotted.</p>
 <li><a class="reference internal" href="#implementation">Implementation</a></li>
 <li><a class="reference internal" href="#parameters">Parameters</a></li>
 <li><a class="reference internal" href="#run-method">Run method</a></li>
-<li><a class="reference internal" href="#output">Output</a></li>
 <li><a class="reference internal" href="#test-the-code">Test the code</a></li>
 </ul>
 </li>

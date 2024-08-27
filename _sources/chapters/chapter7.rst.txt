@@ -123,6 +123,7 @@ chosen to make the calculation faster.
     mc = MonteCarlo(maximum_steps=15000,
         dumping_period=1000,
         thermo_period=1000,
+        thermo_outputs = "Epot-press",
         neighbor=50,
         number_atoms=[N_atom],
         epsilon=[epsilon.magnitude],
@@ -132,6 +133,7 @@ chosen to make the calculation faster.
         displace_mc = displace_mc.magnitude,
         desired_temperature = T.magnitude,
         cut_off = cut_off.magnitude,
+        data_folder = "Outputs/",
         )
     mc.run()
 

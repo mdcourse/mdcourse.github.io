@@ -280,31 +280,6 @@ during the simulation. To do so, the <em>Output</em> class is modified.</p>
 to print the information in the terminal and in a LAMMPS-type data file, respectively.
 These two methods will be written in the following.</p>
 </section>
-<section id="improve-the-output-class">
-<h2>Improve the output class<a class="headerlink" href="#improve-the-output-class" title="Link to this heading">¶</a></h2>
-<p>Modify the <em>__init__</em> class of the <em>Outputs.py</em> file:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">Measurements</span> <span class="kn">import</span> <span class="n">Measurements</span>
-
-
-<span class="k">class</span> <span class="nc">Outputs</span><span class="p">(</span><span class="n">Measurements</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                <span class="n">data_folder</span><span class="o">=</span><span class="s2">&quot;Outputs/&quot;</span><span class="p">,</span>
-                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">=</span> <span class="n">data_folder</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Here, two additional variables have been added: <em>thermo_period</em> which controls
-the period at which information is printed during the run, and <em>dumping_period</em>
-which controls the period at which atom positions are printed in the dump
-file.</p>
-</section>
 <section id="update-the-dump-and-log">
 <h2>Update the dump and log<a class="headerlink" href="#update-the-dump-and-log" title="Link to this heading">¶</a></h2>
 <p>Let us add the following functions named <em>update_dump_file</em> and <em>log_simulation_data</em>
@@ -318,6 +293,20 @@ a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.<
     <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
     <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(message)s</span><span class="s1">&#39;</span>
 <span class="p">)</span>
+
+<span class="c1"># Create a custom logger</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;simulation_logger&#39;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="c1"># Disable propagation to prevent double logging</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="n">console_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>  <span class="c1"># To log to the terminal</span>
+<span class="n">file_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="s1">&#39;simulation.log&#39;</span><span class="p">)</span>  <span class="c1"># To log to a file</span>
+<span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">console_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+<span class="n">file_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">console_handler</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">file_handler</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">update_dump_file</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">dumping_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -377,20 +366,20 @@ a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.<
                     <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
             <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot&quot;</span><span class="p">:</span>
-                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot (kcal/mol)&quot;</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;MaxF&quot;</span><span class="p">:</span>
-                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot (kcal/mol) MaxF (kcal/A/mol)&quot;</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;press&quot;</span><span class="p">:</span>
-                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot (kcal/mol) press (atm)&quot;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot-MaxF&quot;</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot MaxF&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot-press&quot;</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot press&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot&quot;</span><span class="p">:</span>
-                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;MaxF&quot;</span><span class="p">:</span>
-                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">MaxF</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;press&quot;</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot-MaxF&quot;</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">MaxF</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot-press&quot;</span><span class="p">:</span>
                 <span class="n">code</span><span class="o">.</span><span class="n">calculate_pressure</span><span class="p">()</span>
                 <span class="n">press</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">pressure</span> \
                     <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_pressure</span>  <span class="c1"># Atm</span>
-                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">press</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">press</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -415,11 +404,13 @@ every 10 steps in the dump files, as well as in the log:</p>
 <span class="nb">min</span> <span class="o">=</span> <span class="n">MinimizeEnergy</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
     <span class="n">thermo_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="n">dumping_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">thermo_outputs</span> <span class="o">=</span> <span class="s2">&quot;Epot-MaxF&quot;</span><span class="p">,</span>
     <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
     <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
     <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="c1"># A</span>
     <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="c1"># g/mol</span>
     <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">data_folder</span><span class="o">=</span><span class="s2">&quot;Outputs/&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 <span class="nb">min</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
@@ -427,10 +418,11 @@ every 10 steps in the dump files, as well as in the log:</p>
 </pre></div>
 </div>
 <p>When running the simulation, information must be printed in the terminal:</p>
-<div class="highlight-bw notranslate"><div class="highlight"><pre><span></span>step epot maxF
-0 -1.683 2.080
-10 -2.264 0.211
-20 -2.748 0.063
+<div class="highlight-bw notranslate"><div class="highlight"><pre><span></span>step Epot (kcal/mol) MaxF (kcal/A/mol)
+0, -1.40, 14.19
+10, -1.80, 17.98
+20, -2.37, 2.65
+30, -2.50, 4.00
 (...)
 </pre></div>
 </div>
@@ -491,7 +483,6 @@ every 10 steps in the dump files, as well as in the log:</p>
             <ul>
 <li><a class="reference internal" href="#">Output the simulation state</a><ul>
 <li><a class="reference internal" href="#update-the-minimizeenergy-class">Update the MinimizeEnergy class</a></li>
-<li><a class="reference internal" href="#improve-the-output-class">Improve the output class</a></li>
 <li><a class="reference internal" href="#update-the-dump-and-log">Update the dump and log</a></li>
 <li><a class="reference internal" href="#import-the-functions">Import the functions</a></li>
 <li><a class="reference internal" href="#test-the-code">Test the code</a></li>
