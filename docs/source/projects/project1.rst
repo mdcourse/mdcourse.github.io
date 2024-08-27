@@ -20,15 +20,15 @@ for a large range of density.
 
 In 1957, Wood and Parker reported the first numerical study of a 3D fluid that was
 using an attractive Lennard-Jones potential :cite:`woodMonteCarloEquation1957` (before
-them, Metropolis et al. used repultive hard-sphere
+them, Metropolis et al. used repulsive hard-sphere
 potentials only :cite:`metropolis1953equation, metropolis1953simulated`).
-In their study, Wood and Parker used a Monte Carlo algorithm to predit the 
+In their study, Wood and Parker used a Monte Carlo algorithm to predict the 
 Equation of State (EoS) of neutral particles interacting with Lennard-Jones potential,
 whose parameters were chosen to match those of argon gas. Their results show
 good agreement with experimental measurements of Michels on argon :cite:`michels1949isotherms`.
 
 Here, we take advantage of our code and try to reproduce the results of Wood and Parker
-for varying density. To follow this project, only Monte Carlo move are needed,
+for varying density. To follow this project, only Monte Carlo moves are needed,
 and all the chapters up to :ref:`chapter7-label` must have been followed.
 
 Parameters choice
@@ -43,7 +43,7 @@ Some parameters are taken *exactly* the same as those from Wood and Parker:
 - :math:`T = 328.15~\text{K}` (or :math:`T = 55~^\circ\text{C}`).
 
 In addition, some parameters that are not specified by Wood and Parker are
-freely chosen, but it should not impact the result too much, except may be
+freely chosen, but it should not impact the result too much, except maybe
 for the cut-off:
 
 - :math:`d_\text{mc} = \sigma/5`,
@@ -71,7 +71,7 @@ statistical mechanics that describes how the state variables of a system, such a
 pressure :math:`p`, volume :math:`V`, and temperature :math:`T`, are interrelated.
 Here, let us extract the pressure of the fluid for different density values.
 
-In a Python script, let us start by import the *constants* module of *SciPy*, and
+In a Python script, let us start by importing the *constants* module of *SciPy*, and
 the UnitRegistry of *Pint*.
 
 .. code-block:: python
@@ -106,7 +106,7 @@ Then, let us import the *MinimizeEnergy* and *MonteCarlo* classes:
     from MonteCarlo import MonteCarlo
 
 Let us take advantage of the *constants* module to define a few units, and assign
-the right units to these variable using the UnitRegistry:
+the right units to these variables using the UnitRegistry:
 
 .. code-block:: python
 
@@ -193,7 +193,7 @@ i.e. *initial_positions = em.atoms_positions*em.reference_distance*:
 
 Finally, it is possible to call the *launch_MC_code* function using
 *multiprocessing*, and perform the simulation for multiple value of :math:`\tau`
-at the same time (if your computer has enough CPU core, if not, perform these calculation
+at the same time (if your computer has enough CPU core, if not, perform these calculations
 in serial):
 
 .. code-block:: python
@@ -211,7 +211,7 @@ Here, the 10 requested values of :math:`\tau` are 0.75, 0.97, 1.25, 1.62, 2.1,
 When the simulation is done, extract the values of *Epot.dat* within each
 folder named *outputs_tau0.75/*, where *0.75* is the corresponding value of :math:`\tau`.
 Disregard the first values of Epot, and only keep the last part of the Monte Carlo simulation.
-Then, plot *p V / RT* as a function of *V/V^*. The results are in good aggreement
+Then, plot *p V / RT* as a function of *V/V^*. The results are in good agreement
 with those of Ref. :cite:`woodMonteCarloEquation1957`:
 
 .. figure:: project1/pv-nrt.png
@@ -225,5 +225,5 @@ with those of Ref. :cite:`woodMonteCarloEquation1957`:
 Figure: Equation of state of the argon fluid as calculated using the Monte
 carlo code (disks), and compared with the results from Ref. :cite:`woodMonteCarloEquation1957`.
 Normalised pressure, :math:`p V / RT` as a function of the normalised volume,
-:math:`V / V^*`, where :math:`V^*` is the molar volume. For benchmark purpose,
+:math:`V / V^*`, where :math:`V^*` is the molar volume. For benchmark purposes,
 the data obtained using LAMMPS were also added.
