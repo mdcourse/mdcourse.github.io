@@ -279,12 +279,14 @@ to the beginning of the <em>MinimizeEnergy.py</em> file:</p>
                 <span class="n">cut_off</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
                 <span class="n">neighbor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                 <span class="n">displacement</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+                <span class="n">thermo_outputs</span><span class="o">=</span><span class="s2">&quot;MaxF&quot;</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">neighbor</span> <span class="o">=</span> <span class="n">neighbor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cut_off</span> <span class="o">=</span> <span class="n">cut_off</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">displacement</span> <span class="o">=</span> <span class="n">displacement</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span> <span class="o">=</span> <span class="n">maximum_steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">=</span> <span class="n">thermo_outputs</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -324,22 +326,30 @@ energy, and the new position is either accepted or rejected based on energy crit
     <span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
         <span class="c1"># Measure the initial energy and max force</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span>
-        <span class="n">init_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span>
-        <span class="n">initial_positions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span>
-        <span class="n">forces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;force-vector&quot;</span><span class="p">)</span>
-        <span class="n">max_forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">forces</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span> <span class="c1"># try using the last saved Epot, if it exists</span>
+            <span class="n">init_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span>
+            <span class="n">init_MaxF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MaxF</span>
+        <span class="k">except</span><span class="p">:</span> <span class="c1"># If self.Epot does not exists yet, calculate it</span>
+            <span class="n">init_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span>
+            <span class="n">forces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;force-vector&quot;</span><span class="p">)</span>
+            <span class="n">init_MaxF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">forces</span><span class="p">))</span>
+        <span class="n">init_positions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span>
         <span class="c1"># Test a new sets of positions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> \
-            <span class="o">+</span> <span class="n">forces</span><span class="o">/</span><span class="n">max_forces</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">displacement</span>
+            <span class="o">+</span> <span class="n">forces</span><span class="o">/</span><span class="n">init_MaxF</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">displacement</span>
         <span class="n">trial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span>
+        <span class="n">forces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;force-vector&quot;</span><span class="p">)</span>
+        <span class="n">trial_MaxF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">forces</span><span class="p">))</span>
         <span class="c1"># Keep the more favorable energy</span>
         <span class="k">if</span> <span class="n">trial_Epot</span> <span class="o">&lt;</span> <span class="n">init_Epot</span><span class="p">:</span>  <span class="c1"># accept new position</span>
-            <span class="n">Epot</span> <span class="o">=</span> <span class="n">trial_Epot</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="n">trial_Epot</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MaxF</span> <span class="o">=</span> <span class="n">trial_MaxF</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_box</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">displacement</span> <span class="o">*=</span> <span class="mf">1.2</span>
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># reject new position</span>
-            <span class="n">Epot</span> <span class="o">=</span> <span class="n">init_Epot</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">initial_positions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="n">init_Epot</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MaxF</span> <span class="o">=</span> <span class="n">init_MaxF</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">init_positions</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">displacement</span> <span class="o">*=</span> <span class="mf">0.2</span>
 </pre></div>
 </div>

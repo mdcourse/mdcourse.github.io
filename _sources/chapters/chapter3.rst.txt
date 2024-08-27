@@ -25,6 +25,8 @@ the InitializeSimulation class inherits the *Prepare* class.
                     box_dimensions=[10, 10, 10],  # List - Angstroms
                     seed=None,  # Int
                     initial_positions=None,  # Array - Angstroms
+                    thermo_period=None,
+                    dumping_period=None,
                     *args,
                     **kwargs,
                     ):
@@ -33,6 +35,8 @@ the InitializeSimulation class inherits the *Prepare* class.
             self.dimensions = len(box_dimensions)
             self.seed = seed
             self.initial_positions = initial_positions
+            self.thermo_period = thermo_period
+            self.dumping_period = dumping_period
 
 .. label:: end_InitializeSimulation_class
 

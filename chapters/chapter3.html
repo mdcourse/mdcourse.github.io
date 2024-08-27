@@ -277,6 +277,8 @@ the InitializeSimulation class inherits the <em>Prepare</em> class.</p>
                 <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>  <span class="c1"># List - Angstroms</span>
                 <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Int</span>
                 <span class="n">initial_positions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Array - Angstroms</span>
+                <span class="n">thermo_period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">dumping_period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="p">):</span>
@@ -285,6 +287,8 @@ the InitializeSimulation class inherits the <em>Prepare</em> class.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">box_dimensions</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="o">=</span> <span class="n">initial_positions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thermo_period</span> <span class="o">=</span> <span class="n">thermo_period</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dumping_period</span> <span class="o">=</span> <span class="n">dumping_period</span>
 </pre></div>
 </div>
 <p>Three parameters are provided to the <em>InitializeSimulation</em> class. THe first one

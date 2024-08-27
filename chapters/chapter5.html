@@ -272,8 +272,8 @@ during the simulation. To do so, the <em>Output</em> class is modified.</p>
     <span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
         <span class="p">(</span><span class="o">...</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">displacement</span> <span class="o">*=</span> <span class="mf">0.2</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_log_minimize</span><span class="p">(</span><span class="n">Epot</span><span class="p">,</span> <span class="n">max_forces</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_dump_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;dump.min.lammpstrj&quot;</span><span class="p">)</span>
+        <span class="n">log_simulation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">update_dump_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;dump.min.lammpstrj&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The two methods named <em>update_log_minimize()</em> and <em>update_dump_file()</em>, are used
@@ -291,13 +291,9 @@ These two methods will be written in the following.</p>
 
 <span class="k">class</span> <span class="nc">Outputs</span><span class="p">(</span><span class="n">Measurements</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                <span class="n">thermo_period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">dumping_period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">data_folder</span><span class="o">=</span><span class="s2">&quot;Outputs/&quot;</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">thermo_period</span> <span class="o">=</span> <span class="n">thermo_period</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dumping_period</span> <span class="o">=</span> <span class="n">dumping_period</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">=</span> <span class="n">data_folder</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
@@ -309,31 +305,43 @@ the period at which information is printed during the run, and <em>dumping_perio
 which controls the period at which atom positions are printed in the dump
 file.</p>
 </section>
-<section id="update-the-dump-file">
-<h2>Update the dump file<a class="headerlink" href="#update-the-dump-file" title="Link to this heading">¶</a></h2>
-<p>Add the following method named <em>update_dump_file()</em> to the
-<em>Output</em> class.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">update_dump_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dumping_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">box_boundaries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span>\
-            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span>
-        <span class="n">atoms_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span>\
-            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span>
-        <span class="n">atoms_types</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_type</span>
-        <span class="k">if</span> <span class="n">velocity</span><span class="p">:</span>
-            <span class="n">atoms_velocities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_velocities</span> \
-                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_time</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">dumping_period</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">+</span> <span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">+</span> <span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
+<section id="update-the-dump-and-log">
+<h2>Update the dump and log<a class="headerlink" href="#update-the-dump-and-log" title="Link to this heading">¶</a></h2>
+<p>Let us add the following functions named <em>update_dump_file</em> and <em>log_simulation_data</em>
+to the <em>tools.py</em> file. Here, some variable are being printed in a file, such as box dimension and atom positions.
+All quantities are dimensionalized before getting outputed, and the file follows
+a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(message)s</span><span class="s1">&#39;</span>
+<span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">update_dump_file</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">dumping_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="n">code</span><span class="o">.</span><span class="n">dumping_period</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Convert units to the *real* dimensions</span>
+            <span class="n">box_boundaries</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">box_boundaries</span>\
+                <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_distance</span> <span class="c1"># Angstrom</span>
+            <span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">atoms_positions</span>\
+                <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_distance</span> <span class="c1"># Angstrom</span>
+            <span class="n">atoms_types</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">atoms_type</span>
+            <span class="k">if</span> <span class="n">velocity</span><span class="p">:</span>
+                <span class="n">atoms_velocities</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">atoms_velocities</span> \
+                    <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_distance</span><span class="o">/</span><span class="n">code</span><span class="o">.</span><span class="n">reference_time</span> <span class="c1"># Angstrom/femtosecond</span>
+            <span class="c1"># Start writting the file</span>
+            <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># Create new file</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">+</span> <span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span> <span class="c1"># Append to excisting file</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">+</span> <span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ITEM: TIMESTEP</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ITEM: NUMBER OF ATOMS</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ITEM: BOX BOUNDS pp pp pp</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">dimensions</span><span class="p">):</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">box_boundaries</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
                         <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">box_boundaries</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">cpt</span> <span class="o">=</span> <span class="mi">1</span>
@@ -341,48 +349,59 @@ file.</p>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ITEM: ATOMS id type x y z vx vy vz</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="n">characters</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> </span><span class="si">%d</span><span class="s2"> </span><span class="si">%.3f</span><span class="s2"> </span><span class="si">%.3f</span><span class="s2"> </span><span class="si">%.3f</span><span class="s2"> </span><span class="si">%.3f</span><span class="s2"> </span><span class="si">%.3f</span><span class="s2"> </span><span class="si">%.3f</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
                 <span class="k">for</span> <span class="nb">type</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">vxyz</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">atoms_types</span><span class="p">,</span>
-                                           <span class="n">atoms_positions</span><span class="p">,</span>
-                                           <span class="n">atoms_velocities</span><span class="p">):</span>
+                                        <span class="n">atoms_positions</span><span class="p">,</span>
+                                        <span class="n">atoms_velocities</span><span class="p">):</span>
                     <span class="n">v</span> <span class="o">=</span> <span class="p">[</span><span class="n">cpt</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                         <span class="n">vxyz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vxyz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vxyz</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+                            <span class="n">vxyz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vxyz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vxyz</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
                     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">characters</span> <span class="o">%</span> <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
-                                          <span class="n">v</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
+                                        <span class="n">v</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
                     <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ITEM: ATOMS id type x y z</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="n">characters</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> </span><span class="si">%d</span><span class="s2"> </span><span class="si">%.3f</span><span class="s2"> </span><span class="si">%.3f</span><span class="s2"> </span><span class="si">%.3f</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
                 <span class="k">for</span> <span class="nb">type</span><span class="p">,</span> <span class="n">xyz</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">atoms_types</span><span class="p">,</span>
-                                     <span class="n">atoms_positions</span><span class="p">):</span>
+                                    <span class="n">atoms_positions</span><span class="p">):</span>
                     <span class="n">v</span> <span class="o">=</span> <span class="p">[</span><span class="n">cpt</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">xyz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xyz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">xyz</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
                     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">characters</span> <span class="o">%</span> <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                                          <span class="n">v</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
+                                        <span class="n">v</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
                     <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">log_simulation_data</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_period</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">Epot</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">Epot</span> <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">Epot</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span> \
+                    <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
+            <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot&quot;</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot (kcal/mol)&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;MaxF&quot;</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot (kcal/mol) MaxF (kcal/A/mol)&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;press&quot;</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot (kcal/mol) press (atm)&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot&quot;</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;MaxF&quot;</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">MaxF</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;press&quot;</span><span class="p">:</span>
+                <span class="n">code</span><span class="o">.</span><span class="n">calculate_pressure</span><span class="p">()</span>
+                <span class="n">press</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">pressure</span> \
+                    <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_pressure</span>  <span class="c1"># Atm</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">press</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Here, some variable are being printed in a file, such as box dimension and atom positions.
-All quantities are dimensionalized before getting outputed, and the file follows
-a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.</p>
 </section>
-<section id="update-the-log-file">
-<h2>Update the log file<a class="headerlink" href="#update-the-log-file" title="Link to this heading">¶</a></h2>
-<p>Finally, add the following method to the <em>Output</em> class.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">update_log_minimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Epot</span><span class="p">,</span> <span class="n">maxForce</span><span class="p">):</span>
-    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thermo_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">thermo_period</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
-                <span class="o">|</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thermo_period</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)):</span>
-            <span class="n">epot_kcalmol</span> <span class="o">=</span> <span class="n">Epot</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span>
-            <span class="n">max_force_kcalmolA</span> <span class="o">=</span> <span class="n">maxForce</span> \
-                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">characters</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">characters</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;step&quot;</span><span class="p">,</span>
-                                    <span class="s2">&quot;epot&quot;</span><span class="p">,</span>
-                                    <span class="s2">&quot;maxF&quot;</span><span class="p">))</span>
-            <span class="n">characters</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> </span><span class="si">%.3f</span><span class="s2"> </span><span class="si">%.3f</span><span class="s2">&quot;</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">characters</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">,</span>
-                                <span class="n">epot_kcalmol</span><span class="p">,</span>
-                                <span class="n">max_force_kcalmolA</span><span class="p">))</span>
+<section id="import-the-functions">
+<h2>Import the functions<a class="headerlink" href="#import-the-functions" title="Link to this heading">¶</a></h2>
+<p>The Monte Carlo and the Minimize class must import <em>update_dump_file</em> and <em>log_simulation_data</em>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tools</span> <span class="kn">import</span> <span class="n">update_dump_file</span><span class="p">,</span> <span class="n">log_simulation_data</span>
+</pre></div>
+</div>
+<p>and</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tools</span> <span class="kn">import</span> <span class="n">update_dump_file</span><span class="p">,</span> <span class="n">log_simulation_data</span>
 </pre></div>
 </div>
 </section>
@@ -409,8 +428,9 @@ every 10 steps in the dump files, as well as in the log:</p>
 </div>
 <p>When running the simulation, information must be printed in the terminal:</p>
 <div class="highlight-bw notranslate"><div class="highlight"><pre><span></span>step epot maxF
-0 13.176 34.783
-10 -0.157 5.138
+0 -1.683 2.080
+10 -2.264 0.211
+20 -2.748 0.063
 (...)
 </pre></div>
 </div>
@@ -472,8 +492,8 @@ every 10 steps in the dump files, as well as in the log:</p>
 <li><a class="reference internal" href="#">Output the simulation state</a><ul>
 <li><a class="reference internal" href="#update-the-minimizeenergy-class">Update the MinimizeEnergy class</a></li>
 <li><a class="reference internal" href="#improve-the-output-class">Improve the output class</a></li>
-<li><a class="reference internal" href="#update-the-dump-file">Update the dump file</a></li>
-<li><a class="reference internal" href="#update-the-log-file">Update the log file</a></li>
+<li><a class="reference internal" href="#update-the-dump-and-log">Update the dump and log</a></li>
+<li><a class="reference internal" href="#import-the-functions">Import the functions</a></li>
 <li><a class="reference internal" href="#test-the-code">Test the code</a></li>
 </ul>
 </li>
