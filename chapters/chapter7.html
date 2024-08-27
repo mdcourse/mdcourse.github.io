@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="A study of argon" href="../projects/project1.html" /><link rel="prev" title="Monte Carlo displace" href="chapter6.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="A Monte Carlo study of argon" href="../projects/project1.html" /><link rel="prev" title="Monte Carlo displace" href="chapter6.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
         <title>Pressure measurement - </title>
@@ -214,7 +214,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Illustration</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../projects/project1.html">A study of argon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../projects/project1.html">A Monte Carlo study of argon</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Extra content</span></p>
 <ul>
@@ -275,7 +275,7 @@ expression reads:</p>
 </div>
 <p><span class="math notranslate nohighlight">\(N_\text{DOF}\)</span> is the number of degrees-of-freedom, which can be calculated
 from the number of particles, <span class="math notranslate nohighlight">\(N\)</span>, and the dimension of the system, <span class="math notranslate nohighlight">\(d\)</span>, as
-<span class="math notranslate nohighlight">\(N_\text{DOF} = d N - d\)</span> <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id4" title="Daan Frenkel and Berend Smit. Understanding molecular simulation: from algorithms to applications. Elsevier, 2002.">1</a>]</span>.</p>
+<span class="math notranslate nohighlight">\(N_\text{DOF} = d N - d\)</span> <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id4" title="Daan Frenkel and Berend Smit. Understanding molecular simulation: from algorithms to applications. Elsevier, 2002.">2</a>]</span>.</p>
 <p>The calculation of <span class="math notranslate nohighlight">\(p_\text{ideal}\)</span> is straighforward. For Monte Carlo simulation,
 as atoms do not have temperature, the <em>imposed</em> temperature will be used instead.
 The calculation of <span class="math notranslate nohighlight">\(p_\text{non_ideal}\)</span> requires the measurement of all the
@@ -324,10 +324,10 @@ vector direction between atoms pairs will have to be written here.</p>
 <h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
 <p>Let us test the outputed pressure. An interesting test is to contront the output from
 our code with some data from the litterature. Let us used the same parameters
-as in Ref. <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">2</a>]</span>, where Monte Carlo simulations
+as in Ref. <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">1</a>]</span>, where Monte Carlo simulations
 are used to simulate argon bulk phase. All we have to do is to apply our current
 code using their parameters, i.e. <span class="math notranslate nohighlight">\(\sigma = 3.405~\text{Å}\)</span>, <span class="math notranslate nohighlight">\(\epsilon = 0.238~\text{kcal/mol}\)</span>,
-and <span class="math notranslate nohighlight">\(T = 55~^\circ\text{C}\)</span>. More details are given in the first illustration, <a class="reference internal" href="../projects/project1.html#project1-label"><span class="std std-ref">A study of argon</span></a>.</p>
+and <span class="math notranslate nohighlight">\(T = 55~^\circ\text{C}\)</span>. More details are given in the first illustration, <a class="reference internal" href="../projects/project1.html#project1-label"><span class="std std-ref">A Monte Carlo study of argon</span></a>.</p>
 <p>On the side note, a relatively small cut-off as well as a small number of atoms were
 chosen to make the calculation faster.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -380,7 +380,7 @@ chosen to make the calculation faster.</p>
 </pre></div>
 </div>
 <p>Which should return a value for <span class="math notranslate nohighlight">\(p V / R T\)</span> that is close to the expected value
-of 1.5 by Wood and Parker for <span class="math notranslate nohighlight">\(\tau = V/V^* = 2\)</span> (see Fig. 4 in Ref. <span id="id3">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">2</a>]</span>):</p>
+of 1.5 by Wood and Parker for <span class="math notranslate nohighlight">\(\tau = V/V^* = 2\)</span> (see Fig. 4 in Ref. <span id="id3">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">1</a>]</span>):</p>
 <div class="highlight-bw notranslate"><div class="highlight"><pre><span></span>(...)
 p v / R T = 1.56  --- (The expected value from Wood1957 is 1.5)
 </pre></div>
@@ -399,7 +399,7 @@ p v / R T = 1.56  --- (The expected value from Wood1957 is 1.5)
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">A study of argon</div>
+                <div class="title">A Monte Carlo study of argon</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

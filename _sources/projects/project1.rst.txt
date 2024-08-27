@@ -1,7 +1,7 @@
 .. _project1-label:
 
-A study of argon
-================
+A Monte Carlo study of argon
+============================
 
 Using Monte Carlo simulations, the equation of state of 3D fluid of argon is simulated
 for a large range of density.
