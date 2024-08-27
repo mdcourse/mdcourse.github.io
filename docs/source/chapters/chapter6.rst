@@ -1,3 +1,5 @@
+.. _chapter6-label:
+
 Monte Carlo move
 ================
 
@@ -72,14 +74,6 @@ and the desired temperature (:math:`T`). Let us add these parameters to the
 
 .. code-block:: python
 
-    from scipy import constants as cst
-    import numpy as np
-    import copy
-    from Outputs import Outputs
-
-    import warnings
-    warnings.filterwarnings('ignore')
-
     class MonteCarlo(Outputs):
         def __init__(self,
                     maximum_steps,
@@ -87,6 +81,7 @@ and the desired temperature (:math:`T`). Let us add these parameters to the
                     displace_mc = None,
                     neighbor = 1,
                     desired_temperature = 300,
+                    thermo_outputs = "press",
                     *args,
                     **kwargs):
             self.maximum_steps = maximum_steps
@@ -94,6 +89,7 @@ and the desired temperature (:math:`T`). Let us add these parameters to the
             self.displace_mc = displace_mc
             self.neighbor = neighbor
             self.desired_temperature = desired_temperature
+            self.thermo_outputs = thermo_outputs
             super().__init__(*args, **kwargs)
             self.nondimensionalize_units_3()
 
@@ -258,8 +254,8 @@ Let us add a dump too:
         for self.step in range(0, self.maximum_steps+1):
             (...)
             self.wrap_in_box()
-            self.update_log_md_mc(velocity=False)
-            self.update_dump_file(filename="dump.mc.lammpstrj")
+            log_simulation_data(self)
+            update_dump_file(self, "dump.mc.lammpstrj")
 
 .. label:: end_MonteCarlo_class
 
@@ -293,6 +289,7 @@ One can use a similar test as previously. Let us use a displace distance of
     mc = MonteCarlo(maximum_steps=1000,
         dumping_period=100,
         thermo_period=100,
+        thermo_outputs = "Epot",
         displace_mc = 0.5,
         number_atoms=[50],
         epsilon=[0.1], # kcal/mol

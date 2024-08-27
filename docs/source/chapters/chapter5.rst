@@ -19,8 +19,8 @@ Let us start by calling two additional methods within the for loop of the
         for self.step in range(0, self.maximum_steps+1):
             (...)
                 self.displacement *= 0.2
-            self.update_log_minimize(Epot, max_forces)
-            self.update_dump_file(filename="dump.min.lammpstrj")
+            log_simulation_data(self)
+            update_dump_file(self, "dump.min.lammpstrj")
 
 .. label:: end_MinimizeEnergy_class
 
@@ -45,13 +45,9 @@ Modify the *__init__* class of the *Outputs.py* file:
 
     class Outputs(Measurements):
         def __init__(self,
-                    thermo_period=None,
-                    dumping_period=None,
                     data_folder="Outputs/",
                     *args,
                     **kwargs):
-            self.thermo_period = thermo_period
-            self.dumping_period = dumping_period
             self.data_folder = data_folder
             super().__init__(*args, **kwargs)
             if os.path.exists(self.data_folder) is False:
@@ -64,37 +60,49 @@ the period at which information is printed during the run, and *dumping_period*
 which controls the period at which atom positions are printed in the dump
 file. 
 
-Update the dump file
---------------------
+Update the dump and log
+-----------------------
 
-Add the following method named *update_dump_file()* to the
-*Output* class. 
+Let us add the following functions named *update_dump_file* and *log_simulation_data*
+to the *tools.py* file. Here, some variable are being printed in a file, such as box dimension and atom positions.
+All quantities are dimensionalized before getting outputed, and the file follows
+a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.
 
-.. label:: start_Outputs_class
+.. label:: start_tools_class
 
 .. code-block:: python
 
-    def update_dump_file(self, filename, velocity=False):
-        if self.dumping_period is not None:
-            box_boundaries = self.box_boundaries\
-                * self.reference_distance
-            atoms_positions = self.atoms_positions\
-                * self.reference_distance
-            atoms_types = self.atoms_type
-            if velocity:
-                atoms_velocities = self.atoms_velocities \
-                    * self.reference_distance/self.reference_time
-            if self.step % self.dumping_period == 0:
-                if self.step == 0:
-                    f = open(self.data_folder + filename, "w")
-                else:
-                    f = open(self.data_folder + filename, "a")
+    import numpy as np
+
+    import logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(message)s'
+    )
+
+    def update_dump_file(code, filename, velocity=False):
+        if code.dumping_period is not None:
+            if code.step % code.dumping_period == 0:
+                # Convert units to the *real* dimensions
+                box_boundaries = code.box_boundaries\
+                    * code.reference_distance # Angstrom
+                atoms_positions = code.atoms_positions\
+                    * code.reference_distance # Angstrom
+                atoms_types = code.atoms_type
+                if velocity:
+                    atoms_velocities = code.atoms_velocities \
+                        * code.reference_distance/code.reference_time # Angstrom/femtosecond
+                # Start writting the file
+                if code.step == 0: # Create new file
+                    f = open(code.data_folder + filename, "w")
+                else: # Append to excisting file
+                    f = open(code.data_folder + filename, "a")
                 f.write("ITEM: TIMESTEP\n")
-                f.write(str(self.step) + "\n")
+                f.write(str(code.step) + "\n")
                 f.write("ITEM: NUMBER OF ATOMS\n")
-                f.write(str(self.total_number_atoms) + "\n")
+                f.write(str(code.total_number_atoms) + "\n")
                 f.write("ITEM: BOX BOUNDS pp pp pp\n")
-                for dim in np.arange(self.dimensions):
+                for dim in np.arange(code.dimensions):
                     f.write(str(box_boundaries[dim][0]) + " "
                             + str(box_boundaries[dim][1]) + "\n")
                 cpt = 1
@@ -102,64 +110,79 @@ Add the following method named *update_dump_file()* to the
                     f.write("ITEM: ATOMS id type x y z vx vy vz\n")
                     characters = "%d %d %.3f %.3f %.3f %.3f %.3f %.3f %s"
                     for type, xyz, vxyz in zip(atoms_types,
-                                               atoms_positions,
-                                               atoms_velocities):
+                                            atoms_positions,
+                                            atoms_velocities):
                         v = [cpt, type, xyz[0], xyz[1], xyz[2],
-                             vxyz[0], vxyz[1], vxyz[2]]
+                                vxyz[0], vxyz[1], vxyz[2]]
                         f.write(characters % (v[0], v[1], v[2], v[3], v[4],
-                                              v[5], v[6], v[7], '\n'))
+                                            v[5], v[6], v[7], '\n'))
                         cpt += 1
                 else:
                     f.write("ITEM: ATOMS id type x y z\n")
                     characters = "%d %d %.3f %.3f %.3f %s"
                     for type, xyz in zip(atoms_types,
-                                         atoms_positions):
+                                        atoms_positions):
                         v = [cpt, type, xyz[0], xyz[1], xyz[2]]
                         f.write(characters % (v[0], v[1], v[2],
-                                              v[3], v[4], '\n'))
+                                            v[3], v[4], '\n'))
                         cpt += 1
                 f.close()
 
-.. label:: end_Outputs_class
+    def log_simulation_data(code):
+        if code.thermo_period is not None:
+            if code.step % code.thermo_period == 0:
+                try:
+                    Epot = code.Epot * code.reference_energy  # kcal/mol
+                except:
+                    Epot = code.compute_potential(output="potential") \
+                        * code.reference_energy  # kcal/mol
+                if code.step == 0:
+                    if code.thermo_outputs == "Epot":
+                        logging.info(f"step Epot (kcal/mol)")
+                    elif code.thermo_outputs == "MaxF":
+                        logging.info(f"step Epot (kcal/mol) MaxF (kcal/A/mol)")
+                    elif code.thermo_outputs == "press":
+                        logging.info(f"step Epot (kcal/mol) press (atm)")
+                if code.thermo_outputs == "Epot":
+                    logging.info(f"{code.step}, {Epot:.2f}")
+                elif code.thermo_outputs == "MaxF":
+                    logging.info(f"{code.step}, {Epot:.2f}, {code.MaxF:.2f}")
+                elif code.thermo_outputs == "press":
+                    code.calculate_pressure()
+                    press = code.pressure \
+                        * code.reference_pressure  # Atm
+                    logging.info(f"{code.step}, {Epot:.2f}, {press:.2f}")        
 
-Here, some variable are being printed in a file, such as box dimension and atom positions.
-All quantities are dimensionalized before getting outputed, and the file follows
-a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.
+.. label:: end_tools_class
 
-Update the log file
+Import the functions
 --------------------
 
-Finally, add the following method to the *Output* class. 
+The Monte Carlo and the Minimize class must import *update_dump_file* and *log_simulation_data*.
 
-.. label:: start_Outputs_class
+.. label:: start_MonteCarlo_class
 
 .. code-block:: python
 
-    def update_log_minimize(self, Epot, maxForce):
-        if (self.thermo_period is not None):
-            if ((self.step % self.thermo_period == 0)
-                    | (self.thermo_period == 0)):
-                epot_kcalmol = Epot * self.reference_energy
-                max_force_kcalmolA = maxForce \
-                    * self.reference_energy / self.reference_distance
-                if self.step == 0:
-                    characters = "%s %s %s"
-                    print(characters % ("step",
-                                        "epot",
-                                        "maxF"))
-                characters = "%d %.3f %.3f"
-                print(characters % (self.step,
-                                    epot_kcalmol,
-                                    max_force_kcalmolA))
+    from tools import update_dump_file, log_simulation_data
 
-.. label:: end_Outputs_class
+.. label:: end_MonteCarlo_class
+
+and
+
+.. label:: start_MinimizeEnergy_class
+
+.. code-block:: python
+
+    from tools import update_dump_file, log_simulation_data
+
+.. label:: end_MinimizeEnergy_class
 
 Test the code
 -------------
 
 One can use the same test as previously, and ask the code to print information
 every 10 steps in the dump files, as well as in the log:
-
 
 .. label:: start_test_Outputs_class
 
@@ -188,8 +211,9 @@ When running the simulation, information must be printed in the terminal:
 .. code-block:: bw
 
     step epot maxF
-    0 13.176 34.783
-    10 -0.157 5.138
+    0 -1.683 2.080
+    10 -2.264 0.211
+    20 -2.748 0.063
     (...)
 
 and a file named *dump.min.lammpstrj* must have appeared in the *Outputs/* folder.

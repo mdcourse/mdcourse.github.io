@@ -32,12 +32,14 @@ Then, let us fill the *__init__()* method:
                     cut_off=9,
                     neighbor=1,
                     displacement=0.01,
+                    thermo_outputs="MaxF",
                     *args,
                     **kwargs):
             self.neighbor = neighbor
             self.cut_off = cut_off
             self.displacement = displacement
             self.maximum_steps = maximum_steps
+            self.thermo_outputs = thermo_outputs
             super().__init__(*args, **kwargs)
 
 .. label:: end_MinimizeEnergy_class
@@ -96,22 +98,30 @@ energy, and the new position is either accepted or rejected based on energy crit
         for self.step in range(0, self.maximum_steps+1):
             # Measure the initial energy and max force
             self.update_neighbor_lists()
-            init_Epot = self.compute_potential(output="potential")
-            initial_positions = copy.deepcopy(self.atoms_positions)
-            forces = self.compute_potential(output="force-vector")
-            max_forces = np.max(np.abs(forces))
+            try: # try using the last saved Epot, if it exists
+                init_Epot = self.Epot
+                init_MaxF = self.MaxF
+            except: # If self.Epot does not exists yet, calculate it
+                init_Epot = self.compute_potential(output="potential")
+                forces = self.compute_potential(output="force-vector")
+                init_MaxF = np.max(np.abs(forces))
+            init_positions = copy.deepcopy(self.atoms_positions)
             # Test a new sets of positions
             self.atoms_positions = self.atoms_positions \
-                + forces/max_forces*self.displacement
+                + forces/init_MaxF*self.displacement
             trial_Epot = self.compute_potential(output="potential")
+            forces = self.compute_potential(output="force-vector")
+            trial_MaxF = np.max(np.abs(forces))
             # Keep the more favorable energy
             if trial_Epot < init_Epot:  # accept new position
-                Epot = trial_Epot
+                self.Epot = trial_Epot
+                self.MaxF = trial_MaxF
                 self.wrap_in_box()
                 self.displacement *= 1.2
             else:  # reject new position
-                Epot = init_Epot
-                self.atoms_positions = initial_positions
+                self.Epot = init_Epot
+                self.MaxF = init_MaxF
+                self.atoms_positions = init_positions
                 self.displacement *= 0.2
 
 .. label:: end_MinimizeEnergy_class

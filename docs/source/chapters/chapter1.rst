@@ -189,7 +189,7 @@ The *Measurements* class inherits both *InitializeSimulation*  and
 .. label:: end_Measurements_class
 
 The *Outputs* class inherits the *Measurements* class. Within the
-*Outputs.py* file, copy the following lines:
+*Outputs.py* file, copy the following lines: # TOFIX, to remove?
 
 .. label:: start_Outputs_class
 
@@ -250,6 +250,9 @@ Within the *MonteCarlo.py* file, copy the following lines:
     import copy
     from Outputs import Outputs
 
+    import warnings
+    warnings.filterwarnings('ignore')
+
 
     class MonteCarlo(Outputs):
         def __init__(self,
@@ -258,6 +261,10 @@ Within the *MonteCarlo.py* file, copy the following lines:
             super().__init__(*args, **kwargs)
 
 .. label:: end_MonteCarlo_class
+
+The *warnings* was placed to avoid the anoying message "*RuntimeWarning: overflow
+encountered in exp*" that is sometimes triggered by the exponential of the
+*acceptation_probability* (see :ref:`chapter6-label`).
 
 Finally, within the *MolecularDynamics.py* file, copy the following lines:
 
