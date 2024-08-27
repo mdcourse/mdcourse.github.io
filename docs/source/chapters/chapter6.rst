@@ -1,44 +1,72 @@
-Monte Carlo displace
-====================
+Monte Carlo move
+================
 
-Move
-----
+Here, a *Monte Carlo move* simulation is implemented. The principle of the
+simulation is the following:
 
-Let us add a new method callsed *monte_carlo_displacement* to the *MonteCarlo* class. 
-The goal of this method is to implement a Monte Carlo move. The energy of the system is
-first evaluated, an atom is randomly selected and moved. Then, the energy
-of the system is re-measured, and the move is either accepted or rejected, based on the
-Metropolis criteria.
+- 1) We start from a given intial configuration, and measure the potential
+  energy, :math:`E_\text{pot}^\text{initial}`.
+- 2) One of the particles is picked and moved in a random direction. This displacement
+  is made over a distance lower than a certain parameter, :math:`d_\text{mc}`.
+- 3) The energy of the system after the move, :math:`E_\text{pot}^\text{trial}`, is measured.
+- 4) We then have to decide to keep or reject the move. This is done by calculating
+  the difference in energy between the trial and the initial configurations:
+  :math:`\Delta E = E_\text{pot}^\text{trial} - E_\text{pot}^\text{initial}`.
+  
+  - If :math:`\Delta E < 0`, then the move is automatically accepted. 
+  - If :math:`\Delta E > 0`, then the move is accepted with a probability given
+    by the Boltzmann factor :math:`\exp{- \beta \Delta E`, where
+    :math:`\beta = 1 / k_\text{B} T}` and :math:`T` is the imposed temperature.
+
+- 5) Steps 1-4 are repeated a large number of times, generating a broad range of
+     possible configurations.
+
+Implementation
+--------------
+
+Let us add a method named *monte_carlo_move* to the *MonteCarlo* class:
 
 .. label:: start_MonteCarlo_class
 
 .. code-block:: python
 
-    def monte_carlo_displacement(self):
-        if self.displace_mc is not None:
-            try: # try using the last saved Epot
+    def monte_carlo_move(self):
+        """Monte Carlo move trial."""
+        if self.displace_mc is not None: # only trigger if displace_mc was provided by the user
+            try: # try using the last saved Epot, if it exists
                 initial_Epot = self.Epot
-            except: # If no Epot was saved yet, recalculate it
+            except: # If self.Epot does not exists yet, calculate it
                 initial_Epot = self.compute_potential(output="potential")
+            # Make a copy of the initial atoms positions
             initial_positions = copy.deepcopy(self.atoms_positions)
+            # Pick an atom id randomly
             atom_id = np.random.randint(self.total_number_atoms)
-            # Test a new position
-            self.atoms_positions[atom_id] += (np.random.random(3)-0.5)*self.displace_mc
+            # Move the chosen atom in a random direction
+            # The maximum displacement is set by self.displace_mc
+            move = (np.random.random(self.dimensions)-0.5)*self.displace_mc 
+            self.atoms_positions[atom_id] += move
+            # Measure the optential energy of the new configuration
             trial_Epot = self.compute_potential(output="potential")
+            # Evaluate whether the new configuration should be kept or not
             beta =  1/self.desired_temperature
-            acceptation_probability = np.min([1, np.exp(-beta*(trial_Epot-initial_Epot))])
-            if np.random.random() <= acceptation_probability: # Accept new position
+            delta_E = trial_Epot-initial_Epot
+            random_number = np.random.random() # random number between 0 and 1
+            acceptation_probability = np.min([1, np.exp(-beta*delta_E)])
+            if random_number <= acceptation_probability: # Accept new position
                 self.Epot = trial_Epot
             else: # Reject new position
                 self.Epot = initial_Epot
-                self.atoms_positions = initial_positions
+                self.atoms_positions = initial_positions # Revert to initial positions
 
 .. label:: end_MonteCarlo_class
 
 Parameters
 ----------
 
-Let us non-dimentionalized the units, and improve the *__init__* method:
+The *monte_carlo_move* method requires a few parameters to be selected by the
+users, such as *displace_mc* (:math:`d_\text{mc}`), the maximum number of steps,
+and the desired temperature (:math:`T`). Let us add these parameters to the
+*__init__* method:
 
 .. label:: start_MonteCarlo_class
 
@@ -71,7 +99,9 @@ Let us non-dimentionalized the units, and improve the *__init__* method:
 
 .. label:: end_MonteCarlo_class
 
-where:
+Here, we anticipate that some of the parameters have to be nondimensionalized, which
+is done with the *nondimensionalize_units_3* method that must also be added to
+the *MonteCarlo* class:
 
 .. label:: start_MonteCarlo_class
 
@@ -90,7 +120,8 @@ where:
 Run method
 ----------
 
-Finally, let us write a *run* method:
+Finally, let us add a *run* method to the *MonteCarlo* class, that is used to
+perform a loop over the desired number of steps *maximum_steps*:
 
 .. label:: start_MonteCarlo_class
 
@@ -100,10 +131,15 @@ Finally, let us write a *run* method:
         """Perform the loop over time."""
         for self.step in range(0, self.maximum_steps+1):
             self.update_neighbor_lists()
-            self.monte_carlo_displacement()
+            self.monte_carlo_move()
             self.wrap_in_box()
 
 .. label:: end_MonteCarlo_class
+
+At each step, the *monte_carlo_move* method is called. The previously defined
+methods *update_neighbor_lists* and *wrap_in_box* are also called to ensure that
+the neighbor lists are kept up to date despite the motion of the atoms, and that
+the atoms remain inside the box, respectively.
 
 Output
 ------

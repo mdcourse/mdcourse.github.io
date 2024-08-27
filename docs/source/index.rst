@@ -34,8 +34,8 @@ In a second part of the project, the scripts will be used for small scientific
 projects. In particular, some of the earliest results obtained by molecular
 simulations, including the pioneering works by Metropolis, Rosenbluth,
 Wood, and Parker in the 50s, will be re-explored. For instance, the movie on the right
-shows the Monte Carlo simulation of a Lennard-Jones fluid made by Wood and Parker :cite:`woodMonteCarloEquation1957`,
-see :ref:`project1-label`.
+shows the Monte Carlo simulation of a Lennard-Jones fluid made by Wood
+and Parker :cite:`woodMonteCarloEquation1957`, see :ref:`project1-label`.
 
 Prerequisites
 -------------
