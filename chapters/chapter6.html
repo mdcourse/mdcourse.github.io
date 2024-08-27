@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Pressure measurement" href="chapter7.html" /><link rel="prev" title="Output the simulation state" href="chapter5.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
-        <title>Monte Carlo displace - </title>
+        <title>Monte Carlo move - </title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
@@ -209,7 +209,7 @@
 <li class="toctree-l1"><a class="reference internal" href="chapter3.html">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter5.html">Output the simulation state</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Monte Carlo displace</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Monte Carlo move</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter7.html">Pressure measurement</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Illustration</span></p>
@@ -259,39 +259,74 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="monte-carlo-displace">
-<h1>Monte Carlo displace<a class="headerlink" href="#monte-carlo-displace" title="Link to this heading">¶</a></h1>
-<section id="move">
-<h2>Move<a class="headerlink" href="#move" title="Link to this heading">¶</a></h2>
-<p>Let us add a new method callsed <em>monte_carlo_displacement</em> to the <em>MonteCarlo</em> class.
-The goal of this method is to implement a Monte Carlo move. The energy of the system is
-first evaluated, an atom is randomly selected and moved. Then, the energy
-of the system is re-measured, and the move is either accepted or rejected, based on the
-Metropolis criteria.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">monte_carlo_displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span> <span class="c1"># try using the last saved Epot</span>
+          <section id="monte-carlo-move">
+<h1>Monte Carlo move<a class="headerlink" href="#monte-carlo-move" title="Link to this heading">¶</a></h1>
+<p>Here, a <em>Monte Carlo move</em> simulation is implemented. The principle of the
+simulation is the following:</p>
+<ul class="simple">
+<li><p>1) We start from a given intial configuration, and measure the potential
+energy, <span class="math notranslate nohighlight">\(E_\text{pot}^\text{initial}\)</span>.</p></li>
+<li><p>2) One of the particles is picked and moved in a random direction. This displacement
+is made over a distance lower than a certain parameter, <span class="math notranslate nohighlight">\(d_\text{mc}\)</span>.</p></li>
+<li><ol class="arabic simple" start="3">
+<li><p>The energy of the system after the move, <span class="math notranslate nohighlight">\(E_\text{pot}^\text{trial}\)</span>, is measured.</p></li>
+</ol>
+</li>
+<li><p>4) We then have to decide to keep or reject the move. This is done by calculating
+the difference in energy between the trial and the initial configurations:
+<span class="math notranslate nohighlight">\(\Delta E = E_\text{pot}^\text{trial} - E_\text{pot}^\text{initial}\)</span>.</p>
+<ul>
+<li><p>If <span class="math notranslate nohighlight">\(\Delta E &lt; 0\)</span>, then the move is automatically accepted.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(\Delta E &gt; 0\)</span>, then the move is accepted with a probability given
+by the Boltzmann factor <span class="math notranslate nohighlight">\(\exp{- \beta \Delta E\)</span>, where
+<span class="math notranslate nohighlight">\(\beta = 1 / k_\text{B} T}\)</span> and <span class="math notranslate nohighlight">\(T\)</span> is the imposed temperature.</p></li>
+</ul>
+</li>
+<li><ol class="arabic simple" start="5">
+<li><p>Steps 1-4 are repeated a large number of times, generating a broad range of
+possible configurations.</p></li>
+</ol>
+</li>
+</ul>
+<section id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">¶</a></h2>
+<p>Let us add a method named <em>monte_carlo_move</em> to the <em>MonteCarlo</em> class:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">monte_carlo_move</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Monte Carlo move trial.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># only trigger if displace_mc was provided by the user</span>
+        <span class="k">try</span><span class="p">:</span> <span class="c1"># try using the last saved Epot, if it exists</span>
             <span class="n">initial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span>
-        <span class="k">except</span><span class="p">:</span> <span class="c1"># If no Epot was saved yet, recalculate it</span>
+        <span class="k">except</span><span class="p">:</span> <span class="c1"># If self.Epot does not exists yet, calculate it</span>
             <span class="n">initial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span>
+        <span class="c1"># Make a copy of the initial atoms positions</span>
         <span class="n">initial_positions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span>
+        <span class="c1"># Pick an atom id randomly</span>
         <span class="n">atom_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">)</span>
-        <span class="c1"># Test a new position</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="n">atom_id</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span>
+        <span class="c1"># Move the chosen atom in a random direction</span>
+        <span class="c1"># The maximum displacement is set by self.displace_mc</span>
+        <span class="n">move</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="n">atom_id</span><span class="p">]</span> <span class="o">+=</span> <span class="n">move</span>
+        <span class="c1"># Measure the optential energy of the new configuration</span>
         <span class="n">trial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span>
+        <span class="c1"># Evaluate whether the new configuration should be kept or not</span>
         <span class="n">beta</span> <span class="o">=</span>  <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span>
-        <span class="n">acceptation_probability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">beta</span><span class="o">*</span><span class="p">(</span><span class="n">trial_Epot</span><span class="o">-</span><span class="n">initial_Epot</span><span class="p">))])</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">acceptation_probability</span><span class="p">:</span> <span class="c1"># Accept new position</span>
+        <span class="n">delta_E</span> <span class="o">=</span> <span class="n">trial_Epot</span><span class="o">-</span><span class="n">initial_Epot</span>
+        <span class="n">random_number</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="c1"># random number between 0 and 1</span>
+        <span class="n">acceptation_probability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">beta</span><span class="o">*</span><span class="n">delta_E</span><span class="p">)])</span>
+        <span class="k">if</span> <span class="n">random_number</span> <span class="o">&lt;=</span> <span class="n">acceptation_probability</span><span class="p">:</span> <span class="c1"># Accept new position</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="n">trial_Epot</span>
         <span class="k">else</span><span class="p">:</span> <span class="c1"># Reject new position</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="n">initial_Epot</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">initial_positions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">initial_positions</span> <span class="c1"># Revert to initial positions</span>
 </pre></div>
 </div>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h2>
-<p>Let us non-dimentionalized the units, and improve the <em>__init__</em> method:</p>
+<p>The <em>monte_carlo_move</em> method requires a few parameters to be selected by the
+users, such as <em>displace_mc</em> (<span class="math notranslate nohighlight">\(d_\text{mc}\)</span>), the maximum number of steps,
+and the desired temperature (<span class="math notranslate nohighlight">\(T\)</span>). Let us add these parameters to the
+<em>__init__</em> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">copy</span>
@@ -318,7 +353,9 @@ Metropolis criteria.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units_3</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>where:</p>
+<p>Here, we anticipate that some of the parameters have to be nondimensionalized, which
+is done with the <em>nondimensionalize_units_3</em> method that must also be added to
+the <em>MonteCarlo</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">nondimensionalize_units_3</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Use LJ prefactors to convert units into non-dimensional.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cut_off</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cut_off</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span>
@@ -331,15 +368,20 @@ Metropolis criteria.</p>
 </section>
 <section id="run-method">
 <h2>Run method<a class="headerlink" href="#run-method" title="Link to this heading">¶</a></h2>
-<p>Finally, let us write a <em>run</em> method:</p>
+<p>Finally, let us add a <em>run</em> method to the <em>MonteCarlo</em> class, that is used to
+perform a loop over the desired number of steps <em>maximum_steps</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform the loop over time.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_displacement</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_move</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_box</span><span class="p">()</span>
 </pre></div>
 </div>
+<p>At each step, the <em>monte_carlo_move</em> method is called. The previously defined
+methods <em>update_neighbor_lists</em> and <em>wrap_in_box</em> are also called to ensure that
+the neighbor lists are kept up to date despite the motion of the atoms, and that
+the atoms remain inside the box, respectively.</p>
 </section>
 <section id="output">
 <h2>Output<a class="headerlink" href="#output" title="Link to this heading">¶</a></h2>
@@ -529,8 +571,8 @@ are written in the <em>Outputs/Epot.dat</em> file and can be plotted.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Monte Carlo displace</a><ul>
-<li><a class="reference internal" href="#move">Move</a></li>
+<li><a class="reference internal" href="#">Monte Carlo move</a><ul>
+<li><a class="reference internal" href="#implementation">Implementation</a></li>
 <li><a class="reference internal" href="#parameters">Parameters</a></li>
 <li><a class="reference internal" href="#run-method">Run method</a></li>
 <li><a class="reference internal" href="#output">Output</a></li>
@@ -550,5 +592,6 @@ are written in the <em>Outputs/Epot.dat</em> file and can be plotted.</p>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>
