@@ -40,8 +40,6 @@ course, as well as 2 files containing functions:
      - *Utilities* class
    * - *InitializeSimulation.py*
      - *InitializeSimulation* class
-   * - *Outputs.py*
-     - *Outputs* class
    * - *MinimizeEnergy.py* 
      - *MinimizeEnergy* class
    * - *MolecularDynamics.py*
@@ -52,21 +50,23 @@ course, as well as 2 files containing functions:
      - Functions
    * - *Potentials.py* 
      - Functions
+    * - *tools.py*
+     - Functions
 
 Each of these files will serve to perform specific tasks. Within these files,
 the final Python code will be divided into seven classes:
 
 - *Prepare --* Methods preparing the non-dimensionalization of the units
 - *Utilities --* Methods of general purpose, inherited by all the other classes
-- *Outputs --* Methods of interest for printing information in log or data
-  files, inherited by all the classes except *Utilities*
 - *InitializeSimulation --* Methods necessary to set up the system and prepare
-  the simulation, inherited by all the classes except *Outputs* and *Utilities*
-- *MinimizeEnergy --* Methods for performing energy minimization, including 
+  the simulation, inherited by all the classes except *Utilities*
+- *MinimizeEnergy --* Methods for performing energy minimization 
 - *MonteCarlo --* Methods for performing Monte Carlo simulation in different
   ensembles (Grand canonical, canonical)
 - *MolecularDynamics --* Methods for performing molecular dynamics in
   different ensembles (NVE, NPT, NVT)
+- *tools --* Functions of interest for printing information in log or data
+  files
 
 Potential for inter-atomic interaction
 --------------------------------------
@@ -188,50 +188,20 @@ The *Measurements* class inherits both *InitializeSimulation*  and
           
 .. label:: end_Measurements_class
 
-The *Outputs* class inherits the *Measurements* class. Within the
-*Outputs.py* file, copy the following lines: # TOFIX, to remove?
-
-.. label:: start_Outputs_class
-
-.. code-block:: python
-
-    from scipy import constants as cst
-    import numpy as np
-    import os
-    from Measurements import Measurements
-
-
-    class Outputs(Measurements):
-        def __init__(self,
-                    data_folder="Outputs/",
-                    *args,
-                    **kwargs):
-            super().__init__(*args, **kwargs)
-            self.data_folder = data_folder
-            if os.path.exists(self.data_folder) is False:
-                os.mkdir(self.data_folder)
-
-.. label:: end_Outputs_class
-
-Here, we anticipate that the outputs
-from the code will be saved in a folder, which by default
-is named *results/*. If the folder does not exist, it will be
-created using *os.mkdir()* from the *os* module, which was previously
-imported. NumPy and the *constants* module of SciPy were also imported.
-
 Finally, let us create the three remaining classes, named respectively *MinimizeEnergy*,
 *MonteCarlo*, and *MolecularDynamics*. Each class inherits
-the *Outputs* class. Within the *MinimizeEnergy.py* file, copy the
+the *Measurements* class. Within the *MinimizeEnergy.py* file, copy the
 following lines:
 
 .. label:: start_MinimizeEnergy_class
 
 .. code-block:: python
 
-    from Outputs import Outputs
+    from Measurements import Measurements
+    import os
 
 
-    class MinimizeEnergy(Outputs):
+    class MinimizeEnergy(Measurements):
         def __init__(self,
                     *args,
                     **kwargs):
@@ -248,13 +218,14 @@ Within the *MonteCarlo.py* file, copy the following lines:
     from scipy import constants as cst
     import numpy as np
     import copy
-    from Outputs import Outputs
+    import os
+    from Measurements import Measurements
 
     import warnings
     warnings.filterwarnings('ignore')
 
 
-    class MonteCarlo(Outputs):
+    class MonteCarlo(Measurements):
         def __init__(self,
                     *args,
                     **kwargs):
@@ -273,10 +244,10 @@ Finally, within the *MolecularDynamics.py* file, copy the following lines:
 .. code-block:: python
 
     import numpy as np
-    from Outputs import Outputs
+    from Measurements import Measurements
 
 
-    class MolecularDynamics(Outputs):
+    class MolecularDynamics(Measurements):
         def __init__(self,
                     *args,
                     **kwargs,
@@ -301,17 +272,14 @@ the following lines into it:
     from MonteCarlo import MonteCarlo
     from MolecularDynamics import MolecularDynamics
 
-    md = MolecularDynamics(data_folder = "md-output/")
+    md = MolecularDynamics()
     md.__init__()
-    mc = MonteCarlo(data_folder = "mc-output/")
+    mc = MonteCarlo()
     mc.__init__()
 
-    assert os.path.exists("mc-output"), """Error, missing mc-output/ folder"""
-    assert os.path.exists("md-output"), """Error, missing md-output/ folder"""
-    assert os.path.exists("Outputs"), """Error, missing Outputs/ folder"""
+    #assert os.path.exists("mc-output"), """Error, missing mc-output/ folder"""
+    #assert os.path.exists("md-output"), """Error, missing md-output/ folder"""
 
 .. label:: end_test_First_class
 
-If everything is working well, 3 folders named respectively *md-output/*, *mc-output/*,
-and *Outputs/* must have been created. If not, running the test will generate an
-error message.
+No error should be returned.

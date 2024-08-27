@@ -74,7 +74,7 @@ and the desired temperature (:math:`T`). Let us add these parameters to the
 
 .. code-block:: python
 
-    class MonteCarlo(Outputs):
+    class MonteCarlo(Measurements):
         def __init__(self,
                     maximum_steps,
                     cut_off = 9,
@@ -82,6 +82,7 @@ and the desired temperature (:math:`T`). Let us add these parameters to the
                     neighbor = 1,
                     desired_temperature = 300,
                     thermo_outputs = "press",
+                    data_folder = None,
                     *args,
                     **kwargs):
             self.maximum_steps = maximum_steps
@@ -90,6 +91,10 @@ and the desired temperature (:math:`T`). Let us add these parameters to the
             self.neighbor = neighbor
             self.desired_temperature = desired_temperature
             self.thermo_outputs = thermo_outputs
+            self.data_folder = data_folder
+            if self.data_folder is not None:
+                if os.path.exists(self.data_folder) is False:
+                    os.mkdir(self.data_folder)
             super().__init__(*args, **kwargs)
             self.nondimensionalize_units_3()
 
@@ -137,111 +142,6 @@ methods *update_neighbor_lists* and *wrap_in_box* are also called to ensure that
 the neighbor lists are kept up to date despite the motion of the atoms, and that
 the atoms remain inside the box, respectively.
 
-Output
-------
-
-To follow the simulation, let us create a new update function. Add the following
-method to the Outputs class:
-
-.. label:: start_Outputs_class
-
-.. code-block:: python
-
-    def update_log_md_mc(self, velocity=True):
-        """Update the log file during MD or MC simulations"""
-        if self.thermo_period is not None:
-            if (self.step % self.thermo_period == 0) \
-                    | (self.thermo_period == 0):
-                # refresh values
-                if velocity:
-                    self.calculate_temperature()
-                    self.calculate_kinetic_energy()
-                # convert the units
-                if velocity:
-                    temperature = self.temperature \
-                        * self.reference_temperature  # K
-                    Ekin = self.Ekin*self.reference_energy  # kcal/mol
-                else:
-                    temperature = self.desired_temperature \
-                        * self.reference_temperature  # K
-                    Ekin = 0.0
-                try: # will be usefull later
-                    self.calculate_pressure()
-                    pressure = self.pressure \
-                        * self.reference_pressure  # Atm
-                except:
-                    pressure = 0.0
-                volume = np.prod(self.box_size[:3]) \
-                    *self.reference_distance**3  # A3
-                try:
-                    Epot = self.Epot * self.reference_energy  # kcal/mol
-                except:
-                    Epot = self.compute_potential(output="potential") \
-                        * self.reference_energy  # kcal/mol
-                density = self.calculate_density()  # Unitless
-                density *= self.reference_mass \
-                    /self.reference_distance**3  # g/mol/A3
-                Na = cst.Avogadro
-                density *= (cst.centi/cst.angstrom)**3 / Na  # g/cm3
-                if self.step == 0:
-                    characters = '{:<5} {:<5} {:<9} {:<9} {:<9} {:<13} {:<13} {:<13}'
-                    print(characters.format(
-                        '%s' % ("step"),
-                        '%s' % ("N"),
-                        '%s' % ("T (K)"),
-                        '%s' % ("p (atm)"),
-                        '%s' % ("V (A3)"),
-                        '%s' % ("Ep (kcal/mol)"),
-                        '%s' % ("Ek (kcal/mol)"),
-                        '%s' % ("dens (g/cm3)"),
-                        ))
-                characters = '{:<5} {:<5} {:<9} {:<9} {:<9} {:<13} {:<13} {:<13}'
-                print(characters.format(
-                    '%s' % (self.step),
-                    '%s' % (self.total_number_atoms),
-                    '%s' % (f"{temperature:.3}"),
-                    '%s' % (f"{pressure:.3}"),
-                    '%s' % (f"{volume:.3}"),
-                    '%s' % (f"{Epot:.3}"),
-                    '%s' % (f"{Ekin:.3}"),
-                    '%s' % (f"{density:.3}"),
-                    ))
-                for output_value, filename in zip([self.total_number_atoms,
-                                                   Epot,
-                                                   Ekin,
-                                                   pressure,
-                                                   temperature,
-                                                   density,
-                                                   volume],
-                                                  ["atom_number.dat",
-                                                   "Epot.dat",
-                                                   "Ekin.dat",
-                                                   "pressure.dat",
-                                                   "temperature.dat",
-                                                   "density.dat",
-                                                   "volume.dat"]):
-                    self.update_data_file(output_value, filename)
-
-.. label:: end_Outputs_class
-
-As well as
-
-.. label:: start_Outputs_class
-
-.. code-block:: python
-
-    def update_data_file(self, output_value, filename):
-        if self.step == 0:
-            f = open(self.data_folder + filename, "w")
-        else:
-            f = open(self.data_folder + filename, "a")
-        characters = "%d %.3f %s"
-        v = [self.step, output_value]
-        f.write(characters % (v[0], v[1], '\n'))
-        f.close()
-
-.. label:: end_Outputs_class
-
 Let us call *update_log_md_mc* from the run method of the MonteCarlo class.
 Let us add a dump too:
 
@@ -260,6 +160,7 @@ Let us add a dump too:
 .. label:: end_MonteCarlo_class
 
 To output the density, let us add the following method to the *Utilities* class:
+# TOFIX: not used yet
 
 .. label:: start_Utilities_class
 
@@ -296,6 +197,7 @@ One can use a similar test as previously. Let us use a displace distance of
         sigma=[3], # A
         atom_mass=[1], # g/mol
         box_dimensions=[20, 20, 20], # A
+        data_folder="Outputs/",
         )
     mc.run()
 
