@@ -261,6 +261,14 @@
         <article role="main" id="furo-main-content">
           <section id="minimize-the-energy">
 <span id="chapter4-label"></span><h1>Minimize the energy<a class="headerlink" href="#minimize-the-energy" title="Link to this heading">¶</a></h1>
+<figure class="align-right">
+<a class="only-dark reference internal image-reference" href="../_images/avatar-dm.webp"><img alt="The fluid made of argon atoms during energy minimization with Python." class="only-dark" src="../_images/avatar-dm.webp" style="height: 200px;" />
+</a>
+</figure>
+<figure class="align-right">
+<a class="only-light reference internal image-reference" href="../_images/avatar.webp"><img alt="The fluid made of argon atoms during energy minimization with Python/" class="only-light" src="../_images/avatar.webp" style="height: 200px;" />
+</a>
+</figure>
 <p>Now that the code for placing the atoms within the box has been written,
 let us proceed to write the code for performing energy minimization of the
 system. This step helps ensure that there is no unreasonable overlapping
@@ -369,7 +377,8 @@ method:</p>
 <p>Let us implement the energy minimized described at the top of this page. Add the
 following <em>run()</em> method to the <em>MinimizeEnergy</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> <span class="c1"># *step* loops for 0 to *maximum_steps*+1</span>
+    <span class="c1"># *step* loops for 0 to *maximum_steps*+1</span>
+    <span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
         <span class="c1"># First, meevaluate the initial energy and max force</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span> <span class="c1"># Rebuild neighbor list, if necessary</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_cross_coefficients</span><span class="p">()</span> <span class="c1"># Recalculate the cross coefficients, if necessary</span>

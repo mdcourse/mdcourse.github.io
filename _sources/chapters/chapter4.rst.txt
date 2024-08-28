@@ -3,6 +3,18 @@
 Minimize the energy
 ===================
 
+.. figure:: chapter4/avatar-dm.webp
+    :alt: The fluid made of argon atoms during energy minimization with Python.
+    :height: 200
+    :align: right
+    :class: only-dark
+
+.. figure:: chapter4/avatar.webp
+    :alt: The fluid made of argon atoms during energy minimization with Python/
+    :height: 200
+    :align: right
+    :class: only-light
+
 Now that the code for placing the atoms within the box has been written,
 let us proceed to write the code for performing energy minimization of the
 system. This step helps ensure that there is no unreasonable overlapping
@@ -129,7 +141,8 @@ following *run()* method to the *MinimizeEnergy* class:
 .. code-block:: python
 
     def run(self):
-        for self.step in range(0, self.maximum_steps+1): # *step* loops for 0 to *maximum_steps*+1
+        # *step* loops for 0 to *maximum_steps*+1
+        for self.step in range(0, self.maximum_steps+1):
             # First, meevaluate the initial energy and max force
             self.update_neighbor_lists() # Rebuild neighbor list, if necessary
             self.update_cross_coefficients() # Recalculate the cross coefficients, if necessary

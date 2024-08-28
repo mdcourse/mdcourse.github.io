@@ -261,11 +261,17 @@
         <article role="main" id="furo-main-content">
           <section id="initialize-the-simulation">
 <span id="chapter3-label"></span><h1>Initialize the simulation<a class="headerlink" href="#initialize-the-simulation" title="Link to this heading">¶</a></h1>
+<figure class="align-right">
+<a class="only-dark reference internal image-reference" href="../_images/avatar-dm.png"><img alt="Fluid made of argon atoms in a cubic box." class="only-dark" src="../_images/avatar-dm.png" style="height: 200px;" />
+</a>
+</figure>
+<figure class="align-right">
+<a class="only-light reference internal image-reference" href="../_images/avatar.png"><img alt="Fluid made of argon atoms in a cubic box." class="only-light" src="../_images/avatar.png" style="height: 200px;" />
+</a>
+</figure>
 <p>Here, the <em>InitializeSimulation</em> class is created. This class is used to
-prepare the simulation box and populate the box randomly with atoms.</p>
-<section id="start-coding">
-<h2>Start coding<a class="headerlink" href="#start-coding" title="Link to this heading">¶</a></h2>
-<p>Let us improve the previously created <em>InitializeSimulation</em> class:</p>
+prepare the simulation box and populate the box randomly with atoms.
+Let us improve the previously created <em>InitializeSimulation</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">InitializeSimulation</span><span class="p">(</span><span class="n">Prepare</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>  <span class="c1"># List - Angstroms</span>
@@ -304,7 +310,6 @@ in <a class="reference internal" href="chapter5.html#chapter5-label"><span class
 </ul>
 <p>Finally, the <em>dimensions</em> of the system are calculated as the length of
 <em>box_dimensions</em>.</p>
-</section>
 <section id="set-a-random-seed">
 <h2>Set a random seed<a class="headerlink" href="#set-a-random-seed" title="Link to this heading">¶</a></h2>
 <p>Providing a <em>seed</em> allows for reproducible simulations. When a seed is
@@ -490,7 +495,6 @@ boundaries along all 3 dimensions of space:</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Initialize the simulation</a><ul>
-<li><a class="reference internal" href="#start-coding">Start coding</a></li>
 <li><a class="reference internal" href="#set-a-random-seed">Set a random seed</a></li>
 <li><a class="reference internal" href="#nondimensionalize-units">Nondimensionalize units</a></li>
 <li><a class="reference internal" href="#define-the-box">Define the box</a></li>

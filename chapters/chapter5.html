@@ -271,7 +271,7 @@ during the simulation. To do so, the <em>Output</em> class is modified.</p>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
     <span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
         <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">displacement</span> <span class="o">*=</span> <span class="mf">0.2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">displacement</span> <span class="o">*=</span> <span class="mf">0.2</span> <span class="c1"># Multiply the displacement by a factor 0.2</span>
         <span class="n">log_simulation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">update_dump_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;dump.min.lammpstrj&quot;</span><span class="p">)</span>
 </pre></div>
@@ -359,11 +359,11 @@ a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.<
 <span class="k">def</span> <span class="nf">log_simulation_data</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_period</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">Epot</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">Epot</span> <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
-            <span class="k">except</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">Epot</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span> \
                     <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Epot</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">Epot</span> <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
             <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot&quot;</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot&quot;</span><span class="p">)</span>
