@@ -537,25 +537,29 @@ are stored within <em>array_sigma_ij</em> and <em>array_epsilon_ij</em>.</p>
 <section id="test-the-code">
 <h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
 <p>Let us test the <em>Prepare</em> class to make sure that it does what is expected.
-This initiates a system with 2 atoms of type 1, and 3 atoms of type 2:</p>
+Just like in the previous example, let us initiates a system with 2 atoms of
+type 1, and 3 atoms of type 2:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">Prepare</span> <span class="kn">import</span> <span class="n">Prepare</span>
 
 <span class="n">prep</span> <span class="o">=</span> <span class="n">Prepare</span><span class="p">(</span><span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
-    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
-    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="c1"># A</span>
-    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="c1"># g/mol</span>
+    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># g/mol</span>
     <span class="p">)</span>
-<span class="k">assert</span> <span class="n">prep</span><span class="o">.</span><span class="n">reference_energy</span> <span class="o">==</span> <span class="mf">0.1</span>
-<span class="k">assert</span> <span class="n">prep</span><span class="o">.</span><span class="n">reference_distance</span> <span class="o">==</span> <span class="mi">3</span>
-<span class="k">assert</span> <span class="n">prep</span><span class="o">.</span><span class="n">reference_mass</span> <span class="o">==</span> <span class="mi">1</span>
-<span class="k">assert</span> <span class="n">prep</span><span class="o">.</span><span class="n">total_number_atoms</span> <span class="o">==</span> <span class="mi">5</span>
-<span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">(</span><span class="n">prep</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="o">*</span><span class="p">(</span><span class="n">prep</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">prep</span><span class="o">.</span><span class="n">array_epsilon_ij</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">test_array</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">expected</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test function comparing *result* and *expected*&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">expected</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Test failed: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2"> != </span><span class="si">{</span><span class="n">expected</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test passed&quot;</span><span class="p">)</span>
+
+<span class="c1"># Make sure the *atoms_epsilon* gives the expected values</span>
+<span class="c1"># of 1 1 2 2 2 (in LJ units)</span>
+<span class="n">test_array</span><span class="p">(</span><span class="n">prep</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">]))</span>
 </pre></div>
 </div>
-<p>This test assert that the reference energy, distance, and mass were properly defined,
-that the number of atoms indeed corresponds to the sum of the number of atoms of each
-type, and that the length of the array_epsilon_ij array is consistent.</p>
+<p>This test assert that the generated <em>atoms_epsilon</em> array is consistent with
+its expected value (see the previous paragraphs).</p>
 </section>
 </section>
 
