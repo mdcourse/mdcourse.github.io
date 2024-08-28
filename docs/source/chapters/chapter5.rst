@@ -1,3 +1,5 @@
+.. _chapter5-label:
+
 Output the simulation state
 ===========================
 

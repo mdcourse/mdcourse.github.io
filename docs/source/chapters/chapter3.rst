@@ -1,20 +1,15 @@
+.. _chapter3-label:
+
 Initialize the simulation
 =========================
 
 Here, the *InitializeSimulation* class is created. This class is used to
-prepare the simulation box and populate the box with atoms.
-
-Simulation box
---------------
-
-In all the simulations performed here, a certain number of atoms are first 
-randomly placed in a 3D cuboid box.
+prepare the simulation box and populate the box randomly with atoms.
 
 Start coding
 ------------
 
-Let us improve the previously created *InitializeSimulation* class. Remember that
-the InitializeSimulation class inherits the *Prepare* class.
+Let us improve the previously created *InitializeSimulation* class:
 
 .. label:: start_InitializeSimulation_class
 
@@ -40,15 +35,26 @@ the InitializeSimulation class inherits the *Prepare* class.
 
 .. label:: end_InitializeSimulation_class
 
-Three parameters are provided to the *InitializeSimulation* class. THe first one
-is the box dimensions, *box_dimensions*, which is a list with a length corresponding to
-the dimension of the system. The *dimensions* is calculated as the length of *box_dimensions*.
-Each element of the list correspond to a dimension of the box in Ångström in the x, y, and
-z directions, respectively. A seed is also provided as a parameter (an integer), as well as some initial
-positions for the atoms that can be provided as an array of length corresponding
-to the number of atoms, and a number of columns corresponding to *dimensions*. If
-*initial_positions* is left equal to *None*, positions will be randomly attributed
-to the atoms, see below.
+Several parameters are provided to the *InitializeSimulation* class:
+
+- The first parameter is the box dimensions, which is a list with a length
+  corresponding to the dimension of the system. Each element of the list
+  corresponds to a dimension of the box in Ångström in the x, y, and z
+  directions, respectively.
+- Optionally, a seed can be provided as an integer. If the seed is given
+  by the user, the random number generator will always produce the same
+  displacements.
+- Optionally, initial positions for the atoms can be provided as an array
+  of length corresponding to the number of atoms. If *initial_positions* 
+  is left equal to *None*, positions will be randomly assigned to the
+  atoms (see below).
+- Optionally, a thermo period and a dumping_period can be provided to
+  control the outputs from the simulation (it will be implemented
+  in :ref:`chapter5-label`).
+
+Finally, the *dimensions* of the system are calculated as the length of
+*box_dimensions*.
+
 
 Provide a seed
 --------------
