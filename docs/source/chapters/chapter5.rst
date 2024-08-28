@@ -46,7 +46,7 @@ All quantities are re-dimensionalized before getting outputed.
     import logging
 
     # Function to set up the logger
-    def setup_logger(folder_name):
+    def setup_logger(folder_name, overwrite=False):
         # Create a custom logger
         logger = logging.getLogger('simulation_logger')
         logger.setLevel(logging.INFO)
@@ -59,7 +59,10 @@ All quantities are re-dimensionalized before getting outputed.
         # Create handlers for console and file
         console_handler = logging.StreamHandler()  # To log to the terminal
         log_file_path = os.path.join(folder_name, 'simulation.log')
-        file_handler = logging.FileHandler(log_file_path)  # To log to a file
+
+        # Use 'w' mode to overwrite the log file if overwrite is True, else use 'a' mode to append
+        file_mode = 'w' if overwrite else 'a'
+        file_handler = logging.FileHandler(log_file_path, mode=file_mode)  # To log to a file
 
         # Create formatters and add them to the handlers
         formatter = logging.Formatter('%(message)s')
@@ -74,8 +77,8 @@ All quantities are re-dimensionalized before getting outputed.
 
     def log_simulation_data(code):
 
-        # Setup the logger with the folder name
-        logger = setup_logger(code.data_folder)
+        # Setup the logger with the folder name, overwriting the log if code.step is 0
+        logger = setup_logger(code.data_folder, overwrite=(code.step == 0))
 
         # Logging the simulation data
         if code.thermo_period is not None:
@@ -227,7 +230,7 @@ files were indeed created without the *Outputs/* folder:
 .. label:: end_test_5a_class
 
 I addition to the files getting created, information must be printed in the terminal
-during the similation:
+during the simulation:
 
 .. code-block:: bw
 
@@ -237,3 +240,67 @@ during the similation:
     50 -1.11 1.42
     75 -1.22 3.77
     100 -2.10 1.28
+
+The data from the *simulation.log* can be used to generate plots using softwares
+line XmGrace, GnuPlot, or Python/Pyplot. For the later, one can use a simple data
+reader to import the data from *Outputs/simulation.log* into Python. Copy the
+following lines in a file named *reader.py*:
+
+.. label:: start_reader_class
+
+.. code-block:: python
+
+    import csv
+
+    def import_data(file_path):
+        """
+        Imports a data file with a variable number of columns into a list
+        of numerical arrays. The first line (header) is read as a string.
+
+        Parameters:
+        - file_path (str): Path to the data file.
+
+        Returns:
+        - header (str): The header line as a string.
+        - data (list of lists): List where each sublist contains the numeric values of a row.
+        """
+        data = []
+        header = ""
+        with open(file_path, mode='r') as file:
+            # Read the header as a string
+            header = file.readline().strip()
+            # Use csv.reader to process the remaining lines
+            reader = csv.reader(file, delimiter=' ')
+            for row in reader:
+                # Filter out empty fields resulting from multiple spaces
+                filtered_row = [float(value) for value in row if value]
+                data.append(filtered_row)
+        return header, data
+
+.. label:: end_reader_class
+
+The *import_data* function from *reader.py* can simply be used as follows:
+
+.. label:: start_test_5b_class
+
+    from reader import import_data
+
+    file_path = "Outputs/simulation.log"
+    header, data = import_data(file_path)
+
+    print(header)
+    for row in data:
+        print(row)
+
+.. label:: end_test_5b_class
+
+Which must return:
+
+.. code-block:: bw
+
+    step Epot MaxF
+    [0.0, 9.48, 1049.12]
+    [25.0, -2.12, 1.22]
+    [50.0, -2.19, 2.85]
+    [75.0, -2.64, 0.99]
+    [100.0, -2.64, 0.51]
