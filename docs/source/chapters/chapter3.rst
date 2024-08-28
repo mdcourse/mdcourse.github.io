@@ -84,8 +84,8 @@ will proceed with randomization.
 Nondimensionalize units
 -----------------------
 
-Just like we did in the pervious chapter, let us nondimensionalize the provided
-parameters, here the box_dimensions.
+Just like we did in :ref:`chapter2-label`, let us nondimensionalize the provided
+parameters, here the *box_dimensions* as well as the *initial_positions*:
 
 .. label:: start_InitializeSimulation_class
 
@@ -94,20 +94,35 @@ parameters, here the box_dimensions.
     def nondimensionalize_units_1(self):
         """Use LJ prefactors to convert units into non-dimensional."""
         # Normalize box dimensions
-        norm_box_dimensions = []
+        box_dimensions = []
         for L in self.box_dimensions:
-            norm_box_dimensions.append(L/self.reference_distance)
-        self.box_dimensions = norm_box_dimensions
+            box_dimensions.append(L/self.reference_distance)
+        self.box_dimensions = box_dimensions # errase the previously defined box_dimensions
+        # Normalize the box dimensions
         if self.initial_positions is not None:
             self.initial_positions = self.initial_positions/self.reference_distance
+
+.. label:: end_InitializeSimulation_class
+
+Let us call the *nondimensionalize_units_1* method from the *__init__* class:
+
+.. label:: start_InitializeSimulation_class
+
+.. code-block:: python
+
+    def __init__(self,
+        (...)
+        if self.seed is not None:
+            np.random.seed(self.seed)
+        self.nondimensionalize_units_1()
 
 .. label:: end_InitializeSimulation_class
 
 Define the box
 --------------
 
-Let us define a box from the *box_dimensions* list. Add the following method
-to the InitializeSimulation class:
+Let us define the simulation box using the values from *box_dimensions*. Add the following
+method to the *InitializeSimulation* class:
 
 .. label:: start_InitializeSimulation_class
 
@@ -124,21 +139,35 @@ to the InitializeSimulation class:
 
 .. label:: end_InitializeSimulation_class
 
-The *box_boundaries* are calculated from the *box_dimensions*. It corresponds to
-the lowest and highest coordinate in all directions. By symmetry, the box is centered
-in 0 for all axes. A *box_size* is also defined. It follows the MDAnalysis
-conventions: Lx, Ly, Lz, 90, 90, 90, where the last three numbers are angles in
-degrees. Values different from *90* for the angles would define a triclinic
-(non-orthogonal) boxe, which is not currently supported by the current code.
+The *box_boundaries* are calculated from the *box_dimensions*. They
+represent the lowest and highest coordinates in all directions. By symmetry,
+the box is centered at 0 along all axes. A *box_size* is also defined,
+following the MDAnalysis conventions: Lx, Ly, Lz, 90, 90, 90, where the
+last three numbers are angles in degrees. Values different from *90* for
+the angles would define a triclinic (non-orthogonal) box, which is not
+currently supported by the existing code.
+
+Let us call the *define_box* method from the *__init__* class:
+
+.. label:: start_InitializeSimulation_class
+
+.. code-block:: python
+
+    def __init__(self,
+        (...)
+        self.nondimensionalize_units_1()
+        self.define_box()
+
+.. label:: end_InitializeSimulation_class
 
 Populate the box
 ----------------
 
 Here, the atoms are placed within the simulation box. If initial
-positions were not provided (i.e. *initial_positions = None*), atoms
-are placed randomly within the box. If initial positions were provided
-as an array named *initial_positions*, they are used instead. Note that in that
-case, the array number be of size 'number of atoms' x ''number of dimensions.
+positions were not provided (i.e., *initial_positions = None*), atoms
+are placed randomly within the box. If *initial_positions* was provided
+as an array, the provided positions are used instead. Note that, in this
+case, the array must be of size 'number of atoms' times 'number of dimensions'.
 
 .. label:: start_InitializeSimulation_class
 
@@ -158,14 +187,14 @@ case, the array number be of size 'number of atoms' x ''number of dimensions.
 
 .. label:: end_InitializeSimulation_class
 
-In case initial positions were not provided by the user, and array of size
-total_number_atoms x dimensions is created, random positions are defined
-using the random function of NumPy.
+In case *initial_positions is None*, and array is first created. Then, random
+positions that are constrained within the box boundaries are defined using the
+random function of NumPy. Note that, here, the newly added atoms are added
+randomly within the box, without taking care of avoiding overlaps with
+existing atoms. Overlaps will be dealt with using energy minimization,
+see :ref:`chapter4-label`.
 
-Here, the newly added atoms are added randomly within the box, without taking care
-of avoiding any overlap with existing atoms.
-
-Finally, let us call the methods from the *__init__* class:
+Let us call the *populate_box* method from the *__init__* class:
 
 .. label:: start_InitializeSimulation_class
 
@@ -173,23 +202,19 @@ Finally, let us call the methods from the *__init__* class:
 
     def __init__(self,
         (...)
-        self.initial_positions = initial_positions
-        if self.seed is not None:
-            np.random.seed(self.seed)
-        self.nondimensionalize_units_1()
         self.define_box()
         self.populate_box()
 
 .. label:: end_InitializeSimulation_class
-
+        
 Test the code
 -------------
 
 Let us test the *InitializeSimulation* class to make sure that it does what
-is expected, i.e. that it does create a simulation box of desired size and
-attribute positions to the atoms.
+is expected, i.e. that it does create atoms that are located within the box
+boundaries along all 3 dimensions of space:
 
-.. label:: start_test_InitializeSimulation_class
+.. label:: start_test_3a_class
 
 .. code-block:: python
 
@@ -197,24 +222,18 @@ attribute positions to the atoms.
     from InitializeSimulation import InitializeSimulation
 
     init = InitializeSimulation(number_atoms=[2, 3],
-        epsilon=[0.1, 1.0], # kcal/mol
-        sigma=[3, 6], # A
-        atom_mass=[1, 1], # g/mol
+        epsilon=[0.2, 0.4], # kcal/mol
+        sigma=[3, 4], # A
+        atom_mass=[10, 20], # g/mol
         box_dimensions=[20, 20, 20], # A
-        seed=48031,
         )
 
-    for d in range(3):
-        assert np.round(init.box_size[d],3) == np.round(20/3,3)
-    assert np.shape(init.atoms_positions) == (init.total_number_atoms, 3)
-    for d in range(3):
-        assert init.atoms_positions[0][d] >= init.box_boundaries[0][0]
-        assert init.atoms_positions[0][d] <= init.box_boundaries[0][1]
+    def test_placement(box_boundaries, atoms_positions):
+        """Ensure that atoms are placed within the box"""
+        for atom_position in atoms_positions:
+            for x, boundary in zip(atom_position, box_boundaries):
+                assert (x >= boundary[0]) & (x <= boundary[1]), f"Test failed: Atoms outside of the box"
+        print("Test passed")
+    test_placement(init.box_boundaries, init.atoms_positions)
 
-.. label:: end_test_InitializeSimulation_class
-
-The first assert statement ensures that the box size has the expected size along
-all 3 dimensions of space, in normalised units.
-The second assert ensures that the size of the created *atoms_positions* array
-is consistent with the anumber of atoms. The third assert ensures that the created
-atoms are located within the box boundaries along all 3 dimensions of space.
+.. label:: end_test_3a_class
