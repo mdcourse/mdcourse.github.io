@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Initialize the simulation" href="chapter3.html" /><link rel="prev" title="Start coding" href="chapter1.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
-        <title>Prepare the simulation - </title>
+        <title>Setting Up the Simulation - </title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
@@ -205,7 +205,7 @@
   <p class="caption" role="heading"><span class="caption-text">Code</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="chapter1.html">Start coding</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Prepare the simulation</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Setting Up the Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter3.html">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter5.html">Output the simulation state</a></li>
@@ -259,75 +259,74 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="prepare-the-simulation">
-<h1>Prepare the simulation<a class="headerlink" href="#prepare-the-simulation" title="Link to this heading">¶</a></h1>
-<p>For simplicity, all the parameters that are specified as inputs by the user
-will be non-dimensionalized. This makes the calculations, such as force evaluation,
-much simpler. Here, the non-dimensionalization is done within the <em>Prepare</em> class</p>
-<p>Note: Although this is a necessary step that will make our life much easier later,
-this is by far the less exciting part of the code.</p>
+          <section id="setting-up-the-simulation">
+<h1>Setting Up the Simulation<a class="headerlink" href="#setting-up-the-simulation" title="Link to this heading">¶</a></h1>
+<p>To streamline the simulation process, all user-specified parameters will be
+non-dimensionalized. By removing units from the calculations, we simplify
+complex operations like force evaluation, making the code more efficient and
+easier to manage. This non-dimensionalization is handled within the <em>Prepare</em>
+class.</p>
+<p>While this step may not be the most thrilling aspect of the simulation, it is
+essential groundwork that will significantly ease our work as we progress.</p>
 <section id="unit-systems">
 <h2>Unit systems<a class="headerlink" href="#unit-systems" title="Link to this heading">¶</a></h2>
-<p>In this code, two unit systems are used: <em>real</em> and <em>LJ</em>, where <em>LJ</em> stands
+<p>In this code, two unit systems are employed: <em>real</em> and <em>LJ</em>, with <em>LJ</em> standing
 for Lennard-Jones. The <em>real</em> unit system is used for both inputs and outputs,
-and the <em>LJ</em> unit system is used to all the internal calculations.</p>
-<p>The <em>real</em> unit system follows the convention from the <a href="https://docs.lammps.org/units.html" target="_blank">LAMMPS unit systems</a>,
-and:</p>
+while the <em>LJ</em> unit system is used for all internal calculations.</p>
+<p>The <em>real</em> unit system follows the conventions outlined in the <a href="https://docs.lammps.org/units.html" target="_blank">LAMMPS unit systems</a>:</p>
 <ul class="simple">
-<li><p>masses are in grams/mole,</p></li>
-<li><p>distances are in Ångstrom,</p></li>
-<li><p>the time is in femtoseconds,</p></li>
-<li><p>energies are in kcal/mol,</p></li>
-<li><p>velocities are in Ångstrom/femtosecond,</p></li>
-<li><p>forces are in (kcal/mol)/Ångstrom,</p></li>
-<li><p>the temperature is in Kelvin,</p></li>
-<li><p>the pressure is in atmospheres,</p></li>
-<li><p>the density is in g/cm^dim.</p></li>
+<li><p>Masses are in grams per mole,</p></li>
+<li><p>Distances are in Ångströms,</p></li>
+<li><p>Time is in femtoseconds,</p></li>
+<li><p>Energies are in kcal/mol,</p></li>
+<li><p>Velocities are in Ångströms per femtosecond,</p></li>
+<li><p>Forces are in (kcal/mol)/Ångström,</p></li>
+<li><p>Temperature is in Kelvin,</p></li>
+<li><p>Pressure is in atmospheres,</p></li>
+<li><p>Density is in g/cm<sup>3</sup> (in 3D).</p></li>
 </ul>
-<p>The <em>real</em> unit system is conventional in molecular simulations. However,
-it would not be practical to perform calculations with such a complex unit system,
-as it would involve complicated prefactors. Instead, the LJ unit system will be
-used for all calculations. With the LJ unit systems, all quantities are
-unitless: all masses, distances, and energies are specified as multiples
-of <span class="math notranslate nohighlight">\(m\)</span>, <span class="math notranslate nohighlight">\(\sigma\)</span>, and <span class="math notranslate nohighlight">\(\epsilon\)</span>, which are the mass and LJ
-parameters of the atoms. Other quantities are specified from these 3 parameters:</p>
+<p>The <em>real</em> unit system is conventional in molecular simulations. However, using
+such a complex unit system for calculations would involve cumbersome prefactors.
+To simplify, the <em>LJ</em> unit system is used for all calculations. In the <em>LJ</em> unit
+system, all quantities are dimensionless. Masses, distances, and energies are
+expressed as multiples of <span class="math notranslate nohighlight">\(m\)</span>, <span class="math notranslate nohighlight">\(\sigma\)</span>, and <span class="math notranslate nohighlight">\(\epsilon\)</span>,
+which represent the mass and LJ parameters of the atoms. Other quantities are
+derived from these three parameters:</p>
 <ul class="simple">
-<li><p>the time is in <span class="math notranslate nohighlight">\(\sqrt{m \sigma^2 / \epsilon}\)</span>,</p></li>
-<li><p>energies are in <span class="math notranslate nohighlight">\(\epsilon\)</span>,</p></li>
-<li><p>velocities are in <span class="math notranslate nohighlight">\(\sqrt{m \sigma^4 / \epsilon}\)</span>,</p></li>
-<li><p>forces are in <span class="math notranslate nohighlight">\(\epsilon/\sigma\)</span>,</p></li>
-<li><p>the temperature is in <span class="math notranslate nohighlight">\(\epsilon/k_\text{B}\)</span>,</p></li>
-<li><p>the pressure is in <span class="math notranslate nohighlight">\(\epsilon/\sigma^3\)</span>,</p></li>
-<li><p>and the density is in <span class="math notranslate nohighlight">\(m/\sigma^3\)</span>.</p></li>
+<li><p>Time is in <span class="math notranslate nohighlight">\(tau = \sqrt{m \sigma^2 / \epsilon}\)</span>,</p></li>
+<li><p>Energies are in <span class="math notranslate nohighlight">\(\epsilon\)</span>,</p></li>
+<li><p>Velocities are in <span class="math notranslate nohighlight">\(\sigma / \tau\)</span>,</p></li>
+<li><p>Forces are in <span class="math notranslate nohighlight">\(\epsilon / \sigma\)</span>,</p></li>
+<li><p>Temperature is in <span class="math notranslate nohighlight">\(\epsilon / k_\text{B}\)</span>,</p></li>
+<li><p>Pressure is in <span class="math notranslate nohighlight">\(\epsilon / \sigma^3\)</span>,</p></li>
+<li><p>Density is in <span class="math notranslate nohighlight">\(m / \sigma^3\)</span>,</p></li>
 </ul>
 <p>where <span class="math notranslate nohighlight">\(k_\text{B}\)</span> is the Boltzmann constant.</p>
 </section>
 <section id="start-coding">
 <h2>Start coding<a class="headerlink" href="#start-coding" title="Link to this heading">¶</a></h2>
-<p>Let us fill the previously created class named <em>Prepare</em>. To make the
-unit conversion easier, let us import <em>numpy</em>, as
-well as the <em>constants</em> library from <em>numpy</em>.</p>
-<p>In the file named <em>Prepare.py</em>, copy the following lines:</p>
+<p>Let’s fill in the previously created class named Prepare. To facilitate unit
+conversion, we will import <a href="#id1"><span class="problematic" id="id2">|NumPy|</span></a> and the constants module from <a href="#id3"><span class="problematic" id="id4">|SciPy|</span></a>.</p>
+<p>In the file named <em>Prepare.py</em>, add the following lines:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
 </pre></div>
 </div>
-<p>Here, the <a href="https://numpy.org/" target="_blank">NumPy</a> library is imported, together with the constants module of <a href="https://scipy.org/" target="_blank">SciPy</a>.</p>
-<p>Four parameters are given to the <em>Prepare</em> class:</p>
+<p>Four parameters are provided to the <em>Prepare</em> class:</p>
 <ul class="simple">
 <li><p>the atom masses <span class="math notranslate nohighlight">\(m\)</span>,</p></li>
 <li><p>the LJ parameters <span class="math notranslate nohighlight">\(\sigma\)</span> and <span class="math notranslate nohighlight">\(\epsilon\)</span>,</p></li>
 <li><p>and the number of atoms.</p></li>
 </ul>
-<p>All these quantities must be provided as  lists, which will be useful later when we want to mix
-atoms of different types within the same simulation box.</p>
+<p>All these quantities must be supplied as lists. This will be useful later when
+we want to mix atoms of different types within the same simulation box.</p>
 <p>Modify the <em>Prepare</em> class as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Prepare</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span>  <span class="c1"># List</span>
+                <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span>  <span class="c1"># List - no unit</span>
                 <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">],</span>  <span class="c1"># List - Kcal/mol</span>
-                <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>  <span class="c1"># List - Angstrom</span>
-                <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>  <span class="c1"># List - g/mol</span>
+                <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>  <span class="c1"># List - Angstrom</span>
+                <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span>  <span class="c1"># List - g/mol</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span> <span class="o">=</span> <span class="n">number_atoms</span>
@@ -337,12 +336,13 @@ atoms of different types within the same simulation box.</p>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Here the four lists, <em>number_atoms</em>, <em>epsilon</em>, <em>sigma</em>, and <em>atom_mass</em> are
-given default values of <span class="math notranslate nohighlight">\(10\)</span>, <span class="math notranslate nohighlight">\(0.1~\text{[Kcal/mol]}\)</span>, <span class="math notranslate nohighlight">\(1~\text{[Å]}\)</span>,
-and <span class="math notranslate nohighlight">\(0.1~\text{[g/mol]}\)</span>, respectively.</p>
-<p>All four parameters are passed as <em>self</em>, which will allow for other methods to
-access them. Here, <em>args</em> and <em>kwargs</em> are used to accept an arbitrary number of
-positional and keyword arguments, respectively.</p>
+<p>Here, the four lists <em>number_atoms</em> <span class="math notranslate nohighlight">\(N\)</span>, <em>epsilon</em> <span class="math notranslate nohighlight">\(\epsilon\)</span>,
+<em>sigma</em> <span class="math notranslate nohighlight">\(\sigma\)</span>, and <em>atom_mass</em> <span class="math notranslate nohighlight">\(m\)</span> are given default values of
+<span class="math notranslate nohighlight">\(10\)</span>, <span class="math notranslate nohighlight">\(0.1~\text{[Kcal/mol]}\)</span>, <span class="math notranslate nohighlight">\(3~\text{[Å]}\)</span>, and
+<span class="math notranslate nohighlight">\(10~\text{[g/mol]}\)</span>, respectively.</p>
+<p>All four parameters are assigned to <em>self</em>, allowing other methods to access
+them. The <em>args</em> and <em>kwargs</em> parameters are used to accept an arbitrary number
+of positional and keyword arguments, respectively.</p>
 </section>
 <section id="calculate-lj-units-prefactors">
 <h2>Calculate LJ units prefactors<a class="headerlink" href="#calculate-lj-units-prefactors" title="Link to this heading">¶</a></h2>
@@ -608,7 +608,7 @@ type, and that the length of the array_epsilon_ij array is consistent.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Prepare the simulation</a><ul>
+<li><a class="reference internal" href="#">Setting Up the Simulation</a><ul>
 <li><a class="reference internal" href="#unit-systems">Unit systems</a></li>
 <li><a class="reference internal" href="#start-coding">Start coding</a></li>
 <li><a class="reference internal" href="#calculate-lj-units-prefactors">Calculate LJ units prefactors</a></li>

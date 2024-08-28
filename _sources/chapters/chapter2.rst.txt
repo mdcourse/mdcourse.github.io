@@ -1,63 +1,63 @@
-Prepare the simulation
-======================
+Setting Up the Simulation
+==========================
 
-For simplicity, all the parameters that are specified as inputs by the user
-will be non-dimensionalized. This makes the calculations, such as force evaluation,
-much simpler. Here, the non-dimensionalization is done within the *Prepare* class
+To streamline the simulation process, all user-specified parameters will be
+non-dimensionalized. By removing units from the calculations, we simplify
+complex operations like force evaluation, making the code more efficient and
+easier to manage. This non-dimensionalization is handled within the *Prepare*
+class.
 
-Note: Although this is a necessary step that will make our life much easier later,
-this is by far the less exciting part of the code.
+While this step may not be the most thrilling aspect of the simulation, it is
+essential groundwork that will significantly ease our work as we progress.
 
 Unit systems
 ------------
 
-In this code, two unit systems are used: *real* and *LJ*, where *LJ* stands
+In this code, two unit systems are employed: *real* and *LJ*, with *LJ* standing
 for Lennard-Jones. The *real* unit system is used for both inputs and outputs,
-and the *LJ* unit system is used to all the internal calculations.
+while the *LJ* unit system is used for all internal calculations.
 
-The *real* unit system follows the convention from the |lammps-unit-systems|,
-and:
+The *real* unit system follows the conventions outlined in the |lammps-unit-systems|:
 
-- masses are in grams/mole,
-- distances are in Ångstrom,
-- the time is in femtoseconds,
-- energies are in kcal/mol,
-- velocities are in Ångstrom/femtosecond,
-- forces are in (kcal/mol)/Ångstrom,
-- the temperature is in Kelvin,
-- the pressure is in atmospheres,
-- the density is in g/cm^dim.
+- Masses are in grams per mole,
+- Distances are in Ångströms,
+- Time is in femtoseconds,
+- Energies are in kcal/mol,
+- Velocities are in Ångströms per femtosecond,
+- Forces are in (kcal/mol)/Ångström,
+- Temperature is in Kelvin,
+- Pressure is in atmospheres,
+- Density is in g/cm\ :sup:`3` (in 3D).
 
 .. |lammps-unit-systems| raw:: html
 
    <a href="https://docs.lammps.org/units.html" target="_blank">LAMMPS unit systems</a>
 
-The *real* unit system is conventional in molecular simulations. However,
-it would not be practical to perform calculations with such a complex unit system,
-as it would involve complicated prefactors. Instead, the LJ unit system will be
-used for all calculations. With the LJ unit systems, all quantities are
-unitless: all masses, distances, and energies are specified as multiples 
-of :math:`m`, :math:`\sigma`, and :math:`\epsilon`, which are the mass and LJ
-parameters of the atoms. Other quantities are specified from these 3 parameters:
+The *real* unit system is conventional in molecular simulations. However, using
+such a complex unit system for calculations would involve cumbersome prefactors.
+To simplify, the *LJ* unit system is used for all calculations. In the *LJ* unit
+system, all quantities are dimensionless. Masses, distances, and energies are
+expressed as multiples of :math:`m`, :math:`\sigma`, and :math:`\epsilon`,
+which represent the mass and LJ parameters of the atoms. Other quantities are
+derived from these three parameters:
 
-- the time is in :math:`\sqrt{m \sigma^2 / \epsilon}`,
-- energies are in :math:`\epsilon`,
-- velocities are in :math:`\sqrt{m \sigma^4 / \epsilon}`,
-- forces are in :math:`\epsilon/\sigma`,
-- the temperature is in :math:`\epsilon/k_\text{B}`,
-- the pressure is in :math:`\epsilon/\sigma^3`,
-- and the density is in :math:`m/\sigma^3`.
+- Time is in :math:`tau = \sqrt{m \sigma^2 / \epsilon}`,
+- Energies are in :math:`\epsilon`,
+- Velocities are in :math:`\sigma / \tau`,
+- Forces are in :math:`\epsilon / \sigma`,
+- Temperature is in :math:`\epsilon / k_\text{B}`,
+- Pressure is in :math:`\epsilon / \sigma^3`,
+- Density is in :math:`m / \sigma^3`,
 
-where :math:`k_\text{B}` is the Boltzmann constant. 
+where :math:`k_\text{B}` is the Boltzmann constant.
 
 Start coding
 ------------
 
-Let us fill the previously created class named *Prepare*. To make the
-unit conversion easier, let us import *numpy*, as
-well as the *constants* library from *numpy*.
+Let's fill in the previously created class named Prepare. To facilitate unit
+conversion, we will import |NumPy| and the constants module from |SciPy|.
 
-In the file named *Prepare.py*, copy the following lines:
+In the file named *Prepare.py*, add the following lines:
 
 .. label:: start_Prepare_class
 
@@ -68,24 +68,14 @@ In the file named *Prepare.py*, copy the following lines:
 
 .. label:: end_Prepare_class
 
-Here, the |NumPy| library is imported, together with the constants module of |SciPy|.
-
-.. |NumPy| raw:: html
-
-   <a href="https://numpy.org/" target="_blank">NumPy</a>
-
-.. |SciPy| raw:: html
-
-   <a href="https://scipy.org/" target="_blank">SciPy</a>
-
-Four parameters are given to the *Prepare* class:
+Four parameters are provided to the *Prepare* class:
 
 - the atom masses :math:`m`,
 - the LJ parameters :math:`\sigma` and :math:`\epsilon`,
 - and the number of atoms.
 
-All these quantities must be provided as  lists, which will be useful later when we want to mix
-atoms of different types within the same simulation box.
+All these quantities must be supplied as lists. This will be useful later when
+we want to mix atoms of different types within the same simulation box.
 
 Modify the *Prepare* class as follows:  
 
@@ -95,10 +85,10 @@ Modify the *Prepare* class as follows:
 
     class Prepare:
         def __init__(self,
-                    number_atoms=[10],  # List
+                    number_atoms=[10],  # List - no unit
                     epsilon=[0.1],  # List - Kcal/mol
-                    sigma=[1],  # List - Angstrom
-                    atom_mass=[1],  # List - g/mol
+                    sigma=[3],  # List - Angstrom
+                    atom_mass=[10],  # List - g/mol
                     *args,
                     **kwargs):
             self.number_atoms = number_atoms
@@ -109,13 +99,14 @@ Modify the *Prepare* class as follows:
 
 .. label:: end_Prepare_class
 
-Here the four lists, *number_atoms*, *epsilon*, *sigma*, and *atom_mass* are
-given default values of :math:`10`, :math:`0.1~\text{[Kcal/mol]}`, :math:`1~\text{[Å]}`,
-and :math:`0.1~\text{[g/mol]}`, respectively.
+Here, the four lists *number_atoms* :math:`N`, *epsilon* :math:`\epsilon`,
+*sigma* :math:`\sigma`, and *atom_mass* :math:`m` are given default values of
+:math:`10`, :math:`0.1~\text{[Kcal/mol]}`, :math:`3~\text{[Å]}`, and
+:math:`10~\text{[g/mol]}`, respectively.
 
-All four parameters are passed as *self*, which will allow for other methods to
-access them. Here, *args* and *kwargs* are used to accept an arbitrary number of
-positional and keyword arguments, respectively.
+All four parameters are assigned to *self*, allowing other methods to access
+them. The *args* and *kwargs* parameters are used to accept an arbitrary number
+of positional and keyword arguments, respectively.
 
 Calculate LJ units prefactors
 -----------------------------
