@@ -370,9 +370,10 @@ Test the code
 -------------
 
 Let us test the *Prepare* class to make sure that it does what is expected.
-This initiates a system with 2 atoms of type 1, and 3 atoms of type 2:
+Just like in the previous example, let us initiates a system with 2 atoms of
+type 1, and 3 atoms of type 2:
 
-.. label:: start_test_Prepare_class
+.. label:: start_test_2a_class
 
 .. code-block:: python
 
@@ -380,18 +381,21 @@ This initiates a system with 2 atoms of type 1, and 3 atoms of type 2:
     from Prepare import Prepare
 
     prep = Prepare(number_atoms=[2, 3],
-        epsilon=[0.1, 1.0], # kcal/mol
-        sigma=[3, 6], # A
-        atom_mass=[1, 9], # g/mol
+        epsilon=[0.2, 0.4], # kcal/mol
+        sigma=[3, 4], # A
+        atom_mass=[10, 20], # g/mol
         )
-    assert prep.reference_energy == 0.1
-    assert prep.reference_distance == 3
-    assert prep.reference_mass == 1
-    assert prep.total_number_atoms == 5
-    assert np.int32(prep.total_number_atoms*(prep.total_number_atoms-1)/2) == len(prep.array_epsilon_ij)
 
-.. label:: end_test_Prepare_class
+    def test_array(result, expected):
+        """Test function comparing *result* and *expected*"""
+        assert np.array_equal(result, expected), f"Test failed: {result} != {expected}"
+        print("Test passed")
 
-This test assert that the reference energy, distance, and mass were properly defined,
-that the number of atoms indeed corresponds to the sum of the number of atoms of each
-type, and that the length of the array_epsilon_ij array is consistent.
+    # Make sure the *atoms_epsilon* gives the expected values
+    # of 1 1 2 2 2 (in LJ units)
+    test_array(prep.atoms_epsilon, np.array([1., 1., 2., 2., 2.]))
+
+.. label:: end_test_2a_class
+
+This test assert that the generated *atoms_epsilon* array is consistent with
+its expected value (see the previous paragraphs).
