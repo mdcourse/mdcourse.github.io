@@ -269,6 +269,7 @@ and copy the following lines into it:
     from Utilities import Utilities
     from Measurements import Measurements
     from MonteCarlo import MonteCarlo
+
     # Make sure that the ineritance is correct, i.e. that MonteCarlo does inherit
     # from Utilities, Measurements, and InitializeSimulation
     assert issubclass(MonteCarlo, Utilities)
@@ -285,9 +286,11 @@ called *test_1b.py*, copy the following lines:
 
 .. code-block:: python
 
+    # Import the MonteCarlo class
     from MonteCarlo import MonteCarlo
 
-
+    # Define a function that try to call the *__init__()* method, return
+    # a variable "success", and print a message.
     def test_init_method(method):
         try:
             method.__init__()  # Call the method
@@ -298,6 +301,7 @@ called *test_1b.py*, copy the following lines:
             success = False
         return success
 
+    # Make sure the function return "True"
     assert test_init_method(MonteCarlo())
 
 .. label:: end_test_1b_class
