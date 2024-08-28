@@ -477,6 +477,7 @@ and copy the following lines into it:</p>
 <span class="kn">from</span> <span class="nn">Utilities</span> <span class="kn">import</span> <span class="n">Utilities</span>
 <span class="kn">from</span> <span class="nn">Measurements</span> <span class="kn">import</span> <span class="n">Measurements</span>
 <span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
+
 <span class="c1"># Make sure that the ineritance is correct, i.e. that MonteCarlo does inherit</span>
 <span class="c1"># from Utilities, Measurements, and InitializeSimulation</span>
 <span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">)</span>
@@ -487,9 +488,11 @@ and copy the following lines into it:</p>
 <p>This script should not return anything. We can also test that calling the <em>__init__</em>
 method of the <em>MonteCarlo</em> class does not return any error. In new Python file
 called <em>test_1b.py</em>, copy the following lines:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import the MonteCarlo class</span>
+<span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
 
-
+<span class="c1"># Define a function that try to call the *__init__()* method, return</span>
+<span class="c1"># a variable &quot;success&quot;, and print a message.</span>
 <span class="k">def</span> <span class="nf">test_init_method</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">method</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  <span class="c1"># Call the method</span>
@@ -500,6 +503,7 @@ called <em>test_1b.py</em>, copy the following lines:</p>
         <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">return</span> <span class="n">success</span>
 
+<span class="c1"># Make sure the function return &quot;True&quot;</span>
 <span class="k">assert</span> <span class="n">test_init_method</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">())</span>
 </pre></div>
 </div>
