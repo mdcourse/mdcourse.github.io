@@ -350,19 +350,23 @@ of positional and keyword arguments, respectively.</p>
 that will be used to calculate the prefactors necessary to convert units from the <em>real</em>
 unit system to the <em>LJ</em> unit system:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_LJunits_prefactors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the Lennard-Jones units prefacors.&quot;&quot;&quot;</span>
     <span class="c1"># Define the reference distance, energy, and mass</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Angstrom</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Kcal/mol</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># kcal/mol</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">reference_mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># g/mol</span>
+
     <span class="c1"># Calculate the prefactor for the time</span>
     <span class="n">mass_kg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span>  <span class="c1"># kg</span>
     <span class="n">epsilon_J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span>  <span class="c1"># J</span>
     <span class="n">sigma_m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">angstrom</span>  <span class="c1"># m</span>
     <span class="n">time_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mass_kg</span><span class="o">*</span><span class="n">sigma_m</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">epsilon_J</span><span class="p">)</span>  <span class="c1"># s</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">reference_time</span> <span class="o">=</span> <span class="n">time_s</span> <span class="o">/</span> <span class="n">cst</span><span class="o">.</span><span class="n">femto</span>  <span class="c1"># fs</span>
+
     <span class="c1"># Calculate the prefactor for the temperature</span>
-    <span class="n">kB</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span>  <span class="c1"># kCal/mol/K</span>
+    <span class="n">kB</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span>  <span class="c1"># kcal/mol/K</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">reference_temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">kB</span>  <span class="c1"># K</span>
+
     <span class="c1"># Calculate the prefactor for the pressure</span>
     <span class="n">pressure_pa</span> <span class="o">=</span> <span class="n">epsilon_J</span><span class="o">/</span><span class="n">sigma_m</span><span class="o">**</span><span class="mi">3</span>  <span class="c1"># Pa</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">reference_pressure</span> <span class="o">=</span> <span class="n">pressure_pa</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">atm</span>  <span class="c1"># atm</span>
@@ -391,11 +395,10 @@ be calculated and stored as attributes of <em>self</em>.</p>
 <section id="nondimensionalize-units">
 <h2>Nondimensionalize units<a class="headerlink" href="#nondimensionalize-units" title="Link to this heading">¶</a></h2>
 <p>Let us take advantage of the calculated reference values and normalize the
-three inputs of the <em>Prepare</em> class that have a physical dimension, i.e.
+three inputs of the <em>Prepare</em> class that have physical dimensions, i.e.,
 <em>epsilon</em>, <em>sigma</em>, and <em>atom_mass</em>.</p>
 <p>Create a new method called <em>nondimensionalize_units_0</em> within the <em>Prepare</em>
-class. The index <em>0</em> is used to differentiate this method from the other methods
-that will be used to nondimensionalize units in future classes.</p>
+class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">nondimensionalize_units_0</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="c1"># Normalize LJ properties</span>
     <span class="n">epsilon</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">atom_mass</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
@@ -408,11 +411,13 @@ that will be used to nondimensionalize units in future classes.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span> <span class="o">=</span> <span class="n">atom_mass</span>
 </pre></div>
 </div>
-<p>Here, we anticipate that <em>epsilon</em>, <em>sigma</em>, and <em>atom_mass</em> may contain
-more than one element in the future, and normalize each element with the
-corresponding reference value. The <em>zip()</em> function allows us to loop over
-all three lists at once.</p>
-<p>Let us also call the <em>nondimensionalize_units_0</em> from the <em>__init__()</em> method:</p>
+<p>The index <em>0</em> is used to differentiate this method from other methods that
+will be used to nondimensionalize units in future classes. We anticipate that
+<em>epsilon</em>, <em>sigma</em>, and <em>atom_mass</em> may contain more than one element, so
+each element is normalized with the corresponding reference value. The
+<em>zip()</em> function allows us to loop over all three lists at once.</p>
+<p>Let us also call the <em>nondimensionalize_units_0</em> from the <em>__init__()</em> method
+of the <em>Prepare</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">calculate_LJunits_prefactors</span><span class="p">()</span>
@@ -423,20 +428,21 @@ all three lists at once.</p>
 <section id="identify-atom-properties">
 <h2>Identify atom properties<a class="headerlink" href="#identify-atom-properties" title="Link to this heading">¶</a></h2>
 <p>Anticipating the future use of multiple atom types, where each type will be
-associated with its own <span class="math notranslate nohighlight">\(\sigma\)</span>, <span class="math notranslate nohighlight">\(\epsilon\)</span> and  <span class="math notranslate nohighlight">\(m\)</span>,
-let us create arrays containing the properties of each atom in the simulation.
-For instance, in the case of a simulation with two atoms of type 1 and three
-atoms of type 2, the corresponding <em>atoms_sigma</em> will be:</p>
+associated with its own <span class="math notranslate nohighlight">\(\sigma\)</span>, <span class="math notranslate nohighlight">\(\epsilon\)</span>, and <span class="math notranslate nohighlight">\(m\)</span>, let
+us create arrays containing the properties of each atom in the simulation. For
+instance, in the case of a simulation with two atoms of type 1 and three atoms
+of type 2, the corresponding <em>atoms_sigma</em> array will be:</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[\text{atoms_sigma} = [\sigma_{11}, \sigma_{11}, \sigma_{22}, \sigma_{22}, \sigma_{22}]\]</div>
 </div>
 <p>where <span class="math notranslate nohighlight">\(\sigma_{11}\)</span> and <span class="math notranslate nohighlight">\(\sigma_{22}\)</span> are the sigma values for
-atoms of type 1 and 2 respectively. The <em>atoms_sigma</em> array will allow
-for future calculation of force.</p>
+atoms of type 1 and 2, respectively. The <em>atoms_sigma</em> array will allow for
+future calculations of force.</p>
 <p>Create a new method called <em>identify_atom_properties</em>, and place it
 within the <em>Prepare</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">identify_atom_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Identify the atom properties for each atom.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span>
     <span class="n">atoms_sigma</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">atoms_epsilon</span> <span class="o">=</span> <span class="p">[]</span>
@@ -461,7 +467,6 @@ within the <em>Prepare</em> class:</p>
 <p>Let us call the <em>identify_atom_properties</em> from the <em>__init__()</em> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">calculate_LJunits_prefactors</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units_0</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">identify_atom_properties</span><span class="p">()</span>
 </pre></div>
@@ -469,7 +474,7 @@ within the <em>Prepare</em> class:</p>
 </section>
 <section id="calculate-cross-coefficients">
 <h2>Calculate cross coefficients<a class="headerlink" href="#calculate-cross-coefficients" title="Link to this heading">¶</a></h2>
-<p>Let us calculate all cross coefficients that can be used to calculate the interactions
+<p>Let us calculate all cross coefficients that are required to calculate the interactions
 between atom <span class="math notranslate nohighlight">\(i\)</span> and atom <span class="math notranslate nohighlight">\(j\)</span>. From the example described previously,
 where:</p>
 <div class="math-wrapper docutils container">
@@ -487,7 +492,7 @@ where:</p>
     \end{bmatrix}\end{split}\]</div>
 </div>
 <p>where it is assumed that the matrix is symmetric, so the coefficients in the bottom
-left are not specified. The first value in the top left corner of the matrix,
+left corner are not specified. The first value in the top left corner of the matrix,
 <span class="math notranslate nohighlight">\(\sigma_{11} \text{(0-1)}\)</span>, indicates that the <span class="math notranslate nohighlight">\(\sigma\)</span> value for the interaction
 between the first (0) and second atom (1) is <span class="math notranslate nohighlight">\(\sigma_{11}\)</span>, as both atoms 0
 and 1 are of type 1. A similar matrix can be written for epsilon_sigma_ij.</p>
@@ -501,32 +506,29 @@ are assumed to follow the arithmetic mean :</p>
 <p>Create the following method called <em>calculate_cross_coefficients</em> within the
 <em>Prepare</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_cross_coefficients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate all the cross-coefficients for the LJ interations.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">identify_atom_properties</span><span class="p">()</span>
     <span class="n">epsilon_ij</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">sigma_ij</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">):</span>
         <span class="n">epsilon_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">sigma_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">):</span>
             <span class="n">epsilon_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
             <span class="n">epsilon_ij</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">epsilon_i</span><span class="o">+</span><span class="n">epsilon_j</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">array_epsilon_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">epsilon_ij</span><span class="p">)</span>
-    <span class="n">sigma_ij</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">):</span>
-        <span class="n">sigma_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">):</span>
             <span class="n">sigma_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
             <span class="n">sigma_ij</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">sigma_i</span><span class="o">+</span><span class="n">sigma_j</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">array_epsilon_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">epsilon_ij</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">array_sigma_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigma_ij</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>After calling for the <em>identify_atom_properties()</em> method, double loops
-are performed over all direct coefficients, and the cross coefficients
+<p>After calling for the <em>identify_atom_properties()</em> method, a double loop
+is performed over all direct coefficients, and the cross coefficients
 are stored within <em>array_sigma_ij</em> and <em>array_epsilon_ij</em>.</p>
 <p>Finally, let us call the <em>calculate_cross_coefficients</em> method from the
 <em>__init__()</em> method.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">calculate_LJunits_prefactors</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units_0</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">identify_atom_properties</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">calculate_cross_coefficients</span><span class="p">()</span>
 </pre></div>
