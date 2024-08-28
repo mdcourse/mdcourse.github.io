@@ -4,83 +4,70 @@ Start coding
 Presentation
 ------------
 
-To perform the molecular simulations, three key steps will be followed here:
+To perform the molecular simulations, three key steps will be followed:
 
-- First, the system will be initialized. This includes creating the simulation
-  box, placing the atoms, and choosing the potential and parameters for their
-  interactions.
-- Second, an energy minimization of the system will be performed to place the
-  atoms in reasonable relative positions and reduce the energy of the system.
-- Third, the main algorithm will be executed: either molecular dynamics or
-  Monte Carlo.
+1. **System Initialization:** This step involves creating the simulation box,
+   placing the atoms, and selecting the parameters for their interactions.
+  
+2. **Energy Minimization:** An energy minimization of the system will be
+   carried out to position the atoms in reasonable relative locations and
+   reduce the system's energy.
+  
+3. **Execution of the Main Algorithm:** The main algorithm, either Monte Carlo
+   or molecular dynamics, will then be executed.
 
-In addition to these three key steps, some additional tasks will be performed, 
-such as units non-dimensionalization, data measurements, and the outputting of 
+In addition to these three key steps, some supplementary tasks will be
+performed, such as non-dimensionalizing units, measuring data, and outputting
 thermodynamic information during the simulation.
 
-For better readability, the present code is split into separate files, with
-each file containing either Python funtions or Python classes.
-
-List of files
+List of Files
 -------------
 
-In total, 7 Python files containing classes will be written during this
-course, as well as 2 files containing functions:
-
+For better readability, the code is split into separate files, with each file
+containing either Python functions or classes:
 
 .. list-table::
-   :widths: 40 60
+   :widths: 25 75
    :header-rows: 1
-   
-   * - Fine name 
+
+   * - File Name 
      - Content
    * - *Prepare.py* 
-     - *Prepare* class
+     - *Prepare* class: Methods for preparing the non-dimensionalization of the
+       units
    * - *Utilities.py* 
-     - *Utilities* class
+     - *Utilities* class: General-purpose methods, inherited by all other classes
    * - *InitializeSimulation.py*
-     - *InitializeSimulation* class
+     - *InitializeSimulation* class: Methods necessary to set up the system and
+       prepare the simulation, inherited by all the classes below
    * - *MinimizeEnergy.py* 
-     - *MinimizeEnergy* class
-   * - *MolecularDynamics.py*
-     - *MolecularDynamics* class
+     - *MinimizeEnergy* class: Methods for performing energy minimization
    * - *MonteCarlo.py*
-     - *MonteCarlo* class
-   * - *Measurements.py* 
-     - Functions
-   * - *Potentials.py* 
-     - Functions
-    * - *tools.py*
-     - Functions
+     - *MonteCarlo* class: Methods for performing Monte Carlo simulations in
+       different ensembles (e.g., Grand Canonical, Canonical)
+   * - *MolecularDynamics.py*
+     - *MolecularDynamics* class: Methods for performing molecular dynamics in
+       different ensembles (NVE, NPT, NVT)
+   * - *measurements.py* 
+     - Functions for performing specific measurements on the system
+   * - *potentials.py* 
+     - Functions for calculating the potentials and forces between atoms
+   * - *tools.py*
+     - Functions for outputting data into text files
 
-Each of these files will serve to perform specific tasks. Within these files,
-the final Python code will be divided into seven classes:
-
-- *Prepare --* Methods preparing the non-dimensionalization of the units
-- *Utilities --* Methods of general purpose, inherited by all the other classes
-- *InitializeSimulation --* Methods necessary to set up the system and prepare
-  the simulation, inherited by all the classes except *Utilities*
-- *MinimizeEnergy --* Methods for performing energy minimization 
-- *MonteCarlo --* Methods for performing Monte Carlo simulation in different
-  ensembles (Grand canonical, canonical)
-- *MolecularDynamics --* Methods for performing molecular dynamics in
-  different ensembles (NVE, NPT, NVT)
-- *tools --* Functions of interest for printing information in log or data
-  files
 
 Potential for inter-atomic interaction
 --------------------------------------
 
-In molecular simulations, potential functions are used to mimick the
-interaction between atoms. Although there exists some more complicated
-options, potentials are usually defined as functions of the
-distance :math:`r` between two atoms. 
+In molecular simulations, potential functions are used to mimic the interaction
+between atoms. Although more complicated options exist, potentials are usually
+defined as functions of the distance :math:`r` between two atoms.
 
-Within a dedicated folder, create the first file named *Potentials.py*. This
-file will contain a functon named *LJ_potential* for the Lennard-Jones
-potential (LJ). Copy the following into *Potentials.py*:
+Within a dedicated folder, create the first file named *potentials.py*. This
+file will contain a function named *LJ_potential* for the Lennard-Jones
+potential (LJ). Copy the following into *potentials.py*:
 
-.. label:: start_Potentials_class
+.. label:: start_potentials_class
 
 .. code-block:: python
 
@@ -90,20 +77,16 @@ potential (LJ). Copy the following into *Potentials.py*:
         else:
             return 4*epsilon*((sigma/r)**12-(sigma/r)**6)
 
-.. label:: end_Potentials_class
+.. label:: end_potentials_class
 
-.. container:: justify
-
-    Depending on the value of *derivative*, which can be either *False* or *True*,
-    the *LJ_potential()* function will return the LJ force
+Depending on the value of the optional argument *derivative*, which can be
+either *False* or *True*, the *LJ_potential* function will return the force:
 
 .. math::
 
     F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left[ \left( \frac{\sigma}{r} \right)^{12}- \frac{1}{2} \left( \frac{\sigma}{r} \right)^6 \right],
 
-.. container:: justify
-
-    or the LJ potential
+or the potential energy:
 
 .. math::
 
@@ -138,7 +121,7 @@ copy the following lines:
 
 .. code-block:: python
 
-    from Potentials import LJ_potential
+    from potentials import LJ_potential
 
 
     class Utilities:

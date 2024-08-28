@@ -263,51 +263,79 @@
 <h1>Start coding<a class="headerlink" href="#start-coding" title="Link to this heading">¶</a></h1>
 <section id="presentation">
 <h2>Presentation<a class="headerlink" href="#presentation" title="Link to this heading">¶</a></h2>
-<p>To perform the molecular simulations, three key steps will be followed here:</p>
-<ul class="simple">
-<li><p>First, the system will be initialized. This includes creating the simulation
-box, placing the atoms, and choosing the potential and parameters for their
-interactions.</p></li>
-<li><p>Second, an energy minimization of the system will be performed to place the
-atoms in reasonable relative positions and reduce the energy of the system.</p></li>
-<li><p>Third, the main algorithm will be executed: either molecular dynamics or
-Monte Carlo.</p></li>
-</ul>
-<p>In addition to these three key steps, some additional tasks will be performed,
-such as units non-dimensionalization, data measurements, and the outputting of
+<p>To perform the molecular simulations, three key steps will be followed:</p>
+<ol class="arabic simple">
+<li><p><strong>System Initialization:</strong> This step involves creating the simulation box,
+placing the atoms, and selecting the parameters for their interactions.</p></li>
+<li><p><strong>Energy Minimization:</strong> An energy minimization of the system will be
+carried out to position the atoms in reasonable relative locations and
+reduce the system’s energy.</p></li>
+<li><p><strong>Execution of the Main Algorithm:</strong> The main algorithm, either Monte Carlo
+or molecular dynamics, will then be executed.</p></li>
+</ol>
+<p>In addition to these three key steps, some supplementary tasks will be
+performed, such as non-dimensionalizing units, measuring data, and outputting
 thermodynamic information during the simulation.</p>
-<p>For better readability, the present code is split into separate files, with
-each file containing either Python funtions or Python classes.</p>
 </section>
 <section id="list-of-files">
-<h2>List of files<a class="headerlink" href="#list-of-files" title="Link to this heading">¶</a></h2>
-<p>In total, 7 Python files containing classes will be written during this
-course, as well as 2 files containing functions:</p>
-<p>Each of these files will serve to perform specific tasks. Within these files,
-the final Python code will be divided into seven classes:</p>
-<ul class="simple">
-<li><p><em>Prepare –</em> Methods preparing the non-dimensionalization of the units</p></li>
-<li><p><em>Utilities –</em> Methods of general purpose, inherited by all the other classes</p></li>
-<li><p><em>InitializeSimulation –</em> Methods necessary to set up the system and prepare
-the simulation, inherited by all the classes except <em>Utilities</em></p></li>
-<li><p><em>MinimizeEnergy –</em> Methods for performing energy minimization</p></li>
-<li><p><em>MonteCarlo –</em> Methods for performing Monte Carlo simulation in different
-ensembles (Grand canonical, canonical)</p></li>
-<li><p><em>MolecularDynamics –</em> Methods for performing molecular dynamics in
-different ensembles (NVE, NPT, NVT)</p></li>
-<li><p><em>tools –</em> Functions of interest for printing information in log or data
-files</p></li>
-</ul>
+<h2>List of Files<a class="headerlink" href="#list-of-files" title="Link to this heading">¶</a></h2>
+<p>For better readability, the code is split into separate files, with each file
+containing either Python functions or classes:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>File Name</p></th>
+<th class="head"><p>Content</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><em>Prepare.py</em></p></td>
+<td><p><em>Prepare</em> class: Methods for preparing the non-dimensionalization of the
+units</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>Utilities.py</em></p></td>
+<td><p><em>Utilities</em> class: General-purpose methods, inherited by all other classes</p></td>
+</tr>
+<tr class="row-even"><td><p><em>InitializeSimulation.py</em></p></td>
+<td><p><em>InitializeSimulation</em> class: Methods necessary to set up the system and
+prepare the simulation, inherited by all the classes below</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>MinimizeEnergy.py</em></p></td>
+<td><p><em>MinimizeEnergy</em> class: Methods for performing energy minimization</p></td>
+</tr>
+<tr class="row-even"><td><p><em>MonteCarlo.py</em></p></td>
+<td><p><em>MonteCarlo</em> class: Methods for performing Monte Carlo simulations in
+different ensembles (e.g., Grand Canonical, Canonical)</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>MolecularDynamics.py</em></p></td>
+<td><p><em>MolecularDynamics</em> class: Methods for performing molecular dynamics in
+different ensembles (NVE, NPT, NVT)</p></td>
+</tr>
+<tr class="row-even"><td><p><em>measurements.py</em></p></td>
+<td><p>Functions for performing specific measurements on the system</p></td>
+</tr>
+<tr class="row-odd"><td><p><em>potentials.py</em></p></td>
+<td><p>Functions for calculating the potentials and forces between atoms</p></td>
+</tr>
+<tr class="row-even"><td><p><em>tools.py</em></p></td>
+<td><p>Functions for outputting data into text files</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 </section>
 <section id="potential-for-inter-atomic-interaction">
 <h2>Potential for inter-atomic interaction<a class="headerlink" href="#potential-for-inter-atomic-interaction" title="Link to this heading">¶</a></h2>
-<p>In molecular simulations, potential functions are used to mimick the
-interaction between atoms. Although there exists some more complicated
-options, potentials are usually defined as functions of the
-distance <span class="math notranslate nohighlight">\(r\)</span> between two atoms.</p>
-<p>Within a dedicated folder, create the first file named <em>Potentials.py</em>. This
-file will contain a functon named <em>LJ_potential</em> for the Lennard-Jones
-potential (LJ). Copy the following into <em>Potentials.py</em>:</p>
+<p>In molecular simulations, potential functions are used to mimic the interaction
+between atoms. Although more complicated options exist, potentials are usually
+defined as functions of the distance <span class="math notranslate nohighlight">\(r\)</span> between two atoms.</p>
+<p>Within a dedicated folder, create the first file named <em>potentials.py</em>. This
+file will contain a function named <em>LJ_potential</em> for the Lennard-Jones
+potential (LJ). Copy the following into <em>potentials.py</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">LJ_potential</span><span class="p">(</span><span class="n">epsilon</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">derivative</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">derivative</span><span class="p">:</span>
         <span class="k">return</span> <span class="mi">48</span><span class="o">*</span><span class="n">epsilon</span><span class="o">*</span><span class="p">((</span><span class="n">sigma</span><span class="o">/</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">12</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">sigma</span><span class="o">/</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">6</span><span class="p">)</span><span class="o">/</span><span class="n">r</span>
@@ -315,17 +343,13 @@ potential (LJ). Copy the following into <em>Potentials.py</em>:</p>
         <span class="k">return</span> <span class="mi">4</span><span class="o">*</span><span class="n">epsilon</span><span class="o">*</span><span class="p">((</span><span class="n">sigma</span><span class="o">/</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">12</span><span class="o">-</span><span class="p">(</span><span class="n">sigma</span><span class="o">/</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">6</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="justify docutils container">
-<p>Depending on the value of <em>derivative</em>, which can be either <em>False</em> or <em>True</em>,
-the <em>LJ_potential()</em> function will return the LJ force</p>
-</div>
+<p>Depending on the value of the optional argument <em>derivative</em>, which can be
+either <em>False</em> or <em>True</em>, the <em>LJ_potential</em> function will return the force:</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left[ \left( \frac{\sigma}{r} \right)^{12}- \frac{1}{2} \left( \frac{\sigma}{r} \right)^6 \right],\]</div>
 </div>
-<div class="justify docutils container">
-<p>or the LJ potential</p>
-</div>
+<p>or the potential energy:</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[U_\text{LJ} = 4 \epsilon \left[ \left( \frac{\sigma}{r} \right)^{12}- \left( \frac{\sigma}{r} \right)^6 \right].\]</div>
@@ -347,7 +371,7 @@ copy the following lines:</p>
 </div>
 <p>The second class is named <em>Utilities</em>. Within the <em>Utilities.py</em> file,
 copy the following lines:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Potentials</span> <span class="kn">import</span> <span class="n">LJ_potential</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">potentials</span> <span class="kn">import</span> <span class="n">LJ_potential</span>
 
 
 <span class="k">class</span> <span class="nc">Utilities</span><span class="p">:</span>
@@ -510,7 +534,7 @@ the following lines into it:</p>
             <ul>
 <li><a class="reference internal" href="#">Start coding</a><ul>
 <li><a class="reference internal" href="#presentation">Presentation</a></li>
-<li><a class="reference internal" href="#list-of-files">List of files</a></li>
+<li><a class="reference internal" href="#list-of-files">List of Files</a></li>
 <li><a class="reference internal" href="#potential-for-inter-atomic-interaction">Potential for inter-atomic interaction</a></li>
 <li><a class="reference internal" href="#create-the-classes">Create the classes</a></li>
 <li><a class="reference internal" href="#test-the-code">Test the code</a></li>
