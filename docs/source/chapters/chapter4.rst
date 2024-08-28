@@ -299,7 +299,7 @@ class.
 
 Here, the method is a little bit complicated, because three types of outputs can
 be requested by the user: *force-vector*, *force-matrix*, and *potential*. The last
-once, *potential*, simply returns the value of the potential energy for the entire system.
+one, *potential*, simply returns the value of the potential energy for the entire system.
 If *force-vector* or *force-matrix* are selected instead, then the individual forces
 between atoms are returned.
 
