@@ -262,8 +262,48 @@
           <section id="minimize-the-energy">
 <span id="chapter4-label"></span><h1>Minimize the energy<a class="headerlink" href="#minimize-the-energy" title="Link to this heading">¶</a></h1>
 <p>Now that the code for placing the atoms within the box has been written,
-let us perform an energy minimization to ensure that there is no overlapping
-between the atoms, before starting the actual simulation.</p>
+let us proceed to write the code for performing energy minimization of the
+system. This step helps ensure that there is no unreasonable overlapping
+between the atoms.</p>
+<p>The steepest descent method is used for energy minimization, following these steps:</p>
+<ul>
+<li><ol class="arabic simple">
+<li><p>Start with an initial configuration and measure the initial potential energy,
+<span class="math notranslate nohighlight">\(E_\text{pot}^\text{initial}\)</span>.</p></li>
+</ol>
+</li>
+<li><ol class="arabic simple" start="2">
+<li><p>Calculate the gradient of the potential energy with respect to atomic positions
+to determine the direction of the steepest ascent in energy. The magnitude
+of this gradient is used to compute the maximum force acting on the atoms.
+This maximum force indicates the direction in which the energy decreases most
+rapidly.</p></li>
+</ol>
+</li>
+<li><ol class="arabic simple" start="3">
+<li><p>Move the atoms in the opposite direction of the maximum
+force to minimize the potential energy by a displacement step.
+The size of the step is adjusted iteratively based on the reduction in energy.</p></li>
+</ol>
+</li>
+<li><ol class="arabic simple" start="4">
+<li><p>Compute the new potential energy after the displacement, <span class="math notranslate nohighlight">\(E_\text{pot}^\text{trial}\)</span>.</p></li>
+</ol>
+</li>
+<li><ol class="arabic simple" start="5">
+<li><p>Evaluate the change in energy: <span class="math notranslate nohighlight">\(\Delta E = E_\text{pot}^\text{trial} - E_\text{pot}^\text{initial}\)</span>.</p></li>
+</ol>
+<ul class="simple">
+<li><p>If <span class="math notranslate nohighlight">\(\Delta E &lt; 0\)</span>, the new configuration is accepted as it results in
+lower energy, and the step size is increased.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(\Delta E \geq 0\)</span>, the new configuration is rejected, and the step
+size is decreased.</p></li>
+</ul>
+</li>
+</ul>
+<p>The process is repeated until the maximum number of steps is reached.
+The goal is to iteratively reduce the potential energy and reach a stable,
+minimized energy state.</p>
 <section id="prepare-the-minimization">
 <h2>Prepare the minimization<a class="headerlink" href="#prepare-the-minimization" title="Link to this heading">¶</a></h2>
 <p>Let us start by importing NumPy and the copy libraries. Add the following
@@ -295,24 +335,27 @@ to the beginning of the <em>MinimizeEnergy.py</em> file:</p>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>An important parameter is <em>maximum_steps</em>, which sets the maximum number of
-steps that the energy minimization will last. A <em>cut_off</em> with a default value
-of 9 Ångströms is also defined. The <em>neighbor</em> parameter sets the period
-between two recalculations of the neighbor lists, and the <em>displacement</em> with
-a default value of 0.01 Ångström sets the initial value for atom displacement.</p>
+<p>An important parameter is <em>maximum_steps</em>, which sets the maximum number
+of steps for the energy minimization process. A <em>cut_off</em> value with a
+default of 9 Ångströms is also defined. The <em>neighbor</em> parameter determines
+the interval between recalculations of the neighbor lists, and the <em>displacement</em>
+parameter, with a default value of 0.01 Ångström, sets the initial atom
+displacement value.</p>
+<p>The <em>thermo_outputs</em> and <em>data_folder</em> parameters are used for printing data
+to files. These two parameters will be useful in the next chapter, <a class="reference internal" href="chapter5.html#chapter5-label"><span class="std std-ref">Output the simulation state</span></a>.</p>
 </section>
 <section id="nondimensionalize-units">
 <h2>Nondimensionalize units<a class="headerlink" href="#nondimensionalize-units" title="Link to this heading">¶</a></h2>
-<p>Two parameters from the <em>MinimizeEnergy</em> class must be nondimensionalized,
-namely <em>cut_off</em> and <em>displacement</em>. Add the following method to the
-<em>MinimizeEnergy</em> class:</p>
+<p>As was done previously, some parameters from the <em>MinimizeEnergy</em> class
+must be non-dimensionalized: <em>cut_off</em> and <em>displacement</em>. Add the following
+method to the <em>MinimizeEnergy</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">nondimensionalize_units_2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Use LJ prefactors to convert units into non-dimensional.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cut_off</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cut_off</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">displacement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">displacement</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span>
 </pre></div>
 </div>
-<p>Finally, let us call the <em>nondimensionalize_units_2()</em> method from the <em>__init__()</em>
+<p>Let us call the <em>nondimensionalize_units_2()</em> method from the <em>__init__()</em>
 method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
@@ -323,39 +366,38 @@ method:</p>
 </section>
 <section id="energy-minimizer">
 <h2>Energy minimizer<a class="headerlink" href="#energy-minimizer" title="Link to this heading">¶</a></h2>
-<p>Here, the steepest descent method is used. First, the initial energy of the
-system and the maximum force are measured. Then, a set of new positions for the atoms
-is tested. The energy of the new configuration is compared to the initial
-energy, and the new position is either accepted or rejected based on energy criteria.</p>
+<p>Let us implement the energy minimized described at the top of this page. Add the
+following <em>run()</em> method to the <em>MinimizeEnergy</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-        <span class="c1"># Measure the initial energy and max force</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span>
-        <span class="k">try</span><span class="p">:</span> <span class="c1"># try using the last saved Epot, if it exists</span>
+    <span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> <span class="c1"># *step* loops for 0 to *maximum_steps*+1</span>
+        <span class="c1"># First, meevaluate the initial energy and max force</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span> <span class="c1"># Rebuild neighbor list, is necessary</span>
+        <span class="k">try</span><span class="p">:</span> <span class="c1"># try using the last saved Epot and MaxF, if it exists</span>
             <span class="n">init_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span>
             <span class="n">init_MaxF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MaxF</span>
-        <span class="k">except</span><span class="p">:</span> <span class="c1"># If self.Epot does not exists yet, calculate it</span>
+        <span class="k">except</span><span class="p">:</span> <span class="c1"># If Epot/MaxF do not exists yet, calculate them both</span>
             <span class="n">init_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span>
             <span class="n">forces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;force-vector&quot;</span><span class="p">)</span>
             <span class="n">init_MaxF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">forces</span><span class="p">))</span>
+        <span class="c1"># Save the current atom positions</span>
         <span class="n">init_positions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span>
-        <span class="c1"># Test a new sets of positions</span>
+        <span class="c1"># Move the atoms in the opposite direction of the maximum force</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> \
             <span class="o">+</span> <span class="n">forces</span><span class="o">/</span><span class="n">init_MaxF</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">displacement</span>
+        <span class="c1"># Recalculate the energy</span>
         <span class="n">trial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span>
-        <span class="n">forces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;force-vector&quot;</span><span class="p">)</span>
-        <span class="n">trial_MaxF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">forces</span><span class="p">))</span>
         <span class="c1"># Keep the more favorable energy</span>
-        <span class="k">if</span> <span class="n">trial_Epot</span> <span class="o">&lt;</span> <span class="n">init_Epot</span><span class="p">:</span>  <span class="c1"># accept new position</span>
+        <span class="k">if</span> <span class="n">trial_Epot</span> <span class="o">&lt;</span> <span class="n">init_Epot</span><span class="p">:</span> <span class="c1"># accept new position</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="n">trial_Epot</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">MaxF</span> <span class="o">=</span> <span class="n">trial_MaxF</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_box</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">displacement</span> <span class="o">*=</span> <span class="mf">1.2</span>
-        <span class="k">else</span><span class="p">:</span>  <span class="c1"># reject new position</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="n">init_Epot</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">MaxF</span> <span class="o">=</span> <span class="n">init_MaxF</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">init_positions</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">displacement</span> <span class="o">*=</span> <span class="mf">0.2</span>
+            <span class="c1"># calculate the new max force and save it</span>
+            <span class="n">forces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;force-vector&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MaxF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">forces</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_box</span><span class="p">()</span>  <span class="c1"># Wrap atoms in the box, if necessary</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">displacement</span> <span class="o">*=</span> <span class="mf">1.2</span> <span class="c1"># Multiply the displacement by a factor 1.2</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># reject new position</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="n">init_Epot</span> <span class="c1"># Revert to old energy</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">init_positions</span> <span class="c1"># Revert to old positions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">displacement</span> <span class="o">*=</span> <span class="mf">0.2</span> <span class="c1"># Multiply the displacement by a factor 0.2</span>
 </pre></div>
 </div>
 <p>The displacement, which has an initial value of 0.01, is adjusted through energy
@@ -364,10 +406,10 @@ the trial is rejected, its value is multiplied by 0.2.</p>
 </section>
 <section id="build-neighbor-lists">
 <h2>Build neighbor lists<a class="headerlink" href="#build-neighbor-lists" title="Link to this heading">¶</a></h2>
-<p>To save time, it is common in molecular simulations to detect which atoms are
-neighbors. This way, only interactions between neighbors are recalculated.
-This is the purpose of the <em>update_neighbor_lists()</em> method that must be
-added to the <em>Utilities</em> class:</p>
+<p>In molecular simulations, it is common practice to identify neighboring atoms
+to save computational time. By focusing only on interactions between
+neighboring atoms, the simulation becomes more efficient. Add the following
+<em>update_neighbor_lists()</em> method to the <a href="#id1"><span class="problematic" id="id2">*</span></a>Utilities*class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">update_neighbor_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighbor</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
         <span class="n">matrix</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">contact_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">,</span>
@@ -398,11 +440,13 @@ added to the <em>Utilities</em> class:</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_ij_list</span> <span class="o">=</span> <span class="n">epsilon_ij_list</span>
 </pre></div>
 </div>
-<p>The <em>update_neighbor_lists()</em> method generates neighbor lists that are stored
-as Python list named <em>neighbor_lists</em>. The following library
-should also be imported within the <em>Utilities.py</em> file:</p>
+<p># TO FIX: doublons with before !</p>
+<p>The <em>update_neighbor_lists()</em> method generates neighbor lists for each
+atom, ensuring that only relevant interactions are considered in the
+calculations. These lists will be recalculated at intervals specified by
+the <em>neighbor</em> input parameter. To implement this method, you should also
+import the following library in the <em>Utilities.py</em> file:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
 <span class="kn">from</span> <span class="nn">MDAnalysis.analysis</span> <span class="kn">import</span> <span class="n">distances</span>
 </pre></div>
 </div>
@@ -448,6 +492,12 @@ class.</p>
         <span class="k">return</span> <span class="n">forces</span>
 </pre></div>
 </div>
+<p>Here, the method is a little bit complicated, because three types of outputs can
+be requested by the user: <em>force-vector</em>, <em>force-matrix</em>, and <em>potential</em>. The last
+once, <em>potential</em>, simply returns the value of the potential energy for the entire system.
+If <em>force-vector</em> or <em>force-matrix</em> are selected instead, then the individual forces
+between atoms are returned.</p>
+<p># TOFIX: should we simplify that?</p>
 </section>
 <section id="wrap-in-box">
 <h2>Wrap in box<a class="headerlink" href="#wrap-in-box" title="Link to this heading">¶</a></h2>
@@ -563,5 +613,6 @@ typically negative.</p>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

@@ -4,8 +4,33 @@ Minimize the energy
 ===================
 
 Now that the code for placing the atoms within the box has been written,
-let us perform an energy minimization to ensure that there is no overlapping
-between the atoms, before starting the actual simulation.
+let us proceed to write the code for performing energy minimization of the
+system. This step helps ensure that there is no unreasonable overlapping
+between the atoms.
+
+The steepest descent method is used for energy minimization, following these steps:
+
+- 1) Start with an initial configuration and measure the initial potential energy,
+     :math:`E_\text{pot}^\text{initial}`.
+- 2) Calculate the gradient of the potential energy with respect to atomic positions
+     to determine the direction of the steepest ascent in energy. The magnitude
+     of this gradient is used to compute the maximum force acting on the atoms.
+     This maximum force indicates the direction in which the energy decreases most
+     rapidly.
+- 3) Move the atoms in the opposite direction of the maximum
+     force to minimize the potential energy by a displacement step.
+     The size of the step is adjusted iteratively based on the reduction in energy.
+- 4) Compute the new potential energy after the displacement, :math:`E_\text{pot}^\text{trial}`.
+- 5) Evaluate the change in energy: :math:`\Delta E = E_\text{pot}^\text{trial} - E_\text{pot}^\text{initial}`.
+  
+  - If :math:`\Delta E < 0`, the new configuration is accepted as it results in
+    lower energy, and the step size is increased.
+  - If :math:`\Delta E \geq 0`, the new configuration is rejected, and the step
+    size is decreased.
+
+The process is repeated until the maximum number of steps is reached.
+The goal is to iteratively reduce the potential energy and reach a stable,
+minimized energy state.
 
 Prepare the minimization
 ------------------------
@@ -51,18 +76,22 @@ Then, let us fill the *__init__()* method:
 
 .. label:: end_MinimizeEnergy_class
 
-An important parameter is *maximum_steps*, which sets the maximum number of
-steps that the energy minimization will last. A *cut_off* with a default value
-of 9 Ångströms is also defined. The *neighbor* parameter sets the period
-between two recalculations of the neighbor lists, and the *displacement* with
-a default value of 0.01 Ångström sets the initial value for atom displacement.
+An important parameter is *maximum_steps*, which sets the maximum number
+of steps for the energy minimization process. A *cut_off* value with a
+default of 9 Ångströms is also defined. The *neighbor* parameter determines
+the interval between recalculations of the neighbor lists, and the *displacement*
+parameter, with a default value of 0.01 Ångström, sets the initial atom
+displacement value.
+
+The *thermo_outputs* and *data_folder* parameters are used for printing data
+to files. These two parameters will be useful in the next chapter, :ref:`chapter5-label`.
 
 Nondimensionalize units
 -----------------------
 
-Two parameters from the *MinimizeEnergy* class must be nondimensionalized,
-namely *cut_off* and *displacement*. Add the following method to the
-*MinimizeEnergy* class:
+As was done previously, some parameters from the *MinimizeEnergy* class
+must be non-dimensionalized: *cut_off* and *displacement*. Add the following
+method to the *MinimizeEnergy* class:
 
 .. label:: start_MinimizeEnergy_class
 
@@ -75,7 +104,7 @@ namely *cut_off* and *displacement*. Add the following method to the
 
 .. label:: end_MinimizeEnergy_class
 
-Finally, let us call the *nondimensionalize_units_2()* method from the *__init__()*
+Let us call the *nondimensionalize_units_2()* method from the *__init__()*
 method:
 
 .. label:: start_MinimizeEnergy_class
@@ -92,44 +121,43 @@ method:
 Energy minimizer
 ----------------
 
-Here, the steepest descent method is used. First, the initial energy of the
-system and the maximum force are measured. Then, a set of new positions for the atoms
-is tested. The energy of the new configuration is compared to the initial
-energy, and the new position is either accepted or rejected based on energy criteria.  
+Let us implement the energy minimized described at the top of this page. Add the
+following *run()* method to the *MinimizeEnergy* class:
 
 .. label:: start_MinimizeEnergy_class
 
 .. code-block:: python
 
     def run(self):
-        for self.step in range(0, self.maximum_steps+1):
-            # Measure the initial energy and max force
-            self.update_neighbor_lists()
-            try: # try using the last saved Epot, if it exists
+        for self.step in range(0, self.maximum_steps+1): # *step* loops for 0 to *maximum_steps*+1
+            # First, meevaluate the initial energy and max force
+            self.update_neighbor_lists() # Rebuild neighbor list, is necessary
+            try: # try using the last saved Epot and MaxF, if it exists
                 init_Epot = self.Epot
                 init_MaxF = self.MaxF
-            except: # If self.Epot does not exists yet, calculate it
+            except: # If Epot/MaxF do not exists yet, calculate them both
                 init_Epot = self.compute_potential(output="potential")
                 forces = self.compute_potential(output="force-vector")
                 init_MaxF = np.max(np.abs(forces))
+            # Save the current atom positions
             init_positions = copy.deepcopy(self.atoms_positions)
-            # Test a new sets of positions
+            # Move the atoms in the opposite direction of the maximum force
             self.atoms_positions = self.atoms_positions \
                 + forces/init_MaxF*self.displacement
+            # Recalculate the energy
             trial_Epot = self.compute_potential(output="potential")
-            forces = self.compute_potential(output="force-vector")
-            trial_MaxF = np.max(np.abs(forces))
             # Keep the more favorable energy
-            if trial_Epot < init_Epot:  # accept new position
+            if trial_Epot < init_Epot: # accept new position
                 self.Epot = trial_Epot
-                self.MaxF = trial_MaxF
-                self.wrap_in_box()
-                self.displacement *= 1.2
-            else:  # reject new position
-                self.Epot = init_Epot
-                self.MaxF = init_MaxF
-                self.atoms_positions = init_positions
-                self.displacement *= 0.2
+                # calculate the new max force and save it
+                forces = self.compute_potential(output="force-vector")
+                self.MaxF = np.max(np.abs(forces))
+                self.wrap_in_box()  # Wrap atoms in the box, if necessary
+                self.displacement *= 1.2 # Multiply the displacement by a factor 1.2
+            else: # reject new position
+                self.Epot = init_Epot # Revert to old energy
+                self.atoms_positions = init_positions # Revert to old positions
+                self.displacement *= 0.2 # Multiply the displacement by a factor 0.2
 
 .. label:: end_MinimizeEnergy_class
 
@@ -140,10 +168,10 @@ the trial is rejected, its value is multiplied by 0.2.
 Build neighbor lists
 --------------------
 
-To save time, it is common in molecular simulations to detect which atoms are
-neighbors. This way, only interactions between neighbors are recalculated.
-This is the purpose of the *update_neighbor_lists()* method that must be
-added to the *Utilities* class:
+In molecular simulations, it is common practice to identify neighboring atoms
+to save computational time. By focusing only on interactions between
+neighboring atoms, the simulation becomes more efficient. Add the following
+*update_neighbor_lists()* method to the *Utilities*class:
 
 .. label:: start_Utilities_class
 
@@ -178,18 +206,21 @@ added to the *Utilities* class:
             self.sigma_ij_list = sigma_ij_list
             self.epsilon_ij_list = epsilon_ij_list
 
+# TO FIX: doublons with before !
+
 .. label:: end_Utilities_class
 
-The *update_neighbor_lists()* method generates neighbor lists that are stored
-as Python list named *neighbor_lists*. The following library
-should also be imported within the *Utilities.py* file:
+The *update_neighbor_lists()* method generates neighbor lists for each
+atom, ensuring that only relevant interactions are considered in the
+calculations. These lists will be recalculated at intervals specified by
+the *neighbor* input parameter. To implement this method, you should also
+import the following library in the *Utilities.py* file:
 
 .. label:: start_Utilities_class
 
 .. code-block:: python
 
     import numpy as np
-
     from MDAnalysis.analysis import distances
 
 .. label:: end_Utilities_class
@@ -241,6 +272,14 @@ class.
             return forces
 
 .. label:: end_Utilities_class
+
+Here, the method is a little bit complicated, because three types of outputs can
+be requested by the user: *force-vector*, *force-matrix*, and *potential*. The last
+once, *potential*, simply returns the value of the potential energy for the entire system.
+If *force-vector* or *force-matrix* are selected instead, then the individual forces
+between atoms are returned.
+
+# TOFIX: should we simplify that?
 
 Wrap in box
 -----------

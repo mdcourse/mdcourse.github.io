@@ -325,24 +325,33 @@ will proceed with randomization.</p>
 </section>
 <section id="nondimensionalize-units">
 <h2>Nondimensionalize units<a class="headerlink" href="#nondimensionalize-units" title="Link to this heading">¶</a></h2>
-<p>Just like we did in the pervious chapter, let us nondimensionalize the provided
-parameters, here the box_dimensions.</p>
+<p>Just like we did in <a class="reference internal" href="chapter2.html#chapter2-label"><span class="std std-ref">Setting Up the Simulation</span></a>, let us nondimensionalize the provided
+parameters, here the <em>box_dimensions</em> as well as the <em>initial_positions</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">nondimensionalize_units_1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Use LJ prefactors to convert units into non-dimensional.&quot;&quot;&quot;</span>
     <span class="c1"># Normalize box dimensions</span>
-    <span class="n">norm_box_dimensions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">box_dimensions</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">L</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_dimensions</span><span class="p">:</span>
-        <span class="n">norm_box_dimensions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">box_dimensions</span> <span class="o">=</span> <span class="n">norm_box_dimensions</span>
+        <span class="n">box_dimensions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">box_dimensions</span> <span class="o">=</span> <span class="n">box_dimensions</span> <span class="c1"># errase the previously defined box_dimensions</span>
+    <span class="c1"># Normalize the box dimensions</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span>
+</pre></div>
+</div>
+<p>Let us call the <em>nondimensionalize_units_1</em> method from the <em>__init__</em> class:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units_1</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 <section id="define-the-box">
 <h2>Define the box<a class="headerlink" href="#define-the-box" title="Link to this heading">¶</a></h2>
-<p>Let us define a box from the <em>box_dimensions</em> list. Add the following method
-to the InitializeSimulation class:</p>
+<p>Let us define the simulation box using the values from <em>box_dimensions</em>. Add the following
+method to the <em>InitializeSimulation</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">define_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">box_boundaries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">dim</span><span class="p">,</span> <span class="n">L</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_dimensions</span><span class="p">):</span>
@@ -353,20 +362,28 @@ to the InitializeSimulation class:</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">box_size</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="o">+</span><span class="n">box_geometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
 </pre></div>
 </div>
-<p>The <em>box_boundaries</em> are calculated from the <em>box_dimensions</em>. It corresponds to
-the lowest and highest coordinate in all directions. By symmetry, the box is centered
-in 0 for all axes. A <em>box_size</em> is also defined. It follows the MDAnalysis
-conventions: Lx, Ly, Lz, 90, 90, 90, where the last three numbers are angles in
-degrees. Values different from <em>90</em> for the angles would define a triclinic
-(non-orthogonal) boxe, which is not currently supported by the current code.</p>
+<p>The <em>box_boundaries</em> are calculated from the <em>box_dimensions</em>. They
+represent the lowest and highest coordinates in all directions. By symmetry,
+the box is centered at 0 along all axes. A <em>box_size</em> is also defined,
+following the MDAnalysis conventions: Lx, Ly, Lz, 90, 90, 90, where the
+last three numbers are angles in degrees. Values different from <em>90</em> for
+the angles would define a triclinic (non-orthogonal) box, which is not
+currently supported by the existing code.</p>
+<p>Let us call the <em>define_box</em> method from the <em>__init__</em> class:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units_1</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">define_box</span><span class="p">()</span>
+</pre></div>
+</div>
 </section>
 <section id="populate-the-box">
 <h2>Populate the box<a class="headerlink" href="#populate-the-box" title="Link to this heading">¶</a></h2>
 <p>Here, the atoms are placed within the simulation box. If initial
-positions were not provided (i.e. <em>initial_positions = None</em>), atoms
-are placed randomly within the box. If initial positions were provided
-as an array named <em>initial_positions</em>, they are used instead. Note that in that
-case, the array number be of size ‘number of atoms’ x ‘’number of dimensions.</p>
+positions were not provided (i.e., <em>initial_positions = None</em>), atoms
+are placed randomly within the box. If <em>initial_positions</em> was provided
+as an array, the provided positions are used instead. Note that, in this
+case, the array must be of size ‘number of atoms’ times ‘number of dimensions’.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">populate_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">,</span>
@@ -380,18 +397,15 @@ case, the array number be of size ‘number of atoms’ x ‘’number of dimens
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span>
 </pre></div>
 </div>
-<p>In case initial positions were not provided by the user, and array of size
-total_number_atoms x dimensions is created, random positions are defined
-using the random function of NumPy.</p>
-<p>Here, the newly added atoms are added randomly within the box, without taking care
-of avoiding any overlap with existing atoms.</p>
-<p>Finally, let us call the methods from the <em>__init__</em> class:</p>
+<p>In case <em>initial_positions is None</em>, and array is first created. Then, random
+positions that are constrained within the box boundaries are defined using the
+random function of NumPy. Note that, here, the newly added atoms are added
+randomly within the box, without taking care of avoiding overlaps with
+existing atoms. Overlaps will be dealt with using energy minimization,
+see <a class="reference internal" href="chapter4.html#chapter4-label"><span class="std std-ref">Minimize the energy</span></a>.</p>
+<p>Let us call the <em>populate_box</em> method from the <em>__init__</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="o">=</span> <span class="n">initial_positions</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units_1</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">define_box</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">populate_box</span><span class="p">()</span>
 </pre></div>
@@ -400,32 +414,27 @@ of avoiding any overlap with existing atoms.</p>
 <section id="test-the-code">
 <h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
 <p>Let us test the <em>InitializeSimulation</em> class to make sure that it does what
-is expected, i.e. that it does create a simulation box of desired size and
-attribute positions to the atoms.</p>
+is expected, i.e. that it does create atoms that are located within the box
+boundaries along all 3 dimensions of space:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
 
 <span class="n">init</span> <span class="o">=</span> <span class="n">InitializeSimulation</span><span class="p">(</span><span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
-    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
-    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="c1"># A</span>
-    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="c1"># g/mol</span>
+    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># g/mol</span>
     <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># A</span>
-    <span class="n">seed</span><span class="o">=</span><span class="mi">48031</span><span class="p">,</span>
     <span class="p">)</span>
 
-<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">init</span><span class="o">.</span><span class="n">box_size</span><span class="p">[</span><span class="n">d</span><span class="p">],</span><span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">20</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
-<span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">init</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">init</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-    <span class="k">assert</span> <span class="n">init</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">d</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">init</span><span class="o">.</span><span class="n">box_boundaries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">assert</span> <span class="n">init</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">d</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">init</span><span class="o">.</span><span class="n">box_boundaries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">def</span> <span class="nf">test_placement</span><span class="p">(</span><span class="n">box_boundaries</span><span class="p">,</span> <span class="n">atoms_positions</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure that atoms are placed within the box&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">atom_position</span> <span class="ow">in</span> <span class="n">atoms_positions</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">boundary</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">atom_position</span><span class="p">,</span> <span class="n">box_boundaries</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="sa">f</span><span class="s2">&quot;Test failed: Atoms outside of the box&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test passed&quot;</span><span class="p">)</span>
+<span class="n">test_placement</span><span class="p">(</span><span class="n">init</span><span class="o">.</span><span class="n">box_boundaries</span><span class="p">,</span> <span class="n">init</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The first assert statement ensures that the box size has the expected size along
-all 3 dimensions of space, in normalised units.
-The second assert ensures that the size of the created <em>atoms_positions</em> array
-is consistent with the anumber of atoms. The third assert ensures that the created
-atoms are located within the box boundaries along all 3 dimensions of space.</p>
 </section>
 </section>
 
