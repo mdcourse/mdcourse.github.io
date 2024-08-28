@@ -472,20 +472,37 @@ encountered in exp</em>” that is sometimes triggered by the exponential of the
 <p>We can create simple tests to ensure that the classes are inherited as
 expected. Within the same folder, create a new Python file called <em>test_1a.py</em>,
 and copy the following lines into it:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import some of the created method.</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import some of the modules</span>
 <span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
 <span class="kn">from</span> <span class="nn">Utilities</span> <span class="kn">import</span> <span class="n">Utilities</span>
 <span class="kn">from</span> <span class="nn">Measurements</span> <span class="kn">import</span> <span class="n">Measurements</span>
 <span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
 
-<span class="c1"># Make sure that the ineritance is correct, i.e. that MonteCarlo does inherit</span>
-<span class="c1"># from Utilities, Measurements, and InitializeSimulation</span>
-<span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">)</span>
-<span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="n">Measurements</span><span class="p">)</span>
-<span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="n">InitializeSimulation</span><span class="p">)</span>
+<span class="c1"># Create a function to test if a Child class correctly inherits from a Parent class</span>
+<span class="k">def</span> <span class="nf">test_inheritance</span><span class="p">(</span><span class="n">Child</span><span class="p">,</span> <span class="n">Parent</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">Child</span><span class="p">,</span> <span class="n">Parent</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Child</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> correctly inherits from </span><span class="si">{</span><span class="n">Parent</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Child</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> does not inherit from </span><span class="si">{</span><span class="n">Parent</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">success</span>
+
+<span class="c1"># Make sure that inheritances occur are expected</span>
+<span class="k">assert</span> <span class="n">test_inheritance</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="n">Measurements</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">test_inheritance</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">test_inheritance</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="n">InitializeSimulation</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">test_inheritance</span><span class="p">(</span><span class="n">Utilities</span><span class="p">,</span> <span class="n">MonteCarlo</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span>
 </pre></div>
 </div>
-<p>This script should not return anything. We can also test that calling the <em>__init__</em>
+<p>This script should return the four following messages without any <em>AssertionError</em>:</p>
+<div class="highlight-bw notranslate"><div class="highlight"><pre><span></span>MonteCarlo correctly inherits from Measurements.
+MonteCarlo correctly inherits from Utilities.
+MonteCarlo correctly inherits from InitializeSimulation.
+Utilities does not inherit from MonteCarlo.
+</pre></div>
+</div>
+<p>We can also test that calling the <em>__init__</em>
 method of the <em>MonteCarlo</em> class does not return any error. In new Python file
 called <em>test_1b.py</em>, copy the following lines:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import the MonteCarlo class</span>

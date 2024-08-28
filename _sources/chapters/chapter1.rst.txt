@@ -264,21 +264,40 @@ and copy the following lines into it:
 
 .. code-block:: python
 
-    # Import some of the created method.
+    # Import some of the modules
     from InitializeSimulation import InitializeSimulation
     from Utilities import Utilities
     from Measurements import Measurements
     from MonteCarlo import MonteCarlo
 
-    # Make sure that the ineritance is correct, i.e. that MonteCarlo does inherit
-    # from Utilities, Measurements, and InitializeSimulation
-    assert issubclass(MonteCarlo, Utilities)
-    assert issubclass(MonteCarlo, Measurements)
-    assert issubclass(MonteCarlo, InitializeSimulation)
+    # Create a function to test if a Child class correctly inherits from a Parent class
+    def test_inheritance(Child, Parent):
+        if issubclass(Child, Parent):
+            print(f"{Child.__name__} correctly inherits from {Parent.__name__}.")
+            success = True
+        else:
+            print(f"{Child.__name__} does not inherit from {Parent.__name__}.")
+            success = False
+        return success
+
+    # Make sure that inheritances occur are expected
+    assert test_inheritance(MonteCarlo, Measurements)
+    assert test_inheritance(MonteCarlo, Utilities)
+    assert test_inheritance(MonteCarlo, InitializeSimulation)
+    assert test_inheritance(Utilities, MonteCarlo) is False
 
 .. label:: end_test_1a_class
 
-This script should not return anything. We can also test that calling the *__init__*
+This script should return the four following messages without any *AssertionError*:
+
+.. code-block:: bw
+
+    MonteCarlo correctly inherits from Measurements.
+    MonteCarlo correctly inherits from Utilities.
+    MonteCarlo correctly inherits from InitializeSimulation.
+    Utilities does not inherit from MonteCarlo.
+
+We can also test that calling the *__init__*
 method of the *MonteCarlo* class does not return any error. In new Python file
 called *test_1b.py*, copy the following lines:
 
