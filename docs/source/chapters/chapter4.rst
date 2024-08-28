@@ -185,7 +185,7 @@ Build neighbor lists
 In molecular simulations, it is common practice to identify neighboring atoms
 to save computational time. By focusing only on interactions between
 neighboring atoms, the simulation becomes more efficient. Add the following
-*update_neighbor_lists()* method to the *Utilities*class:
+*update_neighbor_lists()* method to the *Utilities* class:
 
 .. label:: start_Utilities_class
 
