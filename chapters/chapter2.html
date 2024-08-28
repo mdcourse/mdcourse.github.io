@@ -306,7 +306,7 @@ derived from these three parameters:</p>
 <section id="start-coding">
 <h2>Start coding<a class="headerlink" href="#start-coding" title="Link to this heading">¶</a></h2>
 <p>Let’s fill in the previously created class named Prepare. To facilitate unit
-conversion, we will import <a href="#id1"><span class="problematic" id="id2">|NumPy|</span></a> and the constants module from <a href="#id3"><span class="problematic" id="id4">|SciPy|</span></a>.</p>
+conversion, we will import <a href="https://numpy.org/" target="_blank">NumPy</a> and the constants module from <a href="https://scipy.org/" target="_blank">SciPy</a>.</p>
 <p>In the file named <em>Prepare.py</em>, add the following lines:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
@@ -348,36 +348,36 @@ of positional and keyword arguments, respectively.</p>
 <h2>Calculate LJ units prefactors<a class="headerlink" href="#calculate-lj-units-prefactors" title="Link to this heading">¶</a></h2>
 <p>Within the <em>Prepare</em> class, let us create a method called <em>calculate_LJunits_prefactors</em>
 that will be used to calculate the prefactors necessary to convert units from the <em>real</em>
-unit system to the <em>LJ</em> unit system.</p>
-<p>Within the <em>Prepare</em> class, copy the following method:</p>
+unit system to the <em>LJ</em> unit system:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_LJunits_prefactors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="c1"># Distance, energy, and mass</span>
+    <span class="c1"># Define the reference distance, energy, and mass</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Angstrom</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Kcal/mol</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">reference_mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># g/mol</span>
-    <span class="c1"># Time</span>
+    <span class="c1"># Calculate the prefactor for the time</span>
     <span class="n">mass_kg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span>  <span class="c1"># kg</span>
     <span class="n">epsilon_J</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span>  <span class="c1"># J</span>
     <span class="n">sigma_m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">angstrom</span>  <span class="c1"># m</span>
     <span class="n">time_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mass_kg</span><span class="o">*</span><span class="n">sigma_m</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">epsilon_J</span><span class="p">)</span>  <span class="c1"># s</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">reference_time</span> <span class="o">=</span> <span class="n">time_s</span> <span class="o">/</span> <span class="n">cst</span><span class="o">.</span><span class="n">femto</span>  <span class="c1"># fs</span>
-    <span class="c1"># Temperature</span>
+    <span class="c1"># Calculate the prefactor for the temperature</span>
     <span class="n">kB</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">calorie</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">kilo</span>  <span class="c1"># kCal/mol/K</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">reference_temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">kB</span>  <span class="c1"># K</span>
-    <span class="c1"># Pressure</span>
+    <span class="c1"># Calculate the prefactor for the pressure</span>
     <span class="n">pressure_pa</span> <span class="o">=</span> <span class="n">epsilon_J</span><span class="o">/</span><span class="n">sigma_m</span><span class="o">**</span><span class="mi">3</span>  <span class="c1"># Pa</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">reference_pressure</span> <span class="o">=</span> <span class="n">pressure_pa</span><span class="o">/</span><span class="n">cst</span><span class="o">.</span><span class="n">atm</span>  <span class="c1"># atm</span>
 </pre></div>
 </div>
-<p>This method defines the <em>reference_distance</em> as the first element in the
-<em>sigma</em> list, i.e. <span class="math notranslate nohighlight">\(\sigma_{11}\)</span>. Therefore atoms of type one will
+<p>This method defines the reference distance as the first element in the
+<em>sigma</em> list, i.e., <span class="math notranslate nohighlight">\(\sigma_{11}\)</span>. Therefore, atoms of type one will
 always be used for the normalization. Similarly, the first element
-in the <em>epsilon</em> list (<span class="math notranslate nohighlight">\(\epsilon_{11}\)</span>) is used as a <em>reference_energy</em>,
-and the first element in the <em>atom_mass</em> list (<span class="math notranslate nohighlight">\(m_1\)</span>) is used as <em>reference_mass</em>.
-Then, the <em>reference_time</em> in femtosecond is calculated as <span class="math notranslate nohighlight">\(\sqrt{m_1 \sigma_{11}^2 / \epsilon_{11}}\)</span>,
-the reference temperature in Kelvin as <span class="math notranslate nohighlight">\(\epsilon_{11} / k_\text{B}\)</span>,
-and the <em>reference_pressure</em> in atmospheres is calculated as <span class="math notranslate nohighlight">\(\epsilon_{11}/\sigma_{11}^3\)</span>.</p>
-<p>Finally, let us make sure that the <em>calculate_LJunits_prefactors()</em> method is
+in the <em>epsilon</em> list (<span class="math notranslate nohighlight">\(\epsilon_{11}\)</span>) is used as the reference energy,
+and the first element in the <em>atom_mass</em> list (<span class="math notranslate nohighlight">\(m_1\)</span>) is used as the
+reference mass. Then, the reference_time in femtoseconds is calculated
+as <span class="math notranslate nohighlight">\(\sqrt{m_1 \sigma_{11}^2 / \epsilon_{11}}\)</span>, the reference temperature
+in Kelvin as <span class="math notranslate nohighlight">\(\epsilon_{11} / k_\text{B}\)</span>, and the reference_pressure
+in atmospheres is calculated as <span class="math notranslate nohighlight">\(\epsilon_{11}/\sigma_{11}^3\)</span>.</p>
+<p>Finally, let us ensure that the <em>calculate_LJunits_prefactors</em> method is
 called systematically by adding the following line to the <em>__init__()</em> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
@@ -385,8 +385,8 @@ called systematically by adding the following line to the <em>__init__()</em> me
     <span class="bp">self</span><span class="o">.</span><span class="n">calculate_LJunits_prefactors</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Every time the <em>Prepare</em> class will be initialized, all reference values
-will be calculated and passed as <em>self</em>.</p>
+<p>Every time the <em>Prepare</em> class is initialized, all reference values will
+be calculated and stored as attributes of <em>self</em>.</p>
 </section>
 <section id="nondimensionalize-units">
 <h2>Nondimensionalize units<a class="headerlink" href="#nondimensionalize-units" title="Link to this heading">¶</a></h2>

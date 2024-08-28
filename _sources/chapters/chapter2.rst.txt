@@ -57,6 +57,14 @@ Start coding
 Let's fill in the previously created class named Prepare. To facilitate unit
 conversion, we will import |NumPy| and the constants module from |SciPy|.
 
+.. |NumPy| raw:: html
+
+   <a href="https://numpy.org/" target="_blank">NumPy</a>
+
+.. |SciPy| raw:: html
+
+   <a href="https://scipy.org/" target="_blank">SciPy</a>
+
 In the file named *Prepare.py*, add the following lines:
 
 .. label:: start_Prepare_class
@@ -113,44 +121,43 @@ Calculate LJ units prefactors
 
 Within the *Prepare* class, let us create a method called *calculate_LJunits_prefactors*
 that will be used to calculate the prefactors necessary to convert units from the *real*
-unit system to the *LJ* unit system.
-
-Within the *Prepare* class, copy the following method:
+unit system to the *LJ* unit system:
 
 .. label:: start_Prepare_class
 
 .. code-block:: python
 
     def calculate_LJunits_prefactors(self):
-        # Distance, energy, and mass
+        # Define the reference distance, energy, and mass
         self.reference_distance = self.sigma[0]  # Angstrom
         self.reference_energy = self.epsilon[0]  # Kcal/mol
         self.reference_mass = self.atom_mass[0]  # g/mol
-        # Time
+        # Calculate the prefactor for the time
         mass_kg = self.atom_mass[0]/cst.kilo/cst.Avogadro  # kg
         epsilon_J = self.epsilon[0]*cst.calorie*cst.kilo/cst.Avogadro  # J
         sigma_m = self.sigma[0]*cst.angstrom  # m
         time_s = np.sqrt(mass_kg*sigma_m**2/epsilon_J)  # s
         self.reference_time = time_s / cst.femto  # fs
-        # Temperature
+        # Calculate the prefactor for the temperature
         kB = cst.Boltzmann*cst.Avogadro/cst.calorie/cst.kilo  # kCal/mol/K
         self.reference_temperature = self.epsilon[0]/kB  # K
-        # Pressure
+        # Calculate the prefactor for the pressure
         pressure_pa = epsilon_J/sigma_m**3  # Pa
         self.reference_pressure = pressure_pa/cst.atm  # atm
 
 .. label:: end_Prepare_class
 
-This method defines the *reference_distance* as the first element in the
-*sigma* list, i.e. :math:`\sigma_{11}`. Therefore atoms of type one will
+This method defines the reference distance as the first element in the
+*sigma* list, i.e., :math:`\sigma_{11}`. Therefore, atoms of type one will
 always be used for the normalization. Similarly, the first element
-in the *epsilon* list (:math:`\epsilon_{11}`) is used as a *reference_energy*, 
-and the first element in the *atom_mass* list (:math:`m_1`) is used as *reference_mass*.
-Then, the *reference_time* in femtosecond is calculated as :math:`\sqrt{m_1 \sigma_{11}^2 / \epsilon_{11}}`,
-the reference temperature in Kelvin as :math:`\epsilon_{11} / k_\text{B}`,
-and the *reference_pressure* in atmospheres is calculated as :math:`\epsilon_{11}/\sigma_{11}^3`.
+in the *epsilon* list (:math:`\epsilon_{11}`) is used as the reference energy,
+and the first element in the *atom_mass* list (:math:`m_1`) is used as the
+reference mass. Then, the reference_time in femtoseconds is calculated
+as :math:`\sqrt{m_1 \sigma_{11}^2 / \epsilon_{11}}`, the reference temperature
+in Kelvin as :math:`\epsilon_{11} / k_\text{B}`, and the reference_pressure
+in atmospheres is calculated as :math:`\epsilon_{11}/\sigma_{11}^3`.
 
-Finally, let us make sure that the *calculate_LJunits_prefactors()* method is
+Finally, let us ensure that the *calculate_LJunits_prefactors* method is
 called systematically by adding the following line to the *__init__()* method:
 
 .. label:: start_Prepare_class
@@ -164,8 +171,8 @@ called systematically by adding the following line to the *__init__()* method:
 
 .. label:: end_Prepare_class
 
-Every time the *Prepare* class will be initialized, all reference values
-will be calculated and passed as *self*. 
+Every time the *Prepare* class is initialized, all reference values will
+be calculated and stored as attributes of *self*.
 
 Nondimensionalize units
 -----------------------
