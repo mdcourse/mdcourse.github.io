@@ -55,13 +55,15 @@ Several parameters are provided to the *InitializeSimulation* class:
 Finally, the *dimensions* of the system are calculated as the length of
 *box_dimensions*.
 
+Set a random seed
+-----------------
 
-Provide a seed
---------------
+Providing a *seed* allows for reproducible simulations. When a seed is
+specified, the simulation will produce the exact same results each time it
+is run, including identical atom positions and velocities. This can be
+particularly useful for debugging purposes.
 
-A *seed* can be provided to launch the *exact* same simulations (i.e. same atom positions,
-same atom velocities) several times in a row, which is useful during debugging. Add
-the following *if* condition to the *__init__()* method:
+Add the following *if* condition to the *__init__()* method:
 
 .. label:: start_InitializeSimulation_class
 
@@ -75,8 +77,9 @@ the following *if* condition to the *__init__()* method:
 
 .. label:: end_InitializeSimulation_class
 
-If a *seed* is provided, it is passed to the *random.seed()* function of *NumPy*.
-If *seed* is left to its default value of *None*, the simulation will be randomized.
+If a *seed* is provided, it is used to initialize the *random.seed()* function
+from *NumPy*. If *seed* is set to its default value of *None*, the simulation
+will proceed with randomization.
 
 Nondimensionalize units
 -----------------------
