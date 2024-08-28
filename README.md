@@ -38,10 +38,16 @@ readings are provided as needed.
 - thermostats and barostats other than Berendsen,
 - energy minimization methods other than the steepest descent.
 
-### Author
+### Authors
+
+#### Project creator
 
 - [Simon Gravelle](https://simongravelle.github.io/): computer physicist in soft matter
   and fluids at interfaces.
+
+#### Contributors
+
+-  [Jake Anderson](https://github.com/jaketanderson) 
 
 ### Acknowledgments and license
 
