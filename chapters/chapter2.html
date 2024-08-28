@@ -485,18 +485,19 @@ where:</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[\begin{split}\text{array_sigma_ij} = \begin{bmatrix}
-        \sigma_{11} \text{(0-1)} &amp; \sigma_{12} \text{(0-2)} &amp; \sigma_{12} \text{(0-3)} &amp; \sigma_{12} \text{(0-4)} \\
-                                 &amp; \sigma_{12} \text{(1-2)} &amp; \sigma_{12} \text{(1-3)} &amp; \sigma_{12} \text{(1-4)} \\
-                                 &amp;                          &amp; \sigma_{22} \text{(2-3)} &amp; \sigma_{22} \text{(2-4)} \\
-                                 &amp;                          &amp;                          &amp; \sigma_{22} \text{(3-4)} \\
+        \sigma_{11} &amp; \sigma_{11} &amp; \sigma_{12} &amp; \sigma_{12} &amp; \sigma_{12} \\
+        \sigma_{11} &amp; \sigma_{11} &amp; \sigma_{12} &amp; \sigma_{12} &amp; \sigma_{12} \\
+        \sigma_{12} &amp; \sigma_{12} &amp; \sigma_{22} &amp; \sigma_{22} &amp; \sigma_{22} \\
+        \sigma_{12} &amp; \sigma_{12} &amp; \sigma_{22} &amp; \sigma_{22} &amp; \sigma_{22} \\
+        \sigma_{12} &amp; \sigma_{12} &amp; \sigma_{22} &amp; \sigma_{22} &amp; \sigma_{22} \\
     \end{bmatrix}\end{split}\]</div>
 </div>
-<p>where it is assumed that the matrix is symmetric, so the coefficients in the bottom
-left corner are not specified. The first value in the top left corner of the matrix,
-<span class="math notranslate nohighlight">\(\sigma_{11} \text{(0-1)}\)</span>, indicates that the <span class="math notranslate nohighlight">\(\sigma\)</span> value for the interaction
-between the first (0) and second atom (1) is <span class="math notranslate nohighlight">\(\sigma_{11}\)</span>, as both atoms 0
-and 1 are of type 1. A similar matrix can be written for epsilon_sigma_ij.</p>
-<p>The values of the cross coefficients <span class="math notranslate nohighlight">\(\sigma_{12}\)</span> and <span class="math notranslate nohighlight">\(\epsilon_{12}\)</span>
+<p>The matrix is symmetric, so the coefficients in the bottom left corner are
+the same as the coefficient in the top right corner. The first value in the top left corner of the matrix,
+<span class="math notranslate nohighlight">\(\sigma_{11}\)</span>, indicates that the <span class="math notranslate nohighlight">\(\sigma\)</span> value for the interaction
+between the atom 1 and itself is is <span class="math notranslate nohighlight">\(\sigma_{11}\)</span>. A similar matrix can
+be written for epsilon_sigma_ij.</p>
+<p>Here, the values of the cross coefficients <span class="math notranslate nohighlight">\(\sigma_{12}\)</span> and <span class="math notranslate nohighlight">\(\epsilon_{12}\)</span>
 are assumed to follow the arithmetic mean :</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
@@ -507,24 +508,22 @@ are assumed to follow the arithmetic mean :</p>
 <em>Prepare</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_cross_coefficients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate all the cross-coefficients for the LJ interations.&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">identify_atom_properties</span><span class="p">()</span>
-    <span class="n">epsilon_ij</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">sigma_ij</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">identify_atom_properties</span><span class="p">()</span> <span class="c1"># TOFIX: this was left because of GCMC. Remove? Move?</span>
+    <span class="n">matrix_epsilon_ij</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">matrix_sigma_ij</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">):</span>
-        <span class="n">epsilon_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">sigma_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">):</span>
-            <span class="n">epsilon_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-            <span class="n">epsilon_ij</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">epsilon_i</span><span class="o">+</span><span class="n">epsilon_j</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-            <span class="n">sigma_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-            <span class="n">sigma_ij</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">sigma_i</span><span class="o">+</span><span class="n">sigma_j</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">array_epsilon_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">epsilon_ij</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">array_sigma_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigma_ij</span><span class="p">)</span>
+        <span class="n">matrix_epsilon_ij</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="n">matrix_sigma_ij</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">):</span>
+            <span class="n">matrix_epsilon_ij</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">matrix_sigma_ij</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">matrix_sigma_ij</span> <span class="o">=</span> <span class="n">matrix_sigma_ij</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">matrix_epsilon_ij</span> <span class="o">=</span> <span class="n">matrix_epsilon_ij</span>
 </pre></div>
 </div>
 <p>After calling for the <em>identify_atom_properties()</em> method, a double loop
 is performed over all direct coefficients, and the cross coefficients
-are stored within <em>array_sigma_ij</em> and <em>array_epsilon_ij</em>.</p>
+are stored within <em>matrix_sigma_ij</em> and <em>matrix_epsilon_ij</em>, two matrices.</p>
 <p>Finally, let us call the <em>calculate_cross_coefficients</em> method from the
 <em>__init__()</em> method.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -556,6 +555,15 @@ type 1, and 3 atoms of type 2:</p>
 <span class="c1"># Make sure the *atoms_epsilon* gives the expected values</span>
 <span class="c1"># of 1 1 2 2 2 (in LJ units)</span>
 <span class="n">test_array</span><span class="p">(</span><span class="n">prep</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">]))</span>
+<span class="c1"># Make sure the *matrix_epsilon_ij* gives the expected values</span>
+<span class="c1"># [[1.0, 1.0, 1.5, 1.5, 1.5],</span>
+<span class="c1"># [1.0, 1.0, 1.5, 1.5, 1.5],</span>
+<span class="c1"># (...)</span>
+<span class="n">test_array</span><span class="p">(</span><span class="n">prep</span><span class="o">.</span><span class="n">matrix_epsilon_ij</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">],</span>
+    <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">],</span>
+    <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span>
+    <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]]))</span>
 </pre></div>
 </div>
 <p>This test assert that the generated <em>atoms_epsilon</em> array is consistent with
