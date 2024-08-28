@@ -280,15 +280,13 @@ during the simulation. To do so, the <em>Output</em> class is modified.</p>
 to print the information in the terminal and in a LAMMPS-type data file, respectively.
 These two methods will be written in the following.</p>
 </section>
-<section id="update-the-dump-and-log">
-<h2>Update the dump and log<a class="headerlink" href="#update-the-dump-and-log" title="Link to this heading">¶</a></h2>
-<p>Let us add the following functions named <em>update_dump_file</em> and <em>log_simulation_data</em>
-to the <em>tools.py</em> file. Here, some variable are being printed in a file, such as box dimension and atom positions.
-All quantities are dimensionalized before getting outputed, and the file follows
-a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
-<span class="kn">import</span> <span class="nn">logging</span>
+<section id="create-logger">
+<h2>Create logger<a class="headerlink" href="#create-logger" title="Link to this heading">¶</a></h2>
+<p>Let us create functions named <em>log_simulation_data</em> to a file named <em>logger.py</em>.
+With the logger, some output are being printed in a file, as well as in the terminal.
+The frequency of printing is set by <em>thermo_period</em>, see <a class="reference internal" href="chapter3.html#chapter3-label"><span class="std std-ref">Initialize the simulation</span></a>.
+All quantities are re-dimensionalized before getting outputed.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
     <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
     <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%(message)s</span><span class="s1">&#39;</span>
@@ -307,6 +305,42 @@ a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.<
 <span class="n">file_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">console_handler</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">file_handler</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">log_simulation_data</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_period</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">Epot</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span> \
+                    <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Epot</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">Epot</span> <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
+            <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot&quot;</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot-MaxF&quot;</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot MaxF&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot-press&quot;</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot press&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot&quot;</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot-MaxF&quot;</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">MaxF</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot-press&quot;</span><span class="p">:</span>
+                <span class="n">code</span><span class="o">.</span><span class="n">calculate_pressure</span><span class="p">()</span>
+                <span class="n">press</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">pressure</span> \
+                    <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_pressure</span>  <span class="c1"># Atm</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">press</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="create-dumper">
+<h2>Create dumper<a class="headerlink" href="#create-dumper" title="Link to this heading">¶</a></h2>
+<p>Let us create a function named <em>update_dump_file</em> to a file named
+<em>dumper.py</em>. The dumper will print a <em>.lammpstrj file</em>, which contains the box
+dimensions and atom positions at every chosen frame (set by <em>dumping_period</em>,
+see <a class="reference internal" href="chapter3.html#chapter3-label"><span class="std std-ref">Initialize the simulation</span></a>). All quantities are dimensionalized before getting outputed, and the file follows
+a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="k">def</span> <span class="nf">update_dump_file</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">velocity</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">dumping_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -355,42 +389,20 @@ a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.<
                                         <span class="n">v</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
                     <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-<span class="k">def</span> <span class="nf">log_simulation_data</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_period</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">Epot</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span> \
-                    <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">Epot</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">Epot</span> <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_energy</span>  <span class="c1"># kcal/mol</span>
-            <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot&quot;</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot&quot;</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot-MaxF&quot;</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot MaxF&quot;</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot-press&quot;</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step Epot press&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot&quot;</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot-MaxF&quot;</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">MaxF</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">code</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">==</span> <span class="s2">&quot;Epot-press&quot;</span><span class="p">:</span>
-                <span class="n">code</span><span class="o">.</span><span class="n">calculate_pressure</span><span class="p">()</span>
-                <span class="n">press</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">pressure</span> \
-                    <span class="o">*</span> <span class="n">code</span><span class="o">.</span><span class="n">reference_pressure</span>  <span class="c1"># Atm</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Epot</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">press</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="import-the-functions">
 <h2>Import the functions<a class="headerlink" href="#import-the-functions" title="Link to this heading">¶</a></h2>
-<p>The Monte Carlo and the Minimize class must import <em>update_dump_file</em> and <em>log_simulation_data</em>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tools</span> <span class="kn">import</span> <span class="n">update_dump_file</span><span class="p">,</span> <span class="n">log_simulation_data</span>
+<p>The Monte Carlo and the Minimize class must both import <em>update_dump_file</em>
+and <em>log_simulation_data</em>. Add these lines at the top of the <em>MonteCarlo.py</em> file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dumper</span> <span class="kn">import</span> <span class="n">update_dump_file</span>
+<span class="kn">from</span> <span class="nn">logger</span> <span class="kn">import</span> <span class="n">log_simulation_data</span>
 </pre></div>
 </div>
-<p>and</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tools</span> <span class="kn">import</span> <span class="n">update_dump_file</span><span class="p">,</span> <span class="n">log_simulation_data</span>
+<p>Add the same lines at the top of the <em>MinimizeEnergy.py</em> file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dumper</span> <span class="kn">import</span> <span class="n">update_dump_file</span>
+<span class="kn">from</span> <span class="nn">logger</span> <span class="kn">import</span> <span class="n">log_simulation_data</span>
 </pre></div>
 </div>
 </section>
@@ -483,7 +495,8 @@ every 10 steps in the dump files, as well as in the log:</p>
             <ul>
 <li><a class="reference internal" href="#">Output the simulation state</a><ul>
 <li><a class="reference internal" href="#update-the-minimizeenergy-class">Update the MinimizeEnergy class</a></li>
-<li><a class="reference internal" href="#update-the-dump-and-log">Update the dump and log</a></li>
+<li><a class="reference internal" href="#create-logger">Create logger</a></li>
+<li><a class="reference internal" href="#create-dumper">Create dumper</a></li>
 <li><a class="reference internal" href="#import-the-functions">Import the functions</a></li>
 <li><a class="reference internal" href="#test-the-code">Test the code</a></li>
 </ul>

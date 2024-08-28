@@ -30,19 +30,17 @@ The two methods named *update_log_minimize()* and *update_dump_file()*, are used
 to print the information in the terminal and in a LAMMPS-type data file, respectively.
 These two methods will be written in the following.
 
-Update the dump and log
------------------------
+Create logger
+-------------
 
-Let us add the following functions named *update_dump_file* and *log_simulation_data*
-to the *tools.py* file. Here, some variable are being printed in a file, such as box dimension and atom positions.
-All quantities are dimensionalized before getting outputed, and the file follows
-a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.
+Let us create functions named *log_simulation_data* to a file named *logger.py*.
+With the logger, some output are being printed in a file, as well as in the terminal.
+The frequency of printing is set by *thermo_period*, see :ref:`chapter3-label`.
+All quantities are re-dimensionalized before getting outputed.
 
-.. label:: start_tools_class
+.. label:: start_logger_class
 
 .. code-block:: python
-
-    import numpy as np
 
     import logging
     logging.basicConfig(
@@ -63,6 +61,48 @@ a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.
     file_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
+
+    def log_simulation_data(code):
+        if code.thermo_period is not None:
+            if code.step % code.thermo_period == 0:
+                if code.step == 0:
+                    Epot = code.compute_potential(output="potential") \
+                        * code.reference_energy  # kcal/mol
+                else:
+                    Epot = code.Epot * code.reference_energy  # kcal/mol
+                if code.step == 0:
+                    if code.thermo_outputs == "Epot":
+                        logger.info(f"step Epot")
+                    elif code.thermo_outputs == "Epot-MaxF":
+                        logger.info(f"step Epot MaxF")
+                    elif code.thermo_outputs == "Epot-press":
+                        logger.info(f"step Epot press")
+                if code.thermo_outputs == "Epot":
+                    logger.info(f"{code.step} {Epot:.2f}")
+                elif code.thermo_outputs == "Epot-MaxF":
+                    logger.info(f"{code.step} {Epot:.2f} {code.MaxF:.2f}")
+                elif code.thermo_outputs == "Epot-press":
+                    code.calculate_pressure()
+                    press = code.pressure \
+                        * code.reference_pressure  # Atm
+                    logger.info(f"{code.step} {Epot:.2f} {press:.2f}")    
+
+.. label:: end_logger_class
+
+Create dumper
+-------------
+
+Let us create a function named *update_dump_file* to a file named 
+*dumper.py*. The dumper will print a *.lammpstrj file*, which contains the box
+dimensions and atom positions at every chosen frame (set by *dumping_period*,
+see :ref:`chapter3-label`). All quantities are dimensionalized before getting outputed, and the file follows
+a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.
+
+.. label:: start_dumper_class
+
+.. code-block:: python
+
+    import numpy as np
 
     def update_dump_file(code, filename, velocity=False):
         if code.dumping_period is not None:
@@ -110,55 +150,33 @@ a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.
                         f.write(characters % (v[0], v[1], v[2],
                                             v[3], v[4], '\n'))
                         cpt += 1
-                f.close()
+                f.close()  
 
-    def log_simulation_data(code):
-        if code.thermo_period is not None:
-            if code.step % code.thermo_period == 0:
-                if code.step == 0:
-                    Epot = code.compute_potential(output="potential") \
-                        * code.reference_energy  # kcal/mol
-                else:
-                    Epot = code.Epot * code.reference_energy  # kcal/mol
-                if code.step == 0:
-                    if code.thermo_outputs == "Epot":
-                        logger.info(f"step Epot")
-                    elif code.thermo_outputs == "Epot-MaxF":
-                        logger.info(f"step Epot MaxF")
-                    elif code.thermo_outputs == "Epot-press":
-                        logger.info(f"step Epot press")
-                if code.thermo_outputs == "Epot":
-                    logger.info(f"{code.step} {Epot:.2f}")
-                elif code.thermo_outputs == "Epot-MaxF":
-                    logger.info(f"{code.step} {Epot:.2f} {code.MaxF:.2f}")
-                elif code.thermo_outputs == "Epot-press":
-                    code.calculate_pressure()
-                    press = code.pressure \
-                        * code.reference_pressure  # Atm
-                    logger.info(f"{code.step} {Epot:.2f} {press:.2f}")    
-
-.. label:: end_tools_class
+.. label:: end_dumper_class
 
 Import the functions
 --------------------
 
-The Monte Carlo and the Minimize class must import *update_dump_file* and *log_simulation_data*.
+The Monte Carlo and the Minimize class must both import *update_dump_file*
+and *log_simulation_data*. Add these lines at the top of the *MonteCarlo.py* file:
 
 .. label:: start_MonteCarlo_class
 
 .. code-block:: python
 
-    from tools import update_dump_file, log_simulation_data
+    from dumper import update_dump_file
+    from logger import log_simulation_data
 
 .. label:: end_MonteCarlo_class
 
-and
+Add the same lines at the top of the *MinimizeEnergy.py* file:
 
 .. label:: start_MinimizeEnergy_class
 
 .. code-block:: python
 
-    from tools import update_dump_file, log_simulation_data
+    from dumper import update_dump_file
+    from logger import log_simulation_data
 
 .. label:: end_MinimizeEnergy_class
 

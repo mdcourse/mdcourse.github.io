@@ -90,7 +90,7 @@ and :math:`T = 55~^\circ\text{C}`. More details are given in the first illustrat
 On the side note, a relatively small cut-off as well as a small number of atoms were
 chosen to make the calculation faster. 
 
-.. label:: start_test_MonteCarloPressure_class
+.. label:: start_test_7a_class
 
 .. code-block:: python
 
@@ -144,7 +144,7 @@ chosen to make the calculation faster.
     # pV_over_RT = np.round((pressure * volume / (R * T) * Na).magnitude,2)
     # print("p v / R T =", pV_over_RT, " --- (The expected value from Wood1957 is 1.5)")
 
-.. label:: end_test_MonteCarloPressure_class
+.. label:: end_test_7a_class
 
 Which should return a value for :math:`p V / R T` that is close to the expected value
 of 1.5 by Wood and Parker for :math:`\tau = V/V^* = 2` (see Fig. 4 in Ref. :cite:`woodMonteCarloEquation1957`):
