@@ -472,67 +472,6 @@ within the <em>Prepare</em> class:</p>
 </pre></div>
 </div>
 </section>
-<section id="calculate-cross-coefficients">
-<h2>Calculate cross coefficients<a class="headerlink" href="#calculate-cross-coefficients" title="Link to this heading">¶</a></h2>
-<p>Let us calculate all cross coefficients that are required to calculate the interactions
-between atom <span class="math notranslate nohighlight">\(i\)</span> and atom <span class="math notranslate nohighlight">\(j\)</span>. From the example described previously,
-where:</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[\text{atoms_sigma} = [\sigma_{11}, \sigma_{11}, \sigma_{22}, \sigma_{22}, \sigma_{22}]\]</div>
-</div>
-<p>one expects all direct and cross coefficients to be:</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[\begin{split}\text{array_sigma_ij} = \begin{bmatrix}
-        \sigma_{11} &amp; \sigma_{11} &amp; \sigma_{12} &amp; \sigma_{12} &amp; \sigma_{12} \\
-        \sigma_{11} &amp; \sigma_{11} &amp; \sigma_{12} &amp; \sigma_{12} &amp; \sigma_{12} \\
-        \sigma_{12} &amp; \sigma_{12} &amp; \sigma_{22} &amp; \sigma_{22} &amp; \sigma_{22} \\
-        \sigma_{12} &amp; \sigma_{12} &amp; \sigma_{22} &amp; \sigma_{22} &amp; \sigma_{22} \\
-        \sigma_{12} &amp; \sigma_{12} &amp; \sigma_{22} &amp; \sigma_{22} &amp; \sigma_{22} \\
-    \end{bmatrix}\end{split}\]</div>
-</div>
-<p>The matrix is symmetric, so the coefficients in the bottom left corner are
-the same as the coefficient in the top right corner. The first value in the top left corner of the matrix,
-<span class="math notranslate nohighlight">\(\sigma_{11}\)</span>, indicates that the <span class="math notranslate nohighlight">\(\sigma\)</span> value for the interaction
-between the atom 1 and itself is is <span class="math notranslate nohighlight">\(\sigma_{11}\)</span>. A similar matrix can
-be written for epsilon_sigma_ij.</p>
-<p>Here, the values of the cross coefficients <span class="math notranslate nohighlight">\(\sigma_{12}\)</span> and <span class="math notranslate nohighlight">\(\epsilon_{12}\)</span>
-are assumed to follow the arithmetic mean :</p>
-<div class="math-wrapper docutils container">
-<div class="math notranslate nohighlight">
-\[\begin{split}\sigma_{12} = (\sigma_{11}+\sigma_{22})/2 \\
-\epsilon_{12} = (\epsilon_{11}+\epsilon_{22})/2\end{split}\]</div>
-</div>
-<p>Create the following method called <em>calculate_cross_coefficients</em> within the
-<em>Prepare</em> class:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_cross_coefficients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate all the cross-coefficients for the LJ interations.&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">identify_atom_properties</span><span class="p">()</span> <span class="c1"># TOFIX: this was left because of GCMC. Remove? Move?</span>
-    <span class="n">matrix_epsilon_ij</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">matrix_sigma_ij</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">):</span>
-        <span class="n">matrix_epsilon_ij</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-        <span class="n">matrix_sigma_ij</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">):</span>
-            <span class="n">matrix_epsilon_ij</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-            <span class="n">matrix_sigma_ij</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">matrix_sigma_ij</span> <span class="o">=</span> <span class="n">matrix_sigma_ij</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">matrix_epsilon_ij</span> <span class="o">=</span> <span class="n">matrix_epsilon_ij</span>
-</pre></div>
-</div>
-<p>After calling for the <em>identify_atom_properties()</em> method, a double loop
-is performed over all direct coefficients, and the cross coefficients
-are stored within <em>matrix_sigma_ij</em> and <em>matrix_epsilon_ij</em>, two matrices.</p>
-<p>Finally, let us call the <em>calculate_cross_coefficients</em> method from the
-<em>__init__()</em> method.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">identify_atom_properties</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">calculate_cross_coefficients</span><span class="p">()</span>
-</pre></div>
-</div>
-</section>
 <section id="test-the-code">
 <h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
 <p>Let us test the <em>Prepare</em> class to make sure that it does what is expected.
@@ -555,15 +494,6 @@ type 1, and 3 atoms of type 2:</p>
 <span class="c1"># Make sure the *atoms_epsilon* gives the expected values</span>
 <span class="c1"># of 1 1 2 2 2 (in LJ units)</span>
 <span class="n">test_array</span><span class="p">(</span><span class="n">prep</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">]))</span>
-<span class="c1"># Make sure the *matrix_epsilon_ij* gives the expected values</span>
-<span class="c1"># [[1.0, 1.0, 1.5, 1.5, 1.5],</span>
-<span class="c1"># [1.0, 1.0, 1.5, 1.5, 1.5],</span>
-<span class="c1"># (...)</span>
-<span class="n">test_array</span><span class="p">(</span><span class="n">prep</span><span class="o">.</span><span class="n">matrix_epsilon_ij</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">],</span>
-                                             <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">],</span>
-                                             <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span>
-                                             <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span>
-                                             <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]]))</span>
 </pre></div>
 </div>
 <p>This test assert that the generated <em>atoms_epsilon</em> array is consistent with
@@ -628,7 +558,6 @@ its expected value (see the previous paragraphs).</p>
 <li><a class="reference internal" href="#calculate-lj-units-prefactors">Calculate LJ units prefactors</a></li>
 <li><a class="reference internal" href="#nondimensionalize-units">Nondimensionalize units</a></li>
 <li><a class="reference internal" href="#identify-atom-properties">Identify atom properties</a></li>
-<li><a class="reference internal" href="#calculate-cross-coefficients">Calculate cross coefficients</a></li>
 <li><a class="reference internal" href="#test-the-code">Test the code</a></li>
 </ul>
 </li>

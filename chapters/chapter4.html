@@ -371,7 +371,8 @@ following <em>run()</em> method to the <em>MinimizeEnergy</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> <span class="c1"># *step* loops for 0 to *maximum_steps*+1</span>
         <span class="c1"># First, meevaluate the initial energy and max force</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span> <span class="c1"># Rebuild neighbor list, is necessary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span> <span class="c1"># Rebuild neighbor list, if necessary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_cross_coefficients</span><span class="p">()</span> <span class="c1"># Recalculate the cross coefficients, if necessary</span>
         <span class="k">try</span><span class="p">:</span> <span class="c1"># try using the last saved Epot and MaxF, if it exists</span>
             <span class="n">init_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span>
             <span class="n">init_MaxF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MaxF</span>
@@ -422,6 +423,20 @@ neighboring atoms, the simulation becomes more efficient. Add the following
             <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="n">ele</span> <span class="k">for</span> <span class="n">ele</span> <span class="ow">in</span> <span class="nb">list</span> <span class="k">if</span> <span class="n">ele</span> <span class="o">&gt;</span> <span class="n">cpt</span><span class="p">]</span>
             <span class="n">neighbor_lists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_lists</span> <span class="o">=</span> <span class="n">neighbor_lists</span>
+</pre></div>
+</div>
+<p>The <em>update_neighbor_lists()</em> method generates neighbor lists for each
+atom, ensuring that only relevant interactions are considered in the
+calculations. These lists will be recalculated at intervals specified by
+the <em>neighbor</em> input parameter.</p>
+</section>
+<section id="update-cross-coefficients">
+<h2>Update cross coefficients<a class="headerlink" href="#update-cross-coefficients" title="Link to this heading">¶</a></h2>
+<p>At the same time as the neighbor lists are getting build up, let us also
+pre-calculate the cross coefficients. This will make the force calculation
+more practical (see below).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">update_cross_coefficients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighbor</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
         <span class="c1"># Precalculte LJ cross-coefficients</span>
         <span class="n">sigma_ij_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">epsilon_ij_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -440,12 +455,14 @@ neighboring atoms, the simulation becomes more efficient. Add the following
         <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_ij_list</span> <span class="o">=</span> <span class="n">epsilon_ij_list</span>
 </pre></div>
 </div>
-<p># TO FIX: doublons with before !</p>
-<p>The <em>update_neighbor_lists()</em> method generates neighbor lists for each
-atom, ensuring that only relevant interactions are considered in the
-calculations. These lists will be recalculated at intervals specified by
-the <em>neighbor</em> input parameter. To implement this method, you should also
-import the following library in the <em>Utilities.py</em> file:</p>
+<p>Here, the values of the cross coefficients between atom of type 1 and 2,
+<span class="math notranslate nohighlight">\(\sigma_{12}\)</span> and <span class="math notranslate nohighlight">\(\epsilon_{12}\)</span>, are assumed to follow the arithmetic mean:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}\sigma_{12} = (\sigma_{11}+\sigma_{22})/2 \\
+\epsilon_{12} = (\epsilon_{11}+\epsilon_{22})/2\end{split}\]</div>
+</div>
+<p>Finally, import the following library in the <em>Utilities.py</em> file:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">MDAnalysis.analysis</span> <span class="kn">import</span> <span class="n">distances</span>
 </pre></div>
@@ -497,7 +514,6 @@ be requested by the user: <em>force-vector</em>, <em>force-matrix</em>, and <em>
 once, <em>potential</em>, simply returns the value of the potential energy for the entire system.
 If <em>force-vector</em> or <em>force-matrix</em> are selected instead, then the individual forces
 between atoms are returned.</p>
-<p># TOFIX: should we simplify that?</p>
 </section>
 <section id="wrap-in-box">
 <h2>Wrap in box<a class="headerlink" href="#wrap-in-box" title="Link to this heading">¶</a></h2>
@@ -526,16 +542,22 @@ typically negative.</p>
 
 <span class="nb">min</span> <span class="o">=</span> <span class="n">MinimizeEnergy</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
     <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
-    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
-    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="c1"># A</span>
-    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="c1"># g/mol</span>
+    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># g/mol</span>
     <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># A</span>
     <span class="p">)</span>
 <span class="nb">min</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
-<span class="k">assert</span> <span class="nb">min</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;potential&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span>
+<span class="n">Final_Epot</span> <span class="o">=</span> <span class="nb">min</span><span class="o">.</span><span class="n">Epot</span>
+<span class="n">Final_MaxF</span> <span class="o">=</span> <span class="nb">min</span><span class="o">.</span><span class="n">MaxF</span>
+<span class="k">assert</span> <span class="n">Final_Epot</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Test failed: Final energy too large&quot;</span>
+<span class="k">assert</span> <span class="n">Final_MaxF</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Test failed: Final max force too large&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test passed&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>For such as low density in particle, we can reasonably expect the energy to be always
+negative after 100 steps.</p>
 </section>
 </section>
 
@@ -595,6 +617,7 @@ typically negative.</p>
 <li><a class="reference internal" href="#nondimensionalize-units">Nondimensionalize units</a></li>
 <li><a class="reference internal" href="#energy-minimizer">Energy minimizer</a></li>
 <li><a class="reference internal" href="#build-neighbor-lists">Build neighbor lists</a></li>
+<li><a class="reference internal" href="#update-cross-coefficients">Update cross coefficients</a></li>
 <li><a class="reference internal" href="#compute-potential">Compute_potential</a></li>
 <li><a class="reference internal" href="#wrap-in-box">Wrap in box</a></li>
 <li><a class="reference internal" href="#test-the-code">Test the code</a></li>
