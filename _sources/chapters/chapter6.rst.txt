@@ -3,6 +3,18 @@
 Monte Carlo move
 ================
 
+.. figure:: ../projects/project1/avatar-dm.webp
+    :alt: The fluid made of argon atoms and simulated using monte carlo and python.
+    :height: 200
+    :align: right
+    :class: only-dark
+
+.. figure:: ../projects/project1/avatar.webp
+    :alt: The fluid made of argon atoms and simulated using monte carlo and python
+    :height: 200
+    :align: right
+    :class: only-light
+
 Here, a *Monte Carlo move* simulation is implemented. The principle of the
 simulation is the following:
 
