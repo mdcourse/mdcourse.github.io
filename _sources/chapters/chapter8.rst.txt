@@ -1,3 +1,5 @@
+.. _chapter8-label:
+
 Monte Carlo insert
 ==================
 

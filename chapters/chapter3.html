@@ -260,18 +260,12 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="initialize-the-simulation">
-<h1>Initialize the simulation<a class="headerlink" href="#initialize-the-simulation" title="Link to this heading">¶</a></h1>
+<span id="chapter3-label"></span><h1>Initialize the simulation<a class="headerlink" href="#initialize-the-simulation" title="Link to this heading">¶</a></h1>
 <p>Here, the <em>InitializeSimulation</em> class is created. This class is used to
-prepare the simulation box and populate the box with atoms.</p>
-<section id="simulation-box">
-<h2>Simulation box<a class="headerlink" href="#simulation-box" title="Link to this heading">¶</a></h2>
-<p>In all the simulations performed here, a certain number of atoms are first
-randomly placed in a 3D cuboid box.</p>
-</section>
+prepare the simulation box and populate the box randomly with atoms.</p>
 <section id="start-coding">
 <h2>Start coding<a class="headerlink" href="#start-coding" title="Link to this heading">¶</a></h2>
-<p>Let us improve the previously created <em>InitializeSimulation</em> class. Remember that
-the InitializeSimulation class inherits the <em>Prepare</em> class.</p>
+<p>Let us improve the previously created <em>InitializeSimulation</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">InitializeSimulation</span><span class="p">(</span><span class="n">Prepare</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>  <span class="c1"># List - Angstroms</span>
@@ -291,15 +285,25 @@ the InitializeSimulation class inherits the <em>Prepare</em> class.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">dumping_period</span> <span class="o">=</span> <span class="n">dumping_period</span>
 </pre></div>
 </div>
-<p>Three parameters are provided to the <em>InitializeSimulation</em> class. THe first one
-is the box dimensions, <em>box_dimensions</em>, which is a list with a length corresponding to
-the dimension of the system. The <em>dimensions</em> is calculated as the length of <em>box_dimensions</em>.
-Each element of the list correspond to a dimension of the box in Ångström in the x, y, and
-z directions, respectively. A seed is also provided as a parameter (an integer), as well as some initial
-positions for the atoms that can be provided as an array of length corresponding
-to the number of atoms, and a number of columns corresponding to <em>dimensions</em>. If
-<em>initial_positions</em> is left equal to <em>None</em>, positions will be randomly attributed
-to the atoms, see below.</p>
+<p>Several parameters are provided to the <em>InitializeSimulation</em> class:</p>
+<ul class="simple">
+<li><p>The first parameter is the box dimensions, which is a list with a length
+corresponding to the dimension of the system. Each element of the list
+corresponds to a dimension of the box in Ångström in the x, y, and z
+directions, respectively.</p></li>
+<li><p>Optionally, a seed can be provided as an integer. If the seed is given
+by the user, the random number generator will always produce the same
+displacements.</p></li>
+<li><p>Optionally, initial positions for the atoms can be provided as an array
+of length corresponding to the number of atoms. If <em>initial_positions</em>
+is left equal to <em>None</em>, positions will be randomly assigned to the
+atoms (see below).</p></li>
+<li><p>Optionally, a thermo period and a dumping_period can be provided to
+control the outputs from the simulation (it will be implemented
+in <a class="reference internal" href="chapter5.html#chapter5-label"><span class="std std-ref">Output the simulation state</span></a>).</p></li>
+</ul>
+<p>Finally, the <em>dimensions</em> of the system are calculated as the length of
+<em>box_dimensions</em>.</p>
 </section>
 <section id="provide-a-seed">
 <h2>Provide a seed<a class="headerlink" href="#provide-a-seed" title="Link to this heading">¶</a></h2>
@@ -474,7 +478,6 @@ atoms are located within the box boundaries along all 3 dimensions of space.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Initialize the simulation</a><ul>
-<li><a class="reference internal" href="#simulation-box">Simulation box</a></li>
 <li><a class="reference internal" href="#start-coding">Start coding</a></li>
 <li><a class="reference internal" href="#provide-a-seed">Provide a seed</a></li>
 <li><a class="reference internal" href="#nondimensionalize-units">Nondimensionalize units</a></li>

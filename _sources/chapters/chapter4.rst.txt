@@ -1,3 +1,5 @@
+.. _chapter4-label:
+
 Minimize the energy
 ===================
 

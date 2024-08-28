@@ -1,3 +1,5 @@
+.. _chapter1-label:
+
 Start coding
 ============
 
