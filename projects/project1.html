@@ -273,14 +273,14 @@ for a large range of density.</p>
 </figure>
 <p>In 1957, Wood and Parker reported the first numerical study of a 3D fluid that was
 using an attractive Lennard-Jones potential <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">1</a>]</span> (before
-them, Metropolis et al. used repultive hard-sphere
+them, Metropolis et al. used repulsive hard-sphere
 potentials only <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id5" title="Nicholas Metropolis, Arianna W Rosenbluth, Marshall N Rosenbluth, Augusta H Teller, and Edward Teller. Equation of state calculations by fast computing machines. The journal of chemical physics, 21(6):1087–1092, 1953.">4</a>, <a class="reference internal" href="../divers/bibliography.html#id6" title="Nicholas Metropolis, AWRMN Rosenbluth, M Rosenbluth, A Teller, and E Teller. Simulated annealing. Journal of Chemical Physics, 21(161-162):1087–1092, 1953.">5</a>]</span>).
-In their study, Wood and Parker used a Monte Carlo algorithm to predit the
+In their study, Wood and Parker used a Monte Carlo algorithm to predict the
 Equation of State (EoS) of neutral particles interacting with Lennard-Jones potential,
 whose parameters were chosen to match those of argon gas. Their results show
 good agreement with experimental measurements of Michels on argon <span id="id3">[<a class="reference internal" href="../divers/bibliography.html#id3" title="A Michels, Hub Wijker, and HK Wijker. Isotherms of argon between 0 c and 150 c and pressures up to 2900 atmospheres. Physica, 15(7):627–633, 1949.">6</a>]</span>.</p>
 <p>Here, we take advantage of our code and try to reproduce the results of Wood and Parker
-for varying density. To follow this project, only Monte Carlo move are needed,
+for varying density. To follow this project, only Monte Carlo moves are needed,
 and all the chapters up to <a class="reference internal" href="../chapters/chapter7.html#chapter7-label"><span class="std std-ref">Pressure measurement</span></a> must have been followed.</p>
 <section id="parameters-choice">
 <h2>Parameters choice<a class="headerlink" href="#parameters-choice" title="Link to this heading">¶</a></h2>
@@ -293,7 +293,7 @@ where <span class="math notranslate nohighlight">\(r^*  = 3.822~\text{Å}\)</spa
 <li><p><span class="math notranslate nohighlight">\(T = 328.15~\text{K}\)</span> (or <span class="math notranslate nohighlight">\(T = 55~^\circ\text{C}\)</span>).</p></li>
 </ul>
 <p>In addition, some parameters that are not specified by Wood and Parker are
-freely chosen, but it should not impact the result too much, except may be
+freely chosen, but it should not impact the result too much, except maybe
 for the cut-off:</p>
 <ul class="simple">
 <li><p><span class="math notranslate nohighlight">\(d_\text{mc} = \sigma/5\)</span>,</p></li>
@@ -314,7 +314,7 @@ is the molar volume.</p>
 statistical mechanics that describes how the state variables of a system, such as
 pressure <span class="math notranslate nohighlight">\(p\)</span>, volume <span class="math notranslate nohighlight">\(V\)</span>, and temperature <span class="math notranslate nohighlight">\(T\)</span>, are interrelated.
 Here, let us extract the pressure of the fluid for different density values.</p>
-<p>In a Python script, let us start by import the <em>constants</em> module of <em>SciPy</em>, and
+<p>In a Python script, let us start by importing the <em>constants</em> module of <em>SciPy</em>, and
 the UnitRegistry of <em>Pint</em>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
 <span class="kn">from</span> <span class="nn">pint</span> <span class="kn">import</span> <span class="n">UnitRegistry</span>
@@ -341,7 +341,7 @@ as the current Python script, then <em>path_to_code = “./”</em>:</p>
 </pre></div>
 </div>
 <p>Let us take advantage of the <em>constants</em> module to define a few units, and assign
-the right units to these variable using the UnitRegistry:</p>
+the right units to these variables using the UnitRegistry:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">kB</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">J</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span> <span class="c1"># boltzman constant</span>
 <span class="n">Na</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mole</span> <span class="c1"># avogadro</span>
 <span class="n">R</span> <span class="o">=</span> <span class="n">kB</span><span class="o">*</span><span class="n">Na</span> <span class="c1"># gas constant</span>
@@ -420,7 +420,7 @@ i.e. <em>initial_positions = em.atoms_positions*em.reference_distance</em>:</p>
 </div>
 <p>Finally, it is possible to call the <em>launch_MC_code</em> function using
 <em>multiprocessing</em>, and perform the simulation for multiple value of <span class="math notranslate nohighlight">\(\tau\)</span>
-at the same time (if your computer has enough CPU core, if not, perform these calculation
+at the same time (if your computer has enough CPU core, if not, perform these calculations
 in serial):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">tau_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.126</span><span class="p">,</span> <span class="mf">0.882</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span><span class="mi">2</span><span class="p">)</span>
@@ -435,7 +435,7 @@ in serial):</p>
 <p>When the simulation is done, extract the values of <em>Epot.dat</em> within each
 folder named <em>outputs_tau0.75/</em>, where <em>0.75</em> is the corresponding value of <span class="math notranslate nohighlight">\(\tau\)</span>.
 Disregard the first values of Epot, and only keep the last part of the Monte Carlo simulation.
-Then, plot <em>p V / RT</em> as a function of <em>V/V^</em>. The results are in good aggreement
+Then, plot <em>p V / RT</em> as a function of <em>V/V^</em>. The results are in good agreement
 with those of Ref. <span id="id4">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">1</a>]</span>:</p>
 <figure class="align-default">
 <img alt="Equation of state of argon as calculated using monte carlo simulation" class="only-light" src="../_images/pv-nrt.png" />
@@ -446,7 +446,7 @@ with those of Ref. <span id="id4">[<a class="reference internal" href="../divers
 <p>Figure: Equation of state of the argon fluid as calculated using the Monte
 carlo code (disks), and compared with the results from Ref. <span id="id5">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">1</a>]</span>.
 Normalised pressure, <span class="math notranslate nohighlight">\(p V / RT\)</span> as a function of the normalised volume,
-<span class="math notranslate nohighlight">\(V / V^*\)</span>, where <span class="math notranslate nohighlight">\(V^*\)</span> is the molar volume. For benchmark purpose,
+<span class="math notranslate nohighlight">\(V / V^*\)</span>, where <span class="math notranslate nohighlight">\(V^*\)</span> is the molar volume. For benchmark purposes,
 the data obtained using LAMMPS were also added.</p>
 </section>
 </section>
