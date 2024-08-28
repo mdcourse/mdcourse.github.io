@@ -128,19 +128,23 @@ unit system to the *LJ* unit system:
 .. code-block:: python
 
     def calculate_LJunits_prefactors(self):
+        """Calculate the Lennard-Jones units prefacors."""
         # Define the reference distance, energy, and mass
         self.reference_distance = self.sigma[0]  # Angstrom
-        self.reference_energy = self.epsilon[0]  # Kcal/mol
+        self.reference_energy = self.epsilon[0]  # kcal/mol
         self.reference_mass = self.atom_mass[0]  # g/mol
+
         # Calculate the prefactor for the time
         mass_kg = self.atom_mass[0]/cst.kilo/cst.Avogadro  # kg
         epsilon_J = self.epsilon[0]*cst.calorie*cst.kilo/cst.Avogadro  # J
         sigma_m = self.sigma[0]*cst.angstrom  # m
         time_s = np.sqrt(mass_kg*sigma_m**2/epsilon_J)  # s
         self.reference_time = time_s / cst.femto  # fs
+
         # Calculate the prefactor for the temperature
-        kB = cst.Boltzmann*cst.Avogadro/cst.calorie/cst.kilo  # kCal/mol/K
+        kB = cst.Boltzmann*cst.Avogadro/cst.calorie/cst.kilo  # kcal/mol/K
         self.reference_temperature = self.epsilon[0]/kB  # K
+
         # Calculate the prefactor for the pressure
         pressure_pa = epsilon_J/sigma_m**3  # Pa
         self.reference_pressure = pressure_pa/cst.atm  # atm
@@ -177,13 +181,12 @@ be calculated and stored as attributes of *self*.
 Nondimensionalize units
 -----------------------
 
-Let us take advantage of the calculated reference values and normalize the 
-three inputs of the *Prepare* class that have a physical dimension, i.e.
+Let us take advantage of the calculated reference values and normalize the
+three inputs of the *Prepare* class that have physical dimensions, i.e.,
 *epsilon*, *sigma*, and *atom_mass*.
 
 Create a new method called *nondimensionalize_units_0* within the *Prepare*
-class. The index *0* is used to differentiate this method from the other methods
-that will be used to nondimensionalize units in future classes. 
+class:
 
 .. label:: start_Prepare_class
 
@@ -202,12 +205,14 @@ that will be used to nondimensionalize units in future classes.
 
 .. label:: end_Prepare_class
 
-Here, we anticipate that *epsilon*, *sigma*, and *atom_mass* may contain
-more than one element in the future, and normalize each element with the
-corresponding reference value. The *zip()* function allows us to loop over
-all three lists at once.  
+The index *0* is used to differentiate this method from other methods that
+will be used to nondimensionalize units in future classes. We anticipate that
+*epsilon*, *sigma*, and *atom_mass* may contain more than one element, so
+each element is normalized with the corresponding reference value. The
+*zip()* function allows us to loop over all three lists at once.
 
-Let us also call the *nondimensionalize_units_0* from the *__init__()* method:
+Let us also call the *nondimensionalize_units_0* from the *__init__()* method
+of the *Prepare* class:
 
 .. label:: start_Prepare_class
 
@@ -224,18 +229,18 @@ Identify atom properties
 ------------------------
 
 Anticipating the future use of multiple atom types, where each type will be
-associated with its own :math:`\sigma`, :math:`\epsilon` and  :math:`m`,
-let us create arrays containing the properties of each atom in the simulation. 
-For instance, in the case of a simulation with two atoms of type 1 and three
-atoms of type 2, the corresponding *atoms_sigma* will be:
+associated with its own :math:`\sigma`, :math:`\epsilon`, and :math:`m`, let
+us create arrays containing the properties of each atom in the simulation. For
+instance, in the case of a simulation with two atoms of type 1 and three atoms
+of type 2, the corresponding *atoms_sigma* array will be:
 
 .. math::
 
     \text{atoms_sigma} = [\sigma_{11}, \sigma_{11}, \sigma_{22}, \sigma_{22}, \sigma_{22}]
 
-where :math:`\sigma_{11}` and :math:`\sigma_{22}` are the sigma values for 
-atoms of type 1 and 2 respectively. The *atoms_sigma* array will allow
-for future calculation of force.
+where :math:`\sigma_{11}` and :math:`\sigma_{22}` are the sigma values for
+atoms of type 1 and 2, respectively. The *atoms_sigma* array will allow for
+future calculations of force.
 
 Create a new method called *identify_atom_properties*, and place it
 within the *Prepare* class:
@@ -245,6 +250,7 @@ within the *Prepare* class:
 .. code-block:: python
 
     def identify_atom_properties(self):
+        """Identify the atom properties for each atom."""
         self.total_number_atoms = np.sum(self.number_atoms)
         atoms_sigma = []
         atoms_epsilon = []
@@ -275,7 +281,6 @@ Let us call the *identify_atom_properties* from the *__init__()* method:
 
     def __init__(self,
         (...)
-        self.calculate_LJunits_prefactors()
         self.nondimensionalize_units_0()
         self.identify_atom_properties()
 
@@ -284,7 +289,7 @@ Let us call the *identify_atom_properties* from the *__init__()* method:
 Calculate cross coefficients
 ----------------------------
 
-Let us calculate all cross coefficients that can be used to calculate the interactions
+Let us calculate all cross coefficients that are required to calculate the interactions
 between atom :math:`i` and atom :math:`j`. From the example described previously,
 where:
 
@@ -305,7 +310,7 @@ one expects all direct and cross coefficients to be:
 
 
 where it is assumed that the matrix is symmetric, so the coefficients in the bottom
-left are not specified. The first value in the top left corner of the matrix,
+left corner are not specified. The first value in the top left corner of the matrix,
 :math:`\sigma_{11} \text{(0-1)}`, indicates that the :math:`\sigma` value for the interaction
 between the first (0) and second atom (1) is :math:`\sigma_{11}`, as both atoms 0
 and 1 are of type 1. A similar matrix can be written for epsilon_sigma_ij.
@@ -326,26 +331,25 @@ Create the following method called *calculate_cross_coefficients* within the
 .. code-block:: python
 
     def calculate_cross_coefficients(self):
+        """Calculate all the cross-coefficients for the LJ interations."""
         self.identify_atom_properties()
         epsilon_ij = []
+        sigma_ij = []
         for i in range(self.total_number_atoms):
             epsilon_i = self.atoms_epsilon[i]
+            sigma_i = self.atoms_sigma[i]
             for j in range(i + 1, self.total_number_atoms):
                 epsilon_j = self.atoms_epsilon[j]
                 epsilon_ij.append((epsilon_i+epsilon_j)/2)
-        self.array_epsilon_ij = np.array(epsilon_ij)
-        sigma_ij = []
-        for i in range(self.total_number_atoms):
-            sigma_i = self.atoms_sigma[i]
-            for j in range(i + 1, self.total_number_atoms):
                 sigma_j = self.atoms_sigma[j]
                 sigma_ij.append((sigma_i+sigma_j)/2)
+        self.array_epsilon_ij = np.array(epsilon_ij)
         self.array_sigma_ij = np.array(sigma_ij)
 
 .. label:: end_Prepare_class
 
-After calling for the *identify_atom_properties()* method, double loops
-are performed over all direct coefficients, and the cross coefficients
+After calling for the *identify_atom_properties()* method, a double loop
+is performed over all direct coefficients, and the cross coefficients
 are stored within *array_sigma_ij* and *array_epsilon_ij*.
 
 Finally, let us call the *calculate_cross_coefficients* method from the
@@ -357,8 +361,6 @@ Finally, let us call the *calculate_cross_coefficients* method from the
 
     def __init__(self,
         (...)
-        self.calculate_LJunits_prefactors()
-        self.nondimensionalize_units_0()
         self.identify_atom_properties()
         self.calculate_cross_coefficients()
 
