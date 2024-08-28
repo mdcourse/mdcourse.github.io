@@ -47,7 +47,7 @@ Learn Molecular Simulations with Python can be followed by anyone with a compute
 
 .. toctree::
     :maxdepth: 2
-    :caption: Code
+    :caption: Code implementation
     :hidden:
 
     chapters/chapter1

@@ -4,6 +4,7 @@ import re
 # Define ANSI escape codes for colors
 RED = '\033[91m'
 GREEN = '\033[92m'
+GRAY = '\033[90m'
 RESET = '\033[0m'
 
 def filter_make_output():
@@ -11,7 +12,10 @@ def filter_make_output():
     # Define multiple patterns to ignore
     ignore_patterns = [
         "Pygments lexer name 'bw' is not known",
-        "Another error message to ignore"
+        "Another error message to ignore",
+        ".. label:: start_",
+        ".. label:: end_",
+        "Unknown directive type"
     ]
     
     # Define a pattern to identify warnings (example pattern, adjust as needed)
@@ -24,17 +28,20 @@ def filter_make_output():
     subprocess.run(['make', 'clean'], check=True)
     
     # Run 'make html' and capture output
-    process = subprocess.Popen(['make', 'html'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    process = subprocess.Popen(['make', 'html'],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT, text=True)
     
     # Read and filter output
     output_lines = []
     for line in process.stdout:
-        if not ignore_pattern.search(line):
-            # Determine the color based on whether the line matches the warning pattern
-            if warning_pattern.search(line):
-                output_lines.append(RED + line + RESET)
-            else:
-                output_lines.append(GREEN + line + RESET)
+        if len(line) > 1:
+            if not ignore_pattern.search(line):
+                # Determine the color based on whether the line matches the warning pattern
+                if warning_pattern.search(line):
+                    output_lines.append(RED + line + RESET)
+                else:
+                    output_lines.append(GRAY + line + RESET)
 
     # Wait for the process to complete
     process.wait()
