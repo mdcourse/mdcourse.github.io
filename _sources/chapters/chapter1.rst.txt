@@ -92,15 +92,16 @@ or the potential energy:
 
     U_\text{LJ} = 4 \epsilon \left[ \left( \frac{\sigma}{r} \right)^{12}- \left( \frac{\sigma}{r} \right)^6 \right].
 
-Create the classes
+Create the Classes
 ------------------
 
-Let us create all the classes and their inheritance. The classes will be
-filled progressively during the following chapters.
+Let's create the files with the minimal information about the classes and
+their inheritance. The classes will be developed progressively in the
+following chapters.
 
-The first class is the *Prepare* class which will serve the
-nondimensionalization of all the parameters. Within the *Prepare.py* file,
-copy the following lines:
+The first class is the *Prepare* class, which will be used for the
+nondimensionalization of the parameters. In the same folder as *potentials.py*,
+create the *Prepare.py* file and copy the following lines into it:
 
 .. label:: start_Prepare_class
 
@@ -132,8 +133,10 @@ copy the following lines:
 
 .. label:: end_Utilities_class
 
-The *InitializeSimulation* class inherits the *Prepare* class. Within the
-*InitializeSimulation.py* file, copy the following lines:
+The line *from potentials import LJ_potential* is used to import the
+*LJ_potential* function.
+
+Within the *InitializeSimulation.py* file, copy the following lines:
 
 .. label:: start_InitializeSimulation_class
 
@@ -152,8 +155,10 @@ The *InitializeSimulation* class inherits the *Prepare* class. Within the
 
 .. label:: end_InitializeSimulation_class
 
-The *Measurements* class inherits both *InitializeSimulation*  and
-*Utilities* classes. Within the *Measurements.py* file, copy the following lines:
+The *InitializeSimulation* class inherits from the previously created
+*Prepare* class. Additionally, we anticipate that *NumPy* will be required.
+
+Within the *Measurements.py* file, copy the following lines:
 
 .. label:: start_Measurements_class
 
@@ -171,10 +176,13 @@ The *Measurements* class inherits both *InitializeSimulation*  and
           
 .. label:: end_Measurements_class
 
-Finally, let us create the three remaining classes, named respectively *MinimizeEnergy*,
-*MonteCarlo*, and *MolecularDynamics*. Each class inherits
-the *Measurements* class. Within the *MinimizeEnergy.py* file, copy the
-following lines:
+The *Measurements* class inherits both the *InitializeSimulation* and
+*Utilities* classes. 
+
+Finally, let us create the three remaining classes, named *MinimizeEnergy*,
+*MonteCarlo*, and *MolecularDynamics*. Each of these three classes inherits
+from the *Measurements* class, and thus from the classes inherited by
+*Measurements*. Within the *MinimizeEnergy.py* file, copy the following lines:
 
 .. label:: start_MinimizeEnergy_class
 
@@ -191,6 +199,9 @@ following lines:
             super().__init__(*args, **kwargs)
 
 .. label:: end_MinimizeEnergy_class
+
+We anticipate that the *os* module, which provides a way to interact with the
+operating system, will be required :cite:`Rossum2009Python3`.
 
 Within the *MonteCarlo.py* file, copy the following lines:
 
@@ -215,6 +226,9 @@ Within the *MonteCarlo.py* file, copy the following lines:
             super().__init__(*args, **kwargs)
 
 .. label:: end_MonteCarlo_class
+
+Several libraries were imported, namely *Constants* from *SciPy*, *NumPy*, *copy*
+and *os*.
 
 The *warnings* was placed to avoid the anoying message "*RuntimeWarning: overflow
 encountered in exp*" that is sometimes triggered by the exponential of the
@@ -242,27 +256,50 @@ Finally, within the *MolecularDynamics.py* file, copy the following lines:
 Test the code
 -------------
 
-We can create a simple test to ensure that the classes
-are being inherited as expected. Within the same folder,
-create a new Jupyter notebook called *test.ipynb*, and copy
-the following lines into it:
+We can create simple tests to ensure that the classes are inherited as
+expected. Within the same folder, create a new Python file called *test_1a.py*,
+and copy the following lines into it:
 
-.. label:: start_test_First_class
+.. label:: start_test_1a_class
 
 .. code-block:: python
 
-    import os
+    # Import some of the created method.
+    from InitializeSimulation import InitializeSimulation
+    from Utilities import Utilities
+    from Measurements import Measurements
     from MonteCarlo import MonteCarlo
-    from MolecularDynamics import MolecularDynamics
+    # Make sure that the ineritance is correct, i.e. that MonteCarlo does inherit
+    # from Utilities, Measurements, and InitializeSimulation
+    assert issubclass(MonteCarlo, Utilities)
+    assert issubclass(MonteCarlo, Measurements)
+    assert issubclass(MonteCarlo, InitializeSimulation)
 
-    md = MolecularDynamics()
-    md.__init__()
-    mc = MonteCarlo()
-    mc.__init__()
+.. label:: end_test_1a_class
 
-    #assert os.path.exists("mc-output"), """Error, missing mc-output/ folder"""
-    #assert os.path.exists("md-output"), """Error, missing md-output/ folder"""
+This script should not return anything. We can also test that calling the *__init__*
+method of the *MonteCarlo* class does not return any error. In new Python file
+called *test_1b.py*, copy the following lines:
 
-.. label:: end_test_First_class
+.. label:: start_test_1b_class
 
-No error should be returned.
+.. code-block:: python
+
+    from MonteCarlo import MonteCarlo
+
+
+    def test_init_method(method):
+        try:
+            method.__init__()  # Call the method
+            print("Method call succeeded")
+            success = True
+        except Exception as e:
+            print(f"Method call raised an error: {e}")
+            success = False
+        return success
+
+    assert test_init_method(MonteCarlo())
+
+.. label:: end_test_1b_class
+
+Running this second test should return "Method call succeeded".

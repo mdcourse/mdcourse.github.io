@@ -356,12 +356,13 @@ either <em>False</em> or <em>True</em>, the <em>LJ_potential</em> function will 
 </div>
 </section>
 <section id="create-the-classes">
-<h2>Create the classes<a class="headerlink" href="#create-the-classes" title="Link to this heading">¶</a></h2>
-<p>Let us create all the classes and their inheritance. The classes will be
-filled progressively during the following chapters.</p>
-<p>The first class is the <em>Prepare</em> class which will serve the
-nondimensionalization of all the parameters. Within the <em>Prepare.py</em> file,
-copy the following lines:</p>
+<h2>Create the Classes<a class="headerlink" href="#create-the-classes" title="Link to this heading">¶</a></h2>
+<p>Let’s create the files with the minimal information about the classes and
+their inheritance. The classes will be developed progressively in the
+following chapters.</p>
+<p>The first class is the <em>Prepare</em> class, which will be used for the
+nondimensionalization of the parameters. In the same folder as <em>potentials.py</em>,
+create the <em>Prepare.py</em> file and copy the following lines into it:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Prepare</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
@@ -381,8 +382,9 @@ copy the following lines:</p>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The <em>InitializeSimulation</em> class inherits the <em>Prepare</em> class. Within the
-<em>InitializeSimulation.py</em> file, copy the following lines:</p>
+<p>The line <em>from potentials import LJ_potential</em> is used to import the
+<em>LJ_potential</em> function.</p>
+<p>Within the <em>InitializeSimulation.py</em> file, copy the following lines:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">Prepare</span> <span class="kn">import</span> <span class="n">Prepare</span>
 
@@ -395,8 +397,9 @@ copy the following lines:</p>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The <em>Measurements</em> class inherits both <em>InitializeSimulation</em>  and
-<em>Utilities</em> classes. Within the <em>Measurements.py</em> file, copy the following lines:</p>
+<p>The <em>InitializeSimulation</em> class inherits from the previously created
+<em>Prepare</em> class. Additionally, we anticipate that <em>NumPy</em> will be required.</p>
+<p>Within the <em>Measurements.py</em> file, copy the following lines:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
 <span class="kn">from</span> <span class="nn">Utilities</span> <span class="kn">import</span> <span class="n">Utilities</span>
 
@@ -408,10 +411,12 @@ copy the following lines:</p>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Finally, let us create the three remaining classes, named respectively <em>MinimizeEnergy</em>,
-<em>MonteCarlo</em>, and <em>MolecularDynamics</em>. Each class inherits
-the <em>Measurements</em> class. Within the <em>MinimizeEnergy.py</em> file, copy the
-following lines:</p>
+<p>The <em>Measurements</em> class inherits both the <em>InitializeSimulation</em> and
+<em>Utilities</em> classes.</p>
+<p>Finally, let us create the three remaining classes, named <em>MinimizeEnergy</em>,
+<em>MonteCarlo</em>, and <em>MolecularDynamics</em>. Each of these three classes inherits
+from the <em>Measurements</em> class, and thus from the classes inherited by
+<em>Measurements</em>. Within the <em>MinimizeEnergy.py</em> file, copy the following lines:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Measurements</span> <span class="kn">import</span> <span class="n">Measurements</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -423,6 +428,8 @@ following lines:</p>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>We anticipate that the <em>os</em> module, which provides a way to interact with the
+operating system, will be required <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id7" title="Guido Van Rossum and Fred L. Drake. Python 3 Reference Manual. CreateSpace, Scotts Valley, CA, 2009. ISBN 1441412697.">2</a>]</span>.</p>
 <p>Within the <em>MonteCarlo.py</em> file, copy the following lines:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -441,6 +448,8 @@ following lines:</p>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Several libraries were imported, namely <em>Constants</em> from <em>SciPy</em>, <em>NumPy</em>, <em>copy</em>
+and <em>os</em>.</p>
 <p>The <em>warnings</em> was placed to avoid the anoying message “<em>RuntimeWarning: overflow
 encountered in exp</em>” that is sometimes triggered by the exponential of the
 <em>acceptation_probability</em> (see <a class="reference internal" href="chapter6.html#chapter6-label"><span class="std std-ref">Monte Carlo move</span></a>).</p>
@@ -460,24 +469,41 @@ encountered in exp</em>” that is sometimes triggered by the exponential of the
 </section>
 <section id="test-the-code">
 <h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
-<p>We can create a simple test to ensure that the classes
-are being inherited as expected. Within the same folder,
-create a new Jupyter notebook called <em>test.ipynb</em>, and copy
-the following lines into it:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<p>We can create simple tests to ensure that the classes are inherited as
+expected. Within the same folder, create a new Python file called <em>test_1a.py</em>,
+and copy the following lines into it:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import some of the created method.</span>
+<span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
+<span class="kn">from</span> <span class="nn">Utilities</span> <span class="kn">import</span> <span class="n">Utilities</span>
+<span class="kn">from</span> <span class="nn">Measurements</span> <span class="kn">import</span> <span class="n">Measurements</span>
 <span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
-<span class="kn">from</span> <span class="nn">MolecularDynamics</span> <span class="kn">import</span> <span class="n">MolecularDynamics</span>
-
-<span class="n">md</span> <span class="o">=</span> <span class="n">MolecularDynamics</span><span class="p">()</span>
-<span class="n">md</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-<span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">()</span>
-<span class="n">mc</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-
-<span class="c1">#assert os.path.exists(&quot;mc-output&quot;), &quot;&quot;&quot;Error, missing mc-output/ folder&quot;&quot;&quot;</span>
-<span class="c1">#assert os.path.exists(&quot;md-output&quot;), &quot;&quot;&quot;Error, missing md-output/ folder&quot;&quot;&quot;</span>
+<span class="c1"># Make sure that the ineritance is correct, i.e. that MonteCarlo does inherit</span>
+<span class="c1"># from Utilities, Measurements, and InitializeSimulation</span>
+<span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="n">Measurements</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="n">InitializeSimulation</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>No error should be returned.</p>
+<p>This script should not return anything. We can also test that calling the <em>__init__</em>
+method of the <em>MonteCarlo</em> class does not return any error. In new Python file
+called <em>test_1b.py</em>, copy the following lines:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
+
+
+<span class="k">def</span> <span class="nf">test_init_method</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">method</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  <span class="c1"># Call the method</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Method call succeeded&quot;</span><span class="p">)</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Method call raised an error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">success</span>
+
+<span class="k">assert</span> <span class="n">test_init_method</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Running this second test should return “Method call succeeded”.</p>
 </section>
 </section>
 
@@ -536,7 +562,7 @@ the following lines into it:</p>
 <li><a class="reference internal" href="#presentation">Presentation</a></li>
 <li><a class="reference internal" href="#list-of-files">List of Files</a></li>
 <li><a class="reference internal" href="#potential-for-inter-atomic-interaction">Potential for inter-atomic interaction</a></li>
-<li><a class="reference internal" href="#create-the-classes">Create the classes</a></li>
+<li><a class="reference internal" href="#create-the-classes">Create the Classes</a></li>
 <li><a class="reference internal" href="#test-the-code">Test the code</a></li>
 </ul>
 </li>
