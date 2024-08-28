@@ -3,12 +3,20 @@
 Initialize the simulation
 =========================
 
+.. figure:: chapter3/avatar-dm.png
+    :alt: Fluid made of argon atoms in a cubic box.
+    :height: 200
+    :align: right
+    :class: only-dark
+
+.. figure:: chapter3/avatar.png
+    :alt: Fluid made of argon atoms in a cubic box.
+    :height: 200
+    :align: right
+    :class: only-light
+
 Here, the *InitializeSimulation* class is created. This class is used to
 prepare the simulation box and populate the box randomly with atoms.
-
-Start coding
-------------
-
 Let us improve the previously created *InitializeSimulation* class:
 
 .. label:: start_InitializeSimulation_class

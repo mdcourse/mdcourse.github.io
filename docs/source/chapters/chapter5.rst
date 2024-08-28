@@ -20,7 +20,7 @@ Let us start by calling two additional methods within the for loop of the
         (...)
         for self.step in range(0, self.maximum_steps+1):
             (...)
-                self.displacement *= 0.2
+                self.displacement *= 0.2 # Multiply the displacement by a factor 0.2
             log_simulation_data(self)
             update_dump_file(self, "dump.min.lammpstrj")
 
@@ -115,11 +115,11 @@ a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.
     def log_simulation_data(code):
         if code.thermo_period is not None:
             if code.step % code.thermo_period == 0:
-                try:
-                    Epot = code.Epot * code.reference_energy  # kcal/mol
-                except:
+                if code.step == 0:
                     Epot = code.compute_potential(output="potential") \
                         * code.reference_energy  # kcal/mol
+                else:
+                    Epot = code.Epot * code.reference_energy  # kcal/mol
                 if code.step == 0:
                     if code.thermo_outputs == "Epot":
                         logger.info(f"step Epot")
@@ -168,7 +168,7 @@ Test the code
 One can use the same test as previously, and ask the code to print information
 every 10 steps in the dump files, as well as in the log:
 
-.. label:: start_test_Outputs_class
+.. label:: start_test_5a_class
 
 .. code-block:: python
 
@@ -190,7 +190,7 @@ every 10 steps in the dump files, as well as in the log:
 
     assert os.path.exists("Outputs/dump.min.lammpstrj")
 
-.. label:: end_test_Outputs_class
+.. label:: end_test_5a_class
 
 When running the simulation, information must be printed in the terminal:
 
