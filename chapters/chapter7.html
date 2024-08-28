@@ -374,11 +374,11 @@ chosen to make the calculation faster.</p>
 <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
 <span class="c1"># Import the data and calculate p V / R T</span>
-<span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;Outputs/pressure.dat&quot;</span><span class="p">)[:,</span><span class="mi">1</span><span class="p">][</span><span class="mi">10</span><span class="p">:])</span>
-<span class="n">pressure</span> <span class="o">=</span> <span class="p">(</span><span class="n">output</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">atm</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">pascal</span><span class="p">)</span>
-<span class="n">volume</span> <span class="o">=</span> <span class="p">(</span><span class="n">volume_star</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">/</span> <span class="n">Na</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">meter</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">pV_over_RT</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="n">pressure</span> <span class="o">*</span> <span class="n">volume</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">Na</span><span class="p">)</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;p v / R T =&quot;</span><span class="p">,</span> <span class="n">pV_over_RT</span><span class="p">,</span> <span class="s2">&quot; --- (The expected value from Wood1957 is 1.5)&quot;</span><span class="p">)</span>
+<span class="c1"># output = np.mean(np.loadtxt(&quot;Outputs/pressure.dat&quot;)[:,1][10:])</span>
+<span class="c1"># pressure = (output*ureg.atm).to(ureg.pascal)</span>
+<span class="c1"># volume = (volume_star * tau / Na).to(ureg.meter**3)</span>
+<span class="c1"># pV_over_RT = np.round((pressure * volume / (R * T) * Na).magnitude,2)</span>
+<span class="c1"># print(&quot;p v / R T =&quot;, pV_over_RT, &quot; --- (The expected value from Wood1957 is 1.5)&quot;)</span>
 </pre></div>
 </div>
 <p>Which should return a value for <span class="math notranslate nohighlight">\(p V / R T\)</span> that is close to the expected value

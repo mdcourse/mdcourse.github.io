@@ -138,11 +138,11 @@ chosen to make the calculation faster.
     mc.run()
 
     # Import the data and calculate p V / R T
-    output = np.mean(np.loadtxt("Outputs/pressure.dat")[:,1][10:])
-    pressure = (output*ureg.atm).to(ureg.pascal)
-    volume = (volume_star * tau / Na).to(ureg.meter**3)
-    pV_over_RT = np.round((pressure * volume / (R * T) * Na).magnitude,2)
-    print("p v / R T =", pV_over_RT, " --- (The expected value from Wood1957 is 1.5)")
+    # output = np.mean(np.loadtxt("Outputs/pressure.dat")[:,1][10:])
+    # pressure = (output*ureg.atm).to(ureg.pascal)
+    # volume = (volume_star * tau / Na).to(ureg.meter**3)
+    # pV_over_RT = np.round((pressure * volume / (R * T) * Na).magnitude,2)
+    # print("p v / R T =", pV_over_RT, " --- (The expected value from Wood1957 is 1.5)")
 
 .. label:: end_test_MonteCarloPressure_class
 

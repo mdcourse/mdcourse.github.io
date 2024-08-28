@@ -181,8 +181,8 @@ every 10 steps in the dump files, as well as in the log:
         thermo_outputs = "Epot-MaxF",
         number_atoms=[2, 3],
         epsilon=[0.1, 1.0], # kcal/mol
-        sigma=[3, 6], # A
-        atom_mass=[1, 1], # g/mol
+        sigma=[3, 4], # A
+        atom_mass=[10, 20], # g/mol
         box_dimensions=[20, 20, 20], # A
         data_folder="Outputs/",
         )

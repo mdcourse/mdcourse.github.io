@@ -381,6 +381,7 @@ perform a loop over the desired number of steps <em>maximum_steps</em>:</p>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform the loop over time.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_cross_coefficients</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_move</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_box</span><span class="p">()</span>
 </pre></div>
@@ -425,7 +426,7 @@ Let us add a dump too:</p>
     <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">50</span><span class="p">],</span>
     <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
     <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="c1"># A</span>
-    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="c1"># g/mol</span>
+    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="c1"># g/mol</span>
     <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># A</span>
     <span class="n">data_folder</span><span class="o">=</span><span class="s2">&quot;Outputs/&quot;</span><span class="p">,</span>
     <span class="p">)</span>
@@ -433,7 +434,8 @@ Let us add a dump too:</p>
 </pre></div>
 </div>
 <p>The evolution of the potential energy as a function of the number of steps
-are written in the <em>Outputs/Epot.dat</em> file and can be plotted.</p>
+are written in the <em>simulation.log</em> file. The data can be used to plot
+the evolution of the system with time.</p>
 </section>
 </section>
 

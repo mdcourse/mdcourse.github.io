@@ -144,6 +144,7 @@ perform a loop over the desired number of steps *maximum_steps*:
         """Perform the loop over time."""
         for self.step in range(0, self.maximum_steps+1):
             self.update_neighbor_lists()
+            self.update_cross_coefficients()
             self.monte_carlo_move()
             self.wrap_in_box()
 
@@ -192,7 +193,7 @@ Test the code
 One can use a similar test as previously. Let us use a displace distance of
 0.5 Angstrom, and make 1000 steps.
 
-.. label:: start_test_MonteCarlo_class
+.. label:: start_test_6a_class
 
 .. code-block:: python
 
@@ -207,13 +208,14 @@ One can use a similar test as previously. Let us use a displace distance of
         number_atoms=[50],
         epsilon=[0.1], # kcal/mol
         sigma=[3], # A
-        atom_mass=[1], # g/mol
+        atom_mass=[10], # g/mol
         box_dimensions=[20, 20, 20], # A
         data_folder="Outputs/",
         )
     mc.run()
 
-.. label:: end_test_MonteCarlo_class
+.. label:: end_test_6a_class
 
 The evolution of the potential energy as a function of the number of steps
-are written in the *Outputs/Epot.dat* file and can be plotted.
+are written in the *simulation.log* file. The data can be used to plot
+the evolution of the system with time.
