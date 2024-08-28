@@ -305,11 +305,13 @@ in <a class="reference internal" href="chapter5.html#chapter5-label"><span class
 <p>Finally, the <em>dimensions</em> of the system are calculated as the length of
 <em>box_dimensions</em>.</p>
 </section>
-<section id="provide-a-seed">
-<h2>Provide a seed<a class="headerlink" href="#provide-a-seed" title="Link to this heading">¶</a></h2>
-<p>A <em>seed</em> can be provided to launch the <em>exact</em> same simulations (i.e. same atom positions,
-same atom velocities) several times in a row, which is useful during debugging. Add
-the following <em>if</em> condition to the <em>__init__()</em> method:</p>
+<section id="set-a-random-seed">
+<h2>Set a random seed<a class="headerlink" href="#set-a-random-seed" title="Link to this heading">¶</a></h2>
+<p>Providing a <em>seed</em> allows for reproducible simulations. When a seed is
+specified, the simulation will produce the exact same results each time it
+is run, including identical atom positions and velocities. This can be
+particularly useful for debugging purposes.</p>
+<p>Add the following <em>if</em> condition to the <em>__init__()</em> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="o">=</span> <span class="n">initial_positions</span>
@@ -317,8 +319,9 @@ the following <em>if</em> condition to the <em>__init__()</em> method:</p>
         <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>If a <em>seed</em> is provided, it is passed to the <em>random.seed()</em> function of <em>NumPy</em>.
-If <em>seed</em> is left to its default value of <em>None</em>, the simulation will be randomized.</p>
+<p>If a <em>seed</em> is provided, it is used to initialize the <em>random.seed()</em> function
+from <em>NumPy</em>. If <em>seed</em> is set to its default value of <em>None</em>, the simulation
+will proceed with randomization.</p>
 </section>
 <section id="nondimensionalize-units">
 <h2>Nondimensionalize units<a class="headerlink" href="#nondimensionalize-units" title="Link to this heading">¶</a></h2>
@@ -479,7 +482,7 @@ atoms are located within the box boundaries along all 3 dimensions of space.</p>
             <ul>
 <li><a class="reference internal" href="#">Initialize the simulation</a><ul>
 <li><a class="reference internal" href="#start-coding">Start coding</a></li>
-<li><a class="reference internal" href="#provide-a-seed">Provide a seed</a></li>
+<li><a class="reference internal" href="#set-a-random-seed">Set a random seed</a></li>
 <li><a class="reference internal" href="#nondimensionalize-units">Nondimensionalize units</a></li>
 <li><a class="reference internal" href="#define-the-box">Define the box</a></li>
 <li><a class="reference internal" href="#populate-the-box">Populate the box</a></li>
