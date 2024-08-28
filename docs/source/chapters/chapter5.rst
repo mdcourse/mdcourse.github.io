@@ -42,27 +42,42 @@ All quantities are re-dimensionalized before getting outputed.
 
 .. code-block:: python
 
+    import os
     import logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(message)s'
-    )
 
-    # Create a custom logger
-    logger = logging.getLogger('simulation_logger')
-    logger.setLevel(logging.INFO)
-    # Disable propagation to prevent double logging
-    logger.propagate = False
+    # Function to set up the logger
+    def setup_logger(folder_name):
+        # Create a custom logger
+        logger = logging.getLogger('simulation_logger')
+        logger.setLevel(logging.INFO)
+        logger.propagate = False  # Disable propagation to prevent double logging
 
-    console_handler = logging.StreamHandler()  # To log to the terminal
-    file_handler = logging.FileHandler('simulation.log')  # To log to a file
-    formatter = logging.Formatter('%(message)s')
-    console_handler.setFormatter(formatter)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-    logger.addHandler(file_handler)
+        # Clear any existing handlers if this function is called again
+        if logger.hasHandlers():
+            logger.handlers.clear()
+
+        # Create handlers for console and file
+        console_handler = logging.StreamHandler()  # To log to the terminal
+        log_file_path = os.path.join(folder_name, 'simulation.log')
+        file_handler = logging.FileHandler(log_file_path)  # To log to a file
+
+        # Create formatters and add them to the handlers
+        formatter = logging.Formatter('%(message)s')
+        console_handler.setFormatter(formatter)
+        file_handler.setFormatter(formatter)
+
+        # Add handlers to the logger
+        logger.addHandler(console_handler)
+        logger.addHandler(file_handler)
+
+        return logger
 
     def log_simulation_data(code):
+
+        # Setup the logger with the folder name
+        logger = setup_logger(code.data_folder)
+
+        # Logging the simulation data
         if code.thermo_period is not None:
             if code.step % code.thermo_period == 0:
                 if code.step == 0:
@@ -83,9 +98,8 @@ All quantities are re-dimensionalized before getting outputed.
                     logger.info(f"{code.step} {Epot:.2f} {code.MaxF:.2f}")
                 elif code.thermo_outputs == "Epot-press":
                     code.calculate_pressure()
-                    press = code.pressure \
-                        * code.reference_pressure  # Atm
-                    logger.info(f"{code.step} {Epot:.2f} {press:.2f}")    
+                    press = code.pressure * code.reference_pressure  # Atm
+                    logger.info(f"{code.step} {Epot:.2f} {press:.2f}")
 
 .. label:: end_logger_class
 
