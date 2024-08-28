@@ -288,84 +288,85 @@ Let us call the *identify_atom_properties* from the *__init__()* method:
 
 .. label:: end_Prepare_class
 
-Calculate cross coefficients
-----------------------------
+..
+    Calculate cross coefficients
+    ----------------------------
 
-Let us calculate all cross coefficients that are required to calculate the interactions
-between atom :math:`i` and atom :math:`j`. From the example described previously,
-where:
+    Let us calculate all cross coefficients that are required to calculate the interactions
+    between atom :math:`i` and atom :math:`j`. From the example described previously,
+    where:
 
-.. math::
+    .. math::
 
-    \text{atoms_sigma} = [\sigma_{11}, \sigma_{11}, \sigma_{22}, \sigma_{22}, \sigma_{22}]
+        \text{atoms_sigma} = [\sigma_{11}, \sigma_{11}, \sigma_{22}, \sigma_{22}, \sigma_{22}]
 
-one expects all direct and cross coefficients to be:
+    one expects all direct and cross coefficients to be:
 
-.. math::
+    .. math::
 
-    \text{array_sigma_ij} = \begin{bmatrix}
-            \sigma_{11} & \sigma_{11} & \sigma_{12} & \sigma_{12} & \sigma_{12} \\
-            \sigma_{11} & \sigma_{11} & \sigma_{12} & \sigma_{12} & \sigma_{12} \\
-            \sigma_{12} & \sigma_{12} & \sigma_{22} & \sigma_{22} & \sigma_{22} \\
-            \sigma_{12} & \sigma_{12} & \sigma_{22} & \sigma_{22} & \sigma_{22} \\
-            \sigma_{12} & \sigma_{12} & \sigma_{22} & \sigma_{22} & \sigma_{22} \\
-        \end{bmatrix}
+        \text{array_sigma_ij} = \begin{bmatrix}
+                \sigma_{11} & \sigma_{11} & \sigma_{12} & \sigma_{12} & \sigma_{12} \\
+                \sigma_{11} & \sigma_{11} & \sigma_{12} & \sigma_{12} & \sigma_{12} \\
+                \sigma_{12} & \sigma_{12} & \sigma_{22} & \sigma_{22} & \sigma_{22} \\
+                \sigma_{12} & \sigma_{12} & \sigma_{22} & \sigma_{22} & \sigma_{22} \\
+                \sigma_{12} & \sigma_{12} & \sigma_{22} & \sigma_{22} & \sigma_{22} \\
+            \end{bmatrix}
 
 
-The matrix is symmetric, so the coefficients in the bottom left corner are 
-the same as the coefficient in the top right corner. The first value in the top left corner of the matrix,
-:math:`\sigma_{11}`, indicates that the :math:`\sigma` value for the interaction
-between the atom 1 and itself is is :math:`\sigma_{11}`. A similar matrix can
-be written for epsilon_sigma_ij.
+    The matrix is symmetric, so the coefficients in the bottom left corner are 
+    the same as the coefficient in the top right corner. The first value in the top left corner of the matrix,
+    :math:`\sigma_{11}`, indicates that the :math:`\sigma` value for the interaction
+    between the atom 1 and itself is is :math:`\sigma_{11}`. A similar matrix can
+    be written for epsilon_sigma_ij.
 
-Here, the values of the cross coefficients :math:`\sigma_{12}` and :math:`\epsilon_{12}`
-are assumed to follow the arithmetic mean :
+    Here, the values of the cross coefficients :math:`\sigma_{12}` and :math:`\epsilon_{12}`
+    are assumed to follow the arithmetic mean :
 
-.. math::
+    .. math::
 
-    \sigma_{12} = (\sigma_{11}+\sigma_{22})/2 \\
-    \epsilon_{12} = (\epsilon_{11}+\epsilon_{22})/2
+        \sigma_{12} = (\sigma_{11}+\sigma_{22})/2 \\
+        \epsilon_{12} = (\epsilon_{11}+\epsilon_{22})/2
 
-Create the following method called *calculate_cross_coefficients* within the 
-*Prepare* class:
+    Create the following method called *calculate_cross_coefficients* within the 
+    *Prepare* class:
 
-.. label:: start_Prepare_class
+    . . label:: start_Prepare_class
 
-.. code-block:: python
+    .. code-block:: python
 
-    def calculate_cross_coefficients(self):
-        """Calculate all the cross-coefficients for the LJ interations."""
-        self.identify_atom_properties() # TOFIX: this was left because of GCMC. Remove? Move?
-        matrix_epsilon_ij = []
-        matrix_sigma_ij = []
-        for i in range(self.total_number_atoms):
-            matrix_epsilon_ij.append([])
-            matrix_sigma_ij.append([])
-            for j in range(self.total_number_atoms):
-                matrix_epsilon_ij[-1].append((self.atoms_epsilon[i]+self.atoms_epsilon[j])/2)
-                matrix_sigma_ij[-1].append((self.atoms_sigma[i]+self.atoms_sigma[j])/2)
-        self.matrix_sigma_ij = matrix_sigma_ij
-        self.matrix_epsilon_ij = matrix_epsilon_ij
+        def calculate_cross_coefficients(self):
+            """Calculate all the cross-coefficients for the LJ interations."""
+            self.identify_atom_properties() # TOFIX: this was left because of GCMC. Remove? Move?
+            matrix_epsilon_ij = []
+            matrix_sigma_ij = []
+            for i in range(self.total_number_atoms):
+                matrix_epsilon_ij.append([])
+                matrix_sigma_ij.append([])
+                for j in range(self.total_number_atoms):
+                    matrix_epsilon_ij[-1].append((self.atoms_epsilon[i]+self.atoms_epsilon[j])/2)
+                    matrix_sigma_ij[-1].append((self.atoms_sigma[i]+self.atoms_sigma[j])/2)
+            self.matrix_sigma_ij = matrix_sigma_ij
+            self.matrix_epsilon_ij = matrix_epsilon_ij
 
-.. label:: end_Prepare_class
+    . . label:: end_Prepare_class
 
-After calling for the *identify_atom_properties()* method, a double loop
-is performed over all direct coefficients, and the cross coefficients
-are stored within *matrix_sigma_ij* and *matrix_epsilon_ij*, two matrices.
+    After calling for the *identify_atom_properties()* method, a double loop
+    is performed over all direct coefficients, and the cross coefficients
+    are stored within *matrix_sigma_ij* and *matrix_epsilon_ij*, two matrices.
 
-Finally, let us call the *calculate_cross_coefficients* method from the
-*__init__()* method.
+    Finally, let us call the *calculate_cross_coefficients* method from the
+    *__init__()* method.
 
-.. label:: start_Prepare_class
+    . . label:: start_Prepare_class
 
-.. code-block:: python
+    .. code-block:: python
 
-    def __init__(self,
-        (...)
-        self.identify_atom_properties()
-        self.calculate_cross_coefficients()
+        def __init__(self,
+            (...)
+            self.identify_atom_properties()
+            self.calculate_cross_coefficients()
 
-.. label:: end_Prepare_class
+    . . label:: end_Prepare_class
 
 Test the code
 -------------
@@ -395,15 +396,6 @@ type 1, and 3 atoms of type 2:
     # Make sure the *atoms_epsilon* gives the expected values
     # of 1 1 2 2 2 (in LJ units)
     test_array(prep.atoms_epsilon, np.array([1., 1., 2., 2., 2.]))
-    # Make sure the *matrix_epsilon_ij* gives the expected values
-    # [[1.0, 1.0, 1.5, 1.5, 1.5],
-    # [1.0, 1.0, 1.5, 1.5, 1.5],
-    # (...)
-    test_array(prep.matrix_epsilon_ij, np.array([[1.0, 1.0, 1.5, 1.5, 1.5],
-                                                 [1.0, 1.0, 1.5, 1.5, 1.5],
-                                                 [1.5, 1.5, 2.0, 2.0, 2.0],
-                                                 [1.5, 1.5, 2.0, 2.0, 2.0],
-                                                 [1.5, 1.5, 2.0, 2.0, 2.0]]))
 
 .. label:: end_test_2a_class
 

@@ -131,7 +131,8 @@ following *run()* method to the *MinimizeEnergy* class:
     def run(self):
         for self.step in range(0, self.maximum_steps+1): # *step* loops for 0 to *maximum_steps*+1
             # First, meevaluate the initial energy and max force
-            self.update_neighbor_lists() # Rebuild neighbor list, is necessary
+            self.update_neighbor_lists() # Rebuild neighbor list, if necessary
+            self.update_cross_coefficients() # Recalculate the cross coefficients, if necessary
             try: # try using the last saved Epot and MaxF, if it exists
                 init_Epot = self.Epot
                 init_MaxF = self.MaxF
@@ -189,6 +190,27 @@ neighboring atoms, the simulation becomes more efficient. Add the following
                 list = [ele for ele in list if ele > cpt]
                 neighbor_lists.append(list)
             self.neighbor_lists = neighbor_lists
+
+.. label:: end_Utilities_class
+
+The *update_neighbor_lists()* method generates neighbor lists for each
+atom, ensuring that only relevant interactions are considered in the
+calculations. These lists will be recalculated at intervals specified by
+the *neighbor* input parameter.
+
+Update cross coefficients
+-------------------------
+
+At the same time as the neighbor lists are getting build up, let us also
+pre-calculate the cross coefficients. This will make the force calculation
+more practical (see below).
+
+.. label:: start_Utilities_class
+
+.. code-block:: python
+
+    def update_cross_coefficients(self):
+        if (self.step % self.neighbor == 0):
             # Precalculte LJ cross-coefficients
             sigma_ij_list = []
             epsilon_ij_list = []
@@ -206,15 +228,17 @@ neighboring atoms, the simulation becomes more efficient. Add the following
             self.sigma_ij_list = sigma_ij_list
             self.epsilon_ij_list = epsilon_ij_list
 
-# TO FIX: doublons with before !
-
 .. label:: end_Utilities_class
 
-The *update_neighbor_lists()* method generates neighbor lists for each
-atom, ensuring that only relevant interactions are considered in the
-calculations. These lists will be recalculated at intervals specified by
-the *neighbor* input parameter. To implement this method, you should also
-import the following library in the *Utilities.py* file:
+Here, the values of the cross coefficients between atom of type 1 and 2,
+:math:`\sigma_{12}` and :math:`\epsilon_{12}`, are assumed to follow the arithmetic mean:
+
+.. math::
+
+    \sigma_{12} = (\sigma_{11}+\sigma_{22})/2 \\
+    \epsilon_{12} = (\epsilon_{11}+\epsilon_{22})/2
+
+Finally, import the following library in the *Utilities.py* file:
 
 .. label:: start_Utilities_class
 
@@ -279,8 +303,6 @@ once, *potential*, simply returns the value of the potential energy for the enti
 If *force-vector* or *force-matrix* are selected instead, then the individual forces
 between atoms are returned.
 
-# TOFIX: should we simplify that?
-
 Wrap in box
 -----------
 
@@ -312,7 +334,7 @@ Let us test the *MinimizeEnergy* class to make sure that it does what
 is expected, i.e. that it leads to a potential energy that is small, and
 typically negative.
 
-.. label:: start_test_MinimizeEnergy_class
+.. label:: start_test_4a_class
 
 .. code-block:: python
 
@@ -320,13 +342,20 @@ typically negative.
 
     min = MinimizeEnergy(maximum_steps=100,
         number_atoms=[2, 3],
-        epsilon=[0.1, 1.0], # kcal/mol
-        sigma=[3, 6], # A
-        atom_mass=[1, 1], # g/mol
+        epsilon=[0.2, 0.4], # kcal/mol
+        sigma=[3, 4], # A
+        atom_mass=[10, 20], # g/mol
         box_dimensions=[20, 20, 20], # A
         )
     min.run()
 
-    assert min.compute_potential(output="potential") < 0
+    Final_Epot = min.Epot
+    Final_MaxF = min.MaxF
+    assert Final_Epot < 0, f"Test failed: Final energy too large"
+    assert Final_MaxF < 10, f"Test failed: Final max force too large"
+    print("Test passed")
 
-.. label:: end_test_MinimizeEnergy_class
+.. label:: end_test_4a_class
+
+For such as low density in particle, we can reasonably expect the energy to be always
+negative after 100 steps.
