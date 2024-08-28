@@ -197,8 +197,9 @@ Add the same lines at the top of the *MinimizeEnergy.py* file:
 Test the code
 -------------
 
-One can use the same test as previously, and ask the code to print information
-every 10 steps in the dump files, as well as in the log:
+One can use a test similar as the previous ones. Let us ask out code to print
+information in the dump and the log files, and then let us assert the
+files were indeed created without the *Outputs/* folder:
 
 .. label:: start_test_5a_class
 
@@ -208,8 +209,8 @@ every 10 steps in the dump files, as well as in the log:
     from MinimizeEnergy import MinimizeEnergy
 
     min = MinimizeEnergy(maximum_steps=100,
-        thermo_period=10,
-        dumping_period=10,
+        thermo_period=25,
+        dumping_period=25,
         thermo_outputs = "Epot-MaxF",
         number_atoms=[2, 3],
         epsilon=[0.1, 1.0], # kcal/mol
@@ -220,19 +221,19 @@ every 10 steps in the dump files, as well as in the log:
         )
     min.run()
 
-    assert os.path.exists("Outputs/dump.min.lammpstrj")
+    assert os.path.exists("Outputs/dump.min.lammpstrj"), f"Test failed: dump file was not created"
+    assert os.path.exists("Outputs/simulation.log"), f"Test failed: log file was not created"
 
 .. label:: end_test_5a_class
 
-When running the simulation, information must be printed in the terminal:
+I addition to the files getting created, information must be printed in the terminal
+during the similation:
 
 .. code-block:: bw
 
-    step Epot (kcal/mol) MaxF (kcal/A/mol)
-    0, -1.40, 14.19
-    10, -1.80, 17.98
-    20, -2.37, 2.65
-    30, -2.50, 4.00
-    (...)
-
-and a file named *dump.min.lammpstrj* must have appeared in the *Outputs/* folder.
+    step Epot MaxF
+    0 -0.17 1.93
+    25 -1.08 1.81
+    50 -1.11 1.42
+    75 -1.22 3.77
+    100 -2.10 1.28

@@ -422,14 +422,15 @@ and <em>log_simulation_data</em>. Add these lines at the top of the <em>MonteCar
 </section>
 <section id="test-the-code">
 <h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
-<p>One can use the same test as previously, and ask the code to print information
-every 10 steps in the dump files, as well as in the log:</p>
+<p>One can use a test similar as the previous ones. Let us ask out code to print
+information in the dump and the log files, and then let us assert the
+files were indeed created without the <em>Outputs/</em> folder:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">MinimizeEnergy</span> <span class="kn">import</span> <span class="n">MinimizeEnergy</span>
 
 <span class="nb">min</span> <span class="o">=</span> <span class="n">MinimizeEnergy</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-    <span class="n">thermo_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-    <span class="n">dumping_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">thermo_period</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+    <span class="n">dumping_period</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
     <span class="n">thermo_outputs</span> <span class="o">=</span> <span class="s2">&quot;Epot-MaxF&quot;</span><span class="p">,</span>
     <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
     <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
@@ -440,19 +441,20 @@ every 10 steps in the dump files, as well as in the log:</p>
     <span class="p">)</span>
 <span class="nb">min</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
-<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/dump.min.lammpstrj&quot;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/dump.min.lammpstrj&quot;</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Test failed: dump file was not created&quot;</span>
+<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/simulation.log&quot;</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Test failed: log file was not created&quot;</span>
 </pre></div>
 </div>
-<p>When running the simulation, information must be printed in the terminal:</p>
-<div class="highlight-bw notranslate"><div class="highlight"><pre><span></span>step Epot (kcal/mol) MaxF (kcal/A/mol)
-0, -1.40, 14.19
-10, -1.80, 17.98
-20, -2.37, 2.65
-30, -2.50, 4.00
-(...)
+<p>I addition to the files getting created, information must be printed in the terminal
+during the similation:</p>
+<div class="highlight-bw notranslate"><div class="highlight"><pre><span></span>step Epot MaxF
+0 -0.17 1.93
+25 -1.08 1.81
+50 -1.11 1.42
+75 -1.22 3.77
+100 -2.10 1.28
 </pre></div>
 </div>
-<p>and a file named <em>dump.min.lammpstrj</em> must have appeared in the <em>Outputs/</em> folder.</p>
 </section>
 </section>
 
