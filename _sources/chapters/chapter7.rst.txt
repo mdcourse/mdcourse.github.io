@@ -39,16 +39,16 @@ Let us add the following method to the *Utilities* class.
     def calculate_pressure(self):
         """Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smit,
         Understanding molecular simulation: from algorithms to applications, 2002)"""
-        # Ideal contribution
+        # Compute the ideal contribution
         Ndof = self.dimensions*self.total_number_atoms-self.dimensions    
-        volume = np.prod(self.box_size[:3])
+        volume = np.prod(self.box_size[:self.dimensions])
         try:
             self.calculate_temperature() # this is for later on, when velocities are computed
             temperature = self.temperature
         except:
             temperature = self.desired_temperature # for MC, simply use the desired temperature
         p_ideal = Ndof*temperature/(volume*self.dimensions)
-        # Non-ideal contribution
+        # Compute the non-ideal contribution
         distances_forces = np.sum(self.compute_potential(output="force-matrix")*self.evaluate_rij_matrix())
         p_nonideal = distances_forces/(volume*self.dimensions)
         # Final pressure
@@ -73,7 +73,8 @@ To evaluate all the vectors between all the particles, let us also add the
             position_i = self.atoms_positions[Ni]
             rij_xyz = (np.remainder(position_i - positions_j + half_box_size, box_size) - half_box_size)
             rij_matrix[Ni] = rij_xyz
-        return rij_matrix
+        # use nan_to_num to avoid "nan" values in 2D
+        return np.nan_to_num(rij_matrix)
 
 .. label:: end_Utilities_class
 

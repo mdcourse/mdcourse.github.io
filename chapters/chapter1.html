@@ -334,25 +334,41 @@ different ensembles (NVE, NPT, NVT)</p></td>
 between atoms. Although more complicated options exist, potentials are usually
 defined as functions of the distance <span class="math notranslate nohighlight">\(r\)</span> between two atoms.</p>
 <p>Within a dedicated folder, create the first file named <em>potentials.py</em>. This
-file will contain a function named <em>LJ_potential</em> for the Lennard-Jones
-potential (LJ). Copy the following into <em>potentials.py</em>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">LJ_potential</span><span class="p">(</span><span class="n">epsilon</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">derivative</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">derivative</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mi">48</span><span class="o">*</span><span class="n">epsilon</span><span class="o">*</span><span class="p">((</span><span class="n">sigma</span><span class="o">/</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">12</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">sigma</span><span class="o">/</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">6</span><span class="p">)</span><span class="o">/</span><span class="n">r</span>
+file will contain a function called <em>potentials</em>. Two types of potential can
+be returned by this function: the Lennard-Jones potential (LJ), and the
+hard-sphere potential.</p>
+<p>Copy the following lines into <em>potentials.py</em>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">potentials</span><span class="p">(</span><span class="n">potential_type</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">derivative</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">potential_type</span> <span class="o">==</span> <span class="s2">&quot;Lennard-Jones&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">derivative</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">48</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">((</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">12</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="n">r</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">((</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">12</span> <span class="o">-</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">potential_type</span> <span class="o">==</span> <span class="s2">&quot;Hard-Sphere&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">derivative</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Derivative is not defined for Hard-Sphere potential.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">1000</span> <span class="k">if</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">sigma</span> <span class="k">else</span> <span class="mi">0</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mi">4</span><span class="o">*</span><span class="n">epsilon</span><span class="o">*</span><span class="p">((</span><span class="n">sigma</span><span class="o">/</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">12</span><span class="o">-</span><span class="p">(</span><span class="n">sigma</span><span class="o">/</span><span class="n">r</span><span class="p">)</span><span class="o">**</span><span class="mi">6</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown potential type: </span><span class="si">{</span><span class="n">potential_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Depending on the value of the optional argument <em>derivative</em>, which can be
-either <em>False</em> or <em>True</em>, the <em>LJ_potential</em> function will return the force:</p>
+<p>The hard-sphere potential either returns a value of 0 when the distance between
+the two particles is larger than the parameter, <span class="math notranslate nohighlight">\(r &gt; \sigma\)</span>, or 1000 when
+<span class="math notranslate nohighlight">\(r &lt; \sigma\)</span>. The value of <em>1000</em> was chosen to be large enough to ensure
+that any Monte Carlo move that would lead to the two particles to overlap will
+be rejected.</p>
+<p>In the case of the LJ potential, depending on the value of the optional
+argument <em>derivative</em>, which can be either <em>False</em> or <em>True</em>, the <em>LJ_potential</em>
+function will return the force:</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left[ \left( \frac{\sigma}{r} \right)^{12}- \frac{1}{2} \left( \frac{\sigma}{r} \right)^6 \right],\]</div>
+\[F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left[ \left( \frac{\sigma}{r} \right)^{12} - \frac{1}{2} \left( \frac{\sigma}{r} \right)^6 \right],\]</div>
 </div>
 <p>or the potential energy:</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[U_\text{LJ} = 4 \epsilon \left[ \left( \frac{\sigma}{r} \right)^{12}- \left( \frac{\sigma}{r} \right)^6 \right].\]</div>
+\[U_\text{LJ} = 4 \epsilon \left[ \left( \frac{\sigma}{r} \right)^{12} - \left( \frac{\sigma}{r} \right)^6 \right].\]</div>
 </div>
 </section>
 <section id="create-the-classes">
@@ -372,7 +388,7 @@ create the <em>Prepare.py</em> file and copy the following lines into it:</p>
 </div>
 <p>The second class is named <em>Utilities</em>. Within the <em>Utilities.py</em> file,
 copy the following lines:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">potentials</span> <span class="kn">import</span> <span class="n">LJ_potential</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">potentials</span> <span class="kn">import</span> <span class="n">potentials</span>
 
 
 <span class="k">class</span> <span class="nc">Utilities</span><span class="p">:</span>

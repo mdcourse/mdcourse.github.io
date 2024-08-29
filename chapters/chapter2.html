@@ -327,12 +327,14 @@ we want to mix atoms of different types within the same simulation box.</p>
                 <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">],</span>  <span class="c1"># List - Kcal/mol</span>
                 <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>  <span class="c1"># List - Angstrom</span>
                 <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span>  <span class="c1"># List - g/mol</span>
+                <span class="n">potential_type</span><span class="o">=</span><span class="s2">&quot;Lennard-Jones&quot;</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span> <span class="o">=</span> <span class="n">number_atoms</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">epsilon</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span> <span class="o">=</span> <span class="n">atom_mass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">potential_type</span> <span class="o">=</span> <span class="n">potential_type</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -340,7 +342,9 @@ we want to mix atoms of different types within the same simulation box.</p>
 <em>sigma</em> <span class="math notranslate nohighlight">\(\sigma\)</span>, and <em>atom_mass</em> <span class="math notranslate nohighlight">\(m\)</span> are given default values of
 <span class="math notranslate nohighlight">\(10\)</span>, <span class="math notranslate nohighlight">\(0.1~\text{[Kcal/mol]}\)</span>, <span class="math notranslate nohighlight">\(3~\text{[Å]}\)</span>, and
 <span class="math notranslate nohighlight">\(10~\text{[g/mol]}\)</span>, respectively.</p>
-<p>All four parameters are assigned to <em>self</em>, allowing other methods to access
+<p>The type of potential is also specified, with Lennard-Jones being closen as
+the default option.</p>
+<p>All the parameters are assigned to <em>self</em>, allowing other methods to access
 them. The <em>args</em> and <em>kwargs</em> parameters are used to accept an arbitrary number
 of positional and keyword arguments, respectively.</p>
 </section>
@@ -350,7 +354,7 @@ of positional and keyword arguments, respectively.</p>
 that will be used to calculate the prefactors necessary to convert units from the <em>real</em>
 unit system to the <em>LJ</em> unit system:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_LJunits_prefactors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the Lennard-Jones units prefacors.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the Lennard-Jones units prefactors.&quot;&quot;&quot;</span>
     <span class="c1"># Define the reference distance, energy, and mass</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Angstrom</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">reference_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># kcal/mol</span>

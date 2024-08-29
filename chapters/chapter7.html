@@ -288,16 +288,16 @@ vector direction between atoms pairs will have to be written here.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smit,</span>
 <span class="sd">    Understanding molecular simulation: from algorithms to applications, 2002)&quot;&quot;&quot;</span>
-    <span class="c1"># Ideal contribution</span>
+    <span class="c1"># Compute the ideal contribution</span>
     <span class="n">Ndof</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span>
-    <span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">])</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calculate_temperature</span><span class="p">()</span> <span class="c1"># this is for later on, when velocities are computed</span>
         <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span> <span class="c1"># for MC, simply use the desired temperature</span>
     <span class="n">p_ideal</span> <span class="o">=</span> <span class="n">Ndof</span><span class="o">*</span><span class="n">temperature</span><span class="o">/</span><span class="p">(</span><span class="n">volume</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
-    <span class="c1"># Non-ideal contribution</span>
+    <span class="c1"># Compute the non-ideal contribution</span>
     <span class="n">distances_forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="s2">&quot;force-matrix&quot;</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluate_rij_matrix</span><span class="p">())</span>
     <span class="n">p_nonideal</span> <span class="o">=</span> <span class="n">distances_forces</span><span class="o">/</span><span class="p">(</span><span class="n">volume</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
     <span class="c1"># Final pressure</span>
@@ -316,7 +316,8 @@ vector direction between atoms pairs will have to be written here.</p>
         <span class="n">position_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
         <span class="n">rij_xyz</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">position_i</span> <span class="o">-</span> <span class="n">positions_j</span> <span class="o">+</span> <span class="n">half_box_size</span><span class="p">,</span> <span class="n">box_size</span><span class="p">)</span> <span class="o">-</span> <span class="n">half_box_size</span><span class="p">)</span>
         <span class="n">rij_matrix</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">rij_xyz</span>
-    <span class="k">return</span> <span class="n">rij_matrix</span>
+    <span class="c1"># use nan_to_num to avoid &quot;nan&quot; values in 2D</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">rij_matrix</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
