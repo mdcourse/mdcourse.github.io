@@ -382,20 +382,25 @@ type 1, and 3 atoms of type 2:
     import numpy as np
     from Prepare import Prepare
 
-    prep = Prepare(number_atoms=[2, 3],
+    # Initialize the Prepare object
+    prep = Prepare(
+        number_atoms=[2, 3],
         epsilon=[0.2, 0.4], # kcal/mol
         sigma=[3, 4], # A
         atom_mass=[10, 20], # g/mol
-        )
+    )
 
-    def test_array(result, expected):
-        """Test function comparing *result* and *expected*"""
+    # Test function using pytest
+    def test_atoms_epsilon():
+        expected = np.array([1., 1., 2., 2., 2.])
+        result = prep.atoms_epsilon
         assert np.array_equal(result, expected), f"Test failed: {result} != {expected}"
         print("Test passed")
 
-    # Make sure the *atoms_epsilon* gives the expected values
-    # of 1 1 2 2 2 (in LJ units)
-    test_array(prep.atoms_epsilon, np.array([1., 1., 2., 2., 2.]))
+    # In the script is launched with Python, call Pytest
+    if __name__ == "__main__":
+        import pytest
+        pytest.main(["-s", __file__])
 
 .. label:: end_test_2a_class
 

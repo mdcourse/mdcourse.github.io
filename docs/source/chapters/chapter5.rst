@@ -211,21 +211,32 @@ files were indeed created without the *Outputs/* folder:
     import os
     from MinimizeEnergy import MinimizeEnergy
 
-    min = MinimizeEnergy(maximum_steps=100,
+    # Initialize the MinimizeEnergy object and run the minimization
+    minimizer = MinimizeEnergy(
+        maximum_steps=100,
         thermo_period=25,
         dumping_period=25,
-        thermo_outputs = "Epot-MaxF",
+        thermo_outputs="Epot-MaxF",
         number_atoms=[2, 3],
         epsilon=[0.1, 1.0], # kcal/mol
         sigma=[3, 4], # A
         atom_mass=[10, 20], # g/mol
         box_dimensions=[20, 20, 20], # A
         data_folder="Outputs/",
-        )
-    min.run()
+    )
+    minimizer.run()
 
-    assert os.path.exists("Outputs/dump.min.lammpstrj"), f"Test failed: dump file was not created"
-    assert os.path.exists("Outputs/simulation.log"), f"Test failed: log file was not created"
+    # Test function using pytest
+    def test_output_files():
+        assert os.path.exists("Outputs/dump.min.lammpstrj"), "Test failed: dump file was not created"
+        assert os.path.exists("Outputs/simulation.log"), "Test failed: log file was not created"
+        print("Test passed")
+
+    # If the script is run directly, execute the tests
+    if __name__ == "__main__":
+        import pytest
+        # Run pytest programmatically
+        pytest.main(["-s", __file__])
 
 .. label:: end_test_5a_class
 

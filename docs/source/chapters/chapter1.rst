@@ -280,8 +280,10 @@ and copy the following lines into it:
         assert not issubclass(Utilities, MonteCarlo), "Utilities should not inherit from MonteCarlo"
         print("Utilities does not inherit from MonteCarlo, as expected")
 
-    test_utilities_does_not_inherit_from_montecarlo()
-    test_montecarlo_inherits_from_utilities()
+    # In the script is launched with Python, call Pytest
+    if __name__ == "__main__":
+        import pytest
+        pytest.main(["-s", __file__])
 
 .. label:: end_test_1a_class
 
@@ -318,8 +320,10 @@ called *test_1b.py*, copy the following lines:
         except Exception as e:
             print(f"Method call raised an error: {e}")
 
-    # Make sure that the method call succeeded
-    test_init_method()
+    # In the script is launched with Python, call Pytest
+    if __name__ == "__main__":
+        import pytest
+        pytest.main(["-s", __file__])
 
 .. label:: end_test_1b_class
 
