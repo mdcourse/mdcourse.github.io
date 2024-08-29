@@ -57,7 +57,10 @@ Let us add a method named *monte_carlo_move* to the *MonteCarlo* class:
             atom_id = np.random.randint(self.total_number_atoms)
             # Move the chosen atom in a random direction
             # The maximum displacement is set by self.displace_mc
-            move = (np.random.random(self.dimensions)-0.5)*self.displace_mc 
+            if self.dimensions == 3:
+                move = (np.random.random(3)-0.5)*self.displace_mc 
+            elif self.dimensions == 2: # the third value will be 0
+                move = np.append((np.random.random(2) - 0.5) * self.displace_mc, 0)
             self.atoms_positions[atom_id] += move
             # Measure the optential energy of the new configuration
             trial_Epot = self.compute_potential(output="potential")

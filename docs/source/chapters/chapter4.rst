@@ -291,7 +291,10 @@ class.
             sigma_ij = self.sigma_ij_list[Ni]
             epsilon_ij = self.epsilon_ij_list[Ni]
             # Measure distances
-            rij_xyz = (np.remainder(position_i - positions_j + half_box_size, box_size) - half_box_size)
+            # Measure distances
+            # The nan_to_num is crutial in 2D to avoid nan value along third dimension
+            rij_xyz = np.nan_to_num(np.remainder(position_i - positions_j
+                                                 + half_box_size, box_size) - half_box_size)
             rij = np.linalg.norm(rij_xyz, axis=1)
             # Measure potential
             if output == "potential":
