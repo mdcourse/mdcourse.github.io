@@ -23,5 +23,6 @@ jobs:
           pip install numpy
           pip install GitPython
           pip install scipy
+          pip install MDAnalysis
           cd tests/
           python build-documentation.py
