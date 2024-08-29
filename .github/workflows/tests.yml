@@ -22,5 +22,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install numpy
           pip install GitPython
+          pip install scipy
           cd tests/
           python build-documentation.py
