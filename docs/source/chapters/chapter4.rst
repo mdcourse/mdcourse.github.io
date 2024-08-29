@@ -148,7 +148,7 @@ following *run()* method to the *MinimizeEnergy* class:
             self.update_cross_coefficients() # Recalculate the cross coefficients, if necessary
             if self.step == 0: # At the first step, Epot/MaxF do not exists yet, calculate them both
                 init_Epot = self.compute_potential()
-                forces, init_MaxF = self.compute_vector_force()
+                forces, init_MaxF = self.compute_force()
             # Save the current atom positions
             init_positions = copy.deepcopy(self.atoms_positions)
             # Move the atoms in the opposite direction of the maximum force
@@ -160,7 +160,7 @@ following *run()* method to the *MinimizeEnergy* class:
             if trial_Epot < init_Epot: # accept new position
                 self.Epot = trial_Epot
                 # calculate the new max force and save it
-                forces, init_MaxF = self.compute_vector_force()
+                forces, init_MaxF = self.compute_force()
                 self.MaxF = np.max(np.abs(forces))
                 self.wrap_in_box()  # Wrap atoms in the box, if necessary
                 self.displacement *= 1.2 # Multiply the displacement by a factor 1.2
@@ -312,8 +312,12 @@ class.
 
 .. code-block:: python
 
-    def compute_vector_force(self):
-        force_vector = np.zeros((self.total_number_atoms,3))
+    def compute_force(self, return_vector = True):
+        if return_vector: # return a N-size vector
+            force_vector = np.zeros((self.total_number_atoms,3))
+        else: # return a N x N matrix
+            force_matrix = np.zeros((self.total_number_atoms,
+                                    self.total_number_atoms,3))
         for Ni in np.arange(self.total_number_atoms-1):
             # Read neighbor list
             neighbor_of_i = self.neighbor_lists[Ni]
@@ -326,37 +330,19 @@ class.
             epsilon_ij = self.epsilon_ij_list[Ni]       
             fij_xyz = potentials(self.potential_type, epsilon_ij,
                                  sigma_ij, rij, derivative = True)
-            # Add the contribution to both Ni and its neighbors
-            force_vector[Ni] += np.sum((fij_xyz*rij_xyz.T/rij).T, axis=0)
-            force_vector[neighbor_of_i] -= (fij_xyz*rij_xyz.T/rij).T 
-        max_force = np.max(np.abs(force_vector))
-        return force_vector, max_force
+            if return_vector:
+                # Add the contribution to both Ni and its neighbors
+                force_vector[Ni] += np.sum((fij_xyz*rij_xyz.T/rij).T, axis=0)
+                force_vector[neighbor_of_i] -= (fij_xyz*rij_xyz.T/rij).T 
+            else:
+                # Add the contribution to the matrix
+                force_matrix[Ni][neighbor_of_i] += (fij_xyz*rij_xyz.T/rij).T
+        if return_vector:
+            max_force = np.max(np.abs(force_vector))
+            return force_vector, max_force
+        else:
+            return force_matrix
     
-.. label:: end_Utilities_class
-
-.. label:: start_Utilities_class
-
-.. code-block:: python
-
-    def compute_vector_matrix(self):
-        force_matrix = np.zeros((self.total_number_atoms,
-                                 self.total_number_atoms,3))
-        for Ni in np.arange(self.total_number_atoms-1):
-            # Read neighbor list
-            neighbor_of_i = self.neighbor_lists[Ni]
-            # Measure distance
-            rij, rij_xyz = self.compute_distance(self.atoms_positions[Ni],
-                                        self.atoms_positions[neighbor_of_i],
-                                        self.box_size[:3], only_norm = False)
-            # Measure force using information about cross coefficients
-            sigma_ij = self.sigma_ij_list[Ni]
-            epsilon_ij = self.epsilon_ij_list[Ni]       
-            fij_xyz = potentials(self.potential_type, epsilon_ij,
-                                 sigma_ij, rij, derivative = True)
-            # Add the contribution to the force matrix
-            force_matrix[Ni][neighbor_of_i] += (fij_xyz*rij_xyz.T/rij).T
-        return force_matrix
-
 .. label:: end_Utilities_class
 
 Here, the method is a little bit complicated, because three types of outputs can
