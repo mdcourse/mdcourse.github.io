@@ -332,53 +332,69 @@ and <span class="math notranslate nohighlight">\(T = 55~^\circ\text{C}\)</span>.
 chosen to make the calculation faster.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
-
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
 <span class="kn">from</span> <span class="nn">pint</span> <span class="kn">import</span> <span class="n">UnitRegistry</span>
+<span class="kn">from</span> <span class="nn">reader</span> <span class="kn">import</span> <span class="n">import_data</span>
+
+<span class="c1"># Initialize the unit registry</span>
 <span class="n">ureg</span> <span class="o">=</span> <span class="n">UnitRegistry</span><span class="p">()</span>
 
 <span class="c1"># Constants</span>
-<span class="n">kB</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">J</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span> <span class="c1"># boltzman constant</span>
-<span class="n">Na</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mole</span> <span class="c1"># avogadro</span>
-<span class="n">R</span> <span class="o">=</span> <span class="n">kB</span><span class="o">*</span><span class="n">Na</span> <span class="c1"># gas constant</span>
+<span class="n">kB</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">J</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span>  <span class="c1"># Boltzmann constant</span>
+<span class="n">Na</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mole</span>  <span class="c1"># Avogadro&#39;s number</span>
+<span class="n">R</span> <span class="o">=</span> <span class="n">kB</span> <span class="o">*</span> <span class="n">Na</span>  <span class="c1"># Gas constant</span>
 
 <span class="c1"># Parameters taken from Wood1957</span>
-<span class="n">tau</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># ratio between volume / reduced volume</span>
-<span class="n">epsilon</span> <span class="o">=</span> <span class="p">(</span><span class="mf">119.76</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="o">*</span><span class="n">kB</span><span class="o">*</span><span class="n">Na</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span><span class="p">)</span> <span class="c1"># kcal/mol</span>
-<span class="n">r_star</span> <span class="o">=</span> <span class="mf">3.822</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span> <span class="c1"># angstrom</span>
-<span class="n">sigma</span> <span class="o">=</span> <span class="n">r_star</span> <span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">6</span><span class="p">)</span> <span class="c1"># angstrom</span>
-<span class="n">N_atom</span> <span class="o">=</span> <span class="mi">50</span> <span class="c1"># no units</span>
-<span class="n">m_argon</span> <span class="o">=</span> <span class="mf">39.948</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">gram</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span> <span class="c1"># g/mol</span>
-<span class="n">T</span> <span class="o">=</span>  <span class="mf">328.15</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">degK</span> <span class="c1"># 328 K or 55°C</span>
+<span class="n">tau</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># Ratio between volume / reduced volume</span>
+<span class="n">epsilon</span> <span class="o">=</span> <span class="p">(</span><span class="mf">119.76</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span> <span class="o">*</span> <span class="n">kB</span> <span class="o">*</span> <span class="n">Na</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mol</span><span class="p">)</span>  <span class="c1"># kcal/mol</span>
+<span class="n">r_star</span> <span class="o">=</span> <span class="mf">3.822</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>  <span class="c1"># Angstrom</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="n">r_star</span> <span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">6</span><span class="p">)</span>  <span class="c1"># Angstrom</span>
+<span class="n">N_atom</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># Number of atoms</span>
+<span class="n">m_argon</span> <span class="o">=</span> <span class="mf">39.948</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">gram</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>  <span class="c1"># g/mol</span>
+<span class="n">T</span> <span class="o">=</span> <span class="mf">328.15</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">degK</span>  <span class="c1"># 328 K or 55°C</span>
 <span class="n">volume_star</span> <span class="o">=</span> <span class="n">r_star</span><span class="o">**</span><span class="mi">3</span> <span class="o">*</span> <span class="n">Na</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
-<span class="n">cut_off</span> <span class="o">=</span> <span class="n">sigma</span><span class="o">*</span><span class="mf">2.5</span> <span class="c1"># angstrom</span>
-<span class="n">displace_mc</span> <span class="o">=</span> <span class="n">sigma</span><span class="o">/</span><span class="mi">5</span> <span class="c1"># angstrom</span>
-<span class="n">volume</span> <span class="o">=</span> <span class="n">N_atom</span><span class="o">*</span><span class="n">volume_star</span><span class="o">*</span><span class="n">tau</span><span class="o">/</span><span class="n">Na</span> <span class="c1"># angstrom**3</span>
-<span class="n">box_size</span> <span class="o">=</span> <span class="n">volume</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># angstrom</span>
+<span class="n">cut_off</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="mf">2.5</span>  <span class="c1"># Angstrom</span>
+<span class="n">displace_mc</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">/</span> <span class="mi">5</span>  <span class="c1"># Angstrom</span>
+<span class="n">volume</span> <span class="o">=</span> <span class="n">N_atom</span> <span class="o">*</span> <span class="n">volume_star</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">/</span> <span class="n">Na</span>  <span class="c1"># Angstrom^3</span>
+<span class="n">box_size</span> <span class="o">=</span> <span class="n">volume</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># Angstrom</span>
 
-<span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">15000</span><span class="p">,</span>
+<span class="c1"># Initialize and run the Monte Carlo simulation</span>
+<span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span>
+    <span class="n">maximum_steps</span><span class="o">=</span><span class="mi">15000</span><span class="p">,</span>
     <span class="n">dumping_period</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
     <span class="n">thermo_period</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
-    <span class="n">thermo_outputs</span> <span class="o">=</span> <span class="s2">&quot;Epot-press&quot;</span><span class="p">,</span>
+    <span class="n">thermo_outputs</span><span class="o">=</span><span class="s2">&quot;Epot-press&quot;</span><span class="p">,</span>
     <span class="n">neighbor</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
     <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="n">N_atom</span><span class="p">],</span>
     <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">epsilon</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
     <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="n">sigma</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
     <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="n">m_argon</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
     <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
-    <span class="n">displace_mc</span> <span class="o">=</span> <span class="n">displace_mc</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
-    <span class="n">desired_temperature</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
-    <span class="n">cut_off</span> <span class="o">=</span> <span class="n">cut_off</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
-    <span class="n">data_folder</span> <span class="o">=</span> <span class="s2">&quot;Outputs/&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="n">displace_mc</span><span class="o">=</span><span class="n">displace_mc</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+    <span class="n">desired_temperature</span><span class="o">=</span><span class="n">T</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+    <span class="n">cut_off</span><span class="o">=</span><span class="n">cut_off</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+    <span class="n">data_folder</span><span class="o">=</span><span class="s2">&quot;Outputs/&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
-<span class="c1"># Import the data and calculate p V / R T</span>
-<span class="c1"># output = np.mean(np.loadtxt(&quot;Outputs/pressure.dat&quot;)[:,1][10:])</span>
-<span class="c1"># pressure = (output*ureg.atm).to(ureg.pascal)</span>
-<span class="c1"># volume = (volume_star * tau / Na).to(ureg.meter**3)</span>
-<span class="c1"># pV_over_RT = np.round((pressure * volume / (R * T) * Na).magnitude,2)</span>
-<span class="c1"># print(&quot;p v / R T =&quot;, pV_over_RT, &quot; --- (The expected value from Wood1957 is 1.5)&quot;)</span>
+<span class="c1"># Test function using pytest</span>
+<span class="k">def</span> <span class="nf">test_pV_over_RT</span><span class="p">():</span>
+    <span class="c1"># Import the data and calculate pV / RT</span>
+    <span class="n">pressure_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">import_data</span><span class="p">(</span><span class="s2">&quot;Outputs/simulation.log&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])[</span><span class="mi">0</span><span class="p">][:,</span><span class="mi">2</span><span class="p">][</span><span class="mi">10</span><span class="p">:]</span>  <span class="c1"># Skip initial values</span>
+    <span class="n">pressure_atm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pressure_data</span><span class="p">)</span> <span class="c1"># atm</span>
+    <span class="n">pressure_Pa</span> <span class="o">=</span> <span class="p">(</span><span class="n">pressure_atm</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">atm</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">pascal</span><span class="p">)</span> <span class="c1"># Pa</span>
+    <span class="n">volume</span> <span class="o">=</span> <span class="p">(</span><span class="n">volume_star</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">/</span> <span class="n">Na</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">meter</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># m3</span>
+    <span class="n">pV_over_RT</span> <span class="o">=</span> <span class="p">(</span><span class="n">pressure_Pa</span> <span class="o">*</span> <span class="n">volume</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">Na</span><span class="p">)</span><span class="o">.</span><span class="n">magnitude</span>
+
+    <span class="c1"># Assert that pV_over_RT is close to 1.5</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">pV_over_RT</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Test failed: pV/Rt = </span><span class="si">{</span><span class="n">pV_over_RT</span><span class="si">}</span><span class="s2">, expected close to 1.5&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pV/RT = </span><span class="si">{</span><span class="n">pV_over_RT</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> --- (The expected value from Wood1957 is 1.5)&quot;</span><span class="p">)</span>
+
+<span class="c1"># If the script is run directly, execute the tests</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pytest</span>
+    <span class="c1"># Run pytest programmatically</span>
+    <span class="n">pytest</span><span class="o">.</span><span class="n">main</span><span class="p">([</span><span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="vm">__file__</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Which should return a value for <span class="math notranslate nohighlight">\(p V / R T\)</span> that is close to the expected value
@@ -387,7 +403,7 @@ of 1.5 by Wood and Parker for <span class="math notranslate nohighlight">\(\tau 
 p v / R T = 1.56  --- (The expected value from Wood1957 is 1.5)
 </pre></div>
 </div>
-<p>The exact value will varie from one simulation to the other due to noise.</p>
+<p>The exact value will vary from one simulation to the other due to noise.</p>
 </section>
 </section>
 

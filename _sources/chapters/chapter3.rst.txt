@@ -229,19 +229,28 @@ boundaries along all 3 dimensions of space:
     import numpy as np
     from InitializeSimulation import InitializeSimulation
 
-    init = InitializeSimulation(number_atoms=[2, 3],
+    # Initialize the InitializeSimulation object
+    init = InitializeSimulation(
+        number_atoms=[2, 3],
         epsilon=[0.2, 0.4], # kcal/mol
         sigma=[3, 4], # A
         atom_mass=[10, 20], # g/mol
         box_dimensions=[20, 20, 20], # A
-        )
+    )
 
-    def test_placement(box_boundaries, atoms_positions):
-        """Ensure that atoms are placed within the box"""
+    # Test function using pytest
+    def test_placement():
+        box_boundaries = init.box_boundaries
+        atoms_positions = init.atoms_positions
         for atom_position in atoms_positions:
             for x, boundary in zip(atom_position, box_boundaries):
-                assert (x >= boundary[0]) & (x <= boundary[1]), f"Test failed: Atoms outside of the box"
+                assert (x >= boundary[0]) and (x <= boundary[1]), f"Test failed: Atoms outside of the box at position {atom_position}"
         print("Test passed")
-    test_placement(init.box_boundaries, init.atoms_positions)
+
+    # If the script is run directly, execute the tests
+    if __name__ == "__main__":
+        import pytest
+        # Run pytest programmatically
+        pytest.main(["-s", __file__])
 
 .. label:: end_test_3a_class

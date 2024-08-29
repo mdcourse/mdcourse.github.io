@@ -431,21 +431,32 @@ files were indeed created without the <em>Outputs/</em> folder:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">MinimizeEnergy</span> <span class="kn">import</span> <span class="n">MinimizeEnergy</span>
 
-<span class="nb">min</span> <span class="o">=</span> <span class="n">MinimizeEnergy</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+<span class="c1"># Initialize the MinimizeEnergy object and run the minimization</span>
+<span class="n">minimizer</span> <span class="o">=</span> <span class="n">MinimizeEnergy</span><span class="p">(</span>
+    <span class="n">maximum_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
     <span class="n">thermo_period</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
     <span class="n">dumping_period</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
-    <span class="n">thermo_outputs</span> <span class="o">=</span> <span class="s2">&quot;Epot-MaxF&quot;</span><span class="p">,</span>
+    <span class="n">thermo_outputs</span><span class="o">=</span><span class="s2">&quot;Epot-MaxF&quot;</span><span class="p">,</span>
     <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
     <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
     <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="c1"># A</span>
     <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># g/mol</span>
     <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># A</span>
     <span class="n">data_folder</span><span class="o">=</span><span class="s2">&quot;Outputs/&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-<span class="nb">min</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">minimizer</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
-<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/dump.min.lammpstrj&quot;</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Test failed: dump file was not created&quot;</span>
-<span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/simulation.log&quot;</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Test failed: log file was not created&quot;</span>
+<span class="c1"># Test function using pytest</span>
+<span class="k">def</span> <span class="nf">test_output_files</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/dump.min.lammpstrj&quot;</span><span class="p">),</span> <span class="s2">&quot;Test failed: dump file was not created&quot;</span>
+    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/simulation.log&quot;</span><span class="p">),</span> <span class="s2">&quot;Test failed: log file was not created&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test passed&quot;</span><span class="p">)</span>
+
+<span class="c1"># If the script is run directly, execute the tests</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pytest</span>
+    <span class="c1"># Run pytest programmatically</span>
+    <span class="n">pytest</span><span class="o">.</span><span class="n">main</span><span class="p">([</span><span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="vm">__file__</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>I addition to the files getting created, information must be printed in the terminal

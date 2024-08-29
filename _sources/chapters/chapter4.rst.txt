@@ -353,20 +353,31 @@ typically negative.
 
     from MinimizeEnergy import MinimizeEnergy
 
-    min = MinimizeEnergy(maximum_steps=100,
+    # Initialize the MinimizeEnergy object and run the minimization
+    minimizer = MinimizeEnergy(
+        maximum_steps=100,
         number_atoms=[2, 3],
         epsilon=[0.2, 0.4], # kcal/mol
         sigma=[3, 4], # A
         atom_mass=[10, 20], # g/mol
         box_dimensions=[20, 20, 20], # A
-        )
-    min.run()
+    )
+    minimizer.run()
 
-    Final_Epot = min.Epot
-    Final_MaxF = min.MaxF
-    assert Final_Epot < 0, f"Test failed: Final energy too large"
-    assert Final_MaxF < 10, f"Test failed: Final max force too large"
-    print("Test passed")
+    # Test function using pytest
+    def test_energy_and_force():
+        Final_Epot = minimizer.Epot
+        Final_MaxF = minimizer.MaxF
+        assert Final_Epot < 0, f"Test failed: Final energy too large: {Final_Epot}"
+        assert Final_MaxF < 10, f"Test failed: Final max force too large: {Final_MaxF}"
+        print("Test passed")
+
+    # If the script is run directly, execute the tests
+    if __name__ == "__main__":
+        import pytest
+        # Run pytest programmatically
+        pytest.main(["-s", __file__])
+
 
 .. label:: end_test_4a_class
 

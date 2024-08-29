@@ -549,20 +549,30 @@ is expected, i.e. that it leads to a potential energy that is small, and
 typically negative.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MinimizeEnergy</span> <span class="kn">import</span> <span class="n">MinimizeEnergy</span>
 
-<span class="nb">min</span> <span class="o">=</span> <span class="n">MinimizeEnergy</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+<span class="c1"># Initialize the MinimizeEnergy object and run the minimization</span>
+<span class="n">minimizer</span> <span class="o">=</span> <span class="n">MinimizeEnergy</span><span class="p">(</span>
+    <span class="n">maximum_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
     <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
     <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
     <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="c1"># A</span>
     <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># g/mol</span>
     <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># A</span>
-    <span class="p">)</span>
-<span class="nb">min</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">minimizer</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
-<span class="n">Final_Epot</span> <span class="o">=</span> <span class="nb">min</span><span class="o">.</span><span class="n">Epot</span>
-<span class="n">Final_MaxF</span> <span class="o">=</span> <span class="nb">min</span><span class="o">.</span><span class="n">MaxF</span>
-<span class="k">assert</span> <span class="n">Final_Epot</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Test failed: Final energy too large&quot;</span>
-<span class="k">assert</span> <span class="n">Final_MaxF</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Test failed: Final max force too large&quot;</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test passed&quot;</span><span class="p">)</span>
+<span class="c1"># Test function using pytest</span>
+<span class="k">def</span> <span class="nf">test_energy_and_force</span><span class="p">():</span>
+    <span class="n">Final_Epot</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">Epot</span>
+    <span class="n">Final_MaxF</span> <span class="o">=</span> <span class="n">minimizer</span><span class="o">.</span><span class="n">MaxF</span>
+    <span class="k">assert</span> <span class="n">Final_Epot</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Test failed: Final energy too large: </span><span class="si">{</span><span class="n">Final_Epot</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">assert</span> <span class="n">Final_MaxF</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Test failed: Final max force too large: </span><span class="si">{</span><span class="n">Final_MaxF</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test passed&quot;</span><span class="p">)</span>
+
+<span class="c1"># If the script is run directly, execute the tests</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pytest</span>
+    <span class="c1"># Run pytest programmatically</span>
+    <span class="n">pytest</span><span class="o">.</span><span class="n">main</span><span class="p">([</span><span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="vm">__file__</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>For such as low density in particle, we can reasonably expect the energy to be always

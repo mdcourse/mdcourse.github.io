@@ -96,53 +96,69 @@ chosen to make the calculation faster.
 
     import numpy as np
     from MonteCarlo import MonteCarlo
-
     from scipy import constants as cst
     from pint import UnitRegistry
+    from reader import import_data
+
+    # Initialize the unit registry
     ureg = UnitRegistry()
 
     # Constants
-    kB = cst.Boltzmann*ureg.J/ureg.kelvin # boltzman constant
-    Na = cst.Avogadro/ureg.mole # avogadro
-    R = kB*Na # gas constant
+    kB = cst.Boltzmann * ureg.J / ureg.kelvin  # Boltzmann constant
+    Na = cst.Avogadro / ureg.mole  # Avogadro's number
+    R = kB * Na  # Gas constant
 
     # Parameters taken from Wood1957
-    tau = 2 # ratio between volume / reduced volume
-    epsilon = (119.76*ureg.kelvin*kB*Na).to(ureg.kcal/ureg.mol) # kcal/mol
-    r_star = 3.822*ureg.angstrom # angstrom
-    sigma = r_star / 2**(1/6) # angstrom
-    N_atom = 50 # no units
-    m_argon = 39.948*ureg.gram/ureg.mol # g/mol
-    T =  328.15 * ureg.degK # 328 K or 55°C
+    tau = 2  # Ratio between volume / reduced volume
+    epsilon = (119.76 * ureg.kelvin * kB * Na).to(ureg.kcal / ureg.mol)  # kcal/mol
+    r_star = 3.822 * ureg.angstrom  # Angstrom
+    sigma = r_star / 2**(1/6)  # Angstrom
+    N_atom = 50  # Number of atoms
+    m_argon = 39.948 * ureg.gram / ureg.mol  # g/mol
+    T = 328.15 * ureg.degK  # 328 K or 55°C
     volume_star = r_star**3 * Na * 2**(-0.5)
-    cut_off = sigma*2.5 # angstrom
-    displace_mc = sigma/5 # angstrom
-    volume = N_atom*volume_star*tau/Na # angstrom**3
-    box_size = volume**(1/3) # angstrom
+    cut_off = sigma * 2.5  # Angstrom
+    displace_mc = sigma / 5  # Angstrom
+    volume = N_atom * volume_star * tau / Na  # Angstrom^3
+    box_size = volume**(1/3)  # Angstrom
 
-    mc = MonteCarlo(maximum_steps=15000,
+    # Initialize and run the Monte Carlo simulation
+    mc = MonteCarlo(
+        maximum_steps=15000,
         dumping_period=1000,
         thermo_period=1000,
-        thermo_outputs = "Epot-press",
+        thermo_outputs="Epot-press",
         neighbor=50,
         number_atoms=[N_atom],
         epsilon=[epsilon.magnitude],
         sigma=[sigma.magnitude],
         atom_mass=[m_argon.magnitude],
         box_dimensions=[box_size.magnitude, box_size.magnitude, box_size.magnitude],
-        displace_mc = displace_mc.magnitude,
-        desired_temperature = T.magnitude,
-        cut_off = cut_off.magnitude,
-        data_folder = "Outputs/",
-        )
+        displace_mc=displace_mc.magnitude,
+        desired_temperature=T.magnitude,
+        cut_off=cut_off.magnitude,
+        data_folder="Outputs/",
+    )
     mc.run()
 
-    # Import the data and calculate p V / R T
-    # output = np.mean(np.loadtxt("Outputs/pressure.dat")[:,1][10:])
-    # pressure = (output*ureg.atm).to(ureg.pascal)
-    # volume = (volume_star * tau / Na).to(ureg.meter**3)
-    # pV_over_RT = np.round((pressure * volume / (R * T) * Na).magnitude,2)
-    # print("p v / R T =", pV_over_RT, " --- (The expected value from Wood1957 is 1.5)")
+    # Test function using pytest
+    def test_pV_over_RT():
+        # Import the data and calculate pV / RT
+        pressure_data = np.array(import_data("Outputs/simulation.log")[1:])[0][:,2][10:]  # Skip initial values
+        pressure_atm = np.mean(pressure_data) # atm
+        pressure_Pa = (pressure_atm * ureg.atm).to(ureg.pascal) # Pa
+        volume = (volume_star * tau / Na).to(ureg.meter**3) # m3
+        pV_over_RT = (pressure_Pa * volume / (R * T) * Na).magnitude
+        
+        # Assert that pV_over_RT is close to 1.5
+        assert np.isclose(pV_over_RT, 1.5, atol=1.0), f"Test failed: pV/Rt = {pV_over_RT}, expected close to 1.5"
+        print(f"pV/RT = {pV_over_RT:.2f} --- (The expected value from Wood1957 is 1.5)")
+
+    # If the script is run directly, execute the tests
+    if __name__ == "__main__":
+        import pytest
+        # Run pytest programmatically
+        pytest.main(["-s", __file__])
 
 .. label:: end_test_7a_class
 
@@ -154,4 +170,4 @@ of 1.5 by Wood and Parker for :math:`\tau = V/V^* = 2` (see Fig. 4 in Ref. :cite
     (...)
     p v / R T = 1.56  --- (The expected value from Wood1957 is 1.5)
 
-The exact value will varie from one simulation to the other due to noise.
+The exact value will vary from one simulation to the other due to noise.
