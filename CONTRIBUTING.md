@@ -10,7 +10,7 @@ to discuss the proposed changes or features. This helps us ensure that:
 - There is no duplicate effort by other contributors.
 - We can provide feedback or suggestions before you start working.
 
-You can open an issue by [clicking here](./issues).
+You can open an issue by [clicking here](https://github.com/mdcourse/mdcourse.github.io/issues).
 
 ### 2. Fork the Repository
 
