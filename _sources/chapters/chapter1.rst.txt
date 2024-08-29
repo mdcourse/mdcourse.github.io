@@ -266,38 +266,38 @@ and copy the following lines into it:
 
 .. code-block:: python
 
-    # Import some of the modules
-    from InitializeSimulation import InitializeSimulation
+    # Import the required modules
     from Utilities import Utilities
-    from Measurements import Measurements
     from MonteCarlo import MonteCarlo
 
-    # Create a function to test if a Child class correctly inherits from a Parent class
-    def test_inheritance(Child, Parent):
-        if issubclass(Child, Parent):
-            print(f"{Child.__name__} correctly inherits from {Parent.__name__}.")
-            success = True
-        else:
-            print(f"{Child.__name__} does not inherit from {Parent.__name__}.")
-            success = False
-        return success
+    # Make sure that MonteCarlo correctly inherits from Utilities
+    def test_montecarlo_inherits_from_utilities():
+        assert issubclass(MonteCarlo, Utilities), "MonteCarlo should inherit from Utilities"
+        print("MonteCarlo correctly inherits from Utilities")
 
-    # Make sure that inheritances occur are expected
-    assert test_inheritance(MonteCarlo, Measurements)
-    assert test_inheritance(MonteCarlo, Utilities)
-    assert test_inheritance(MonteCarlo, InitializeSimulation)
-    assert test_inheritance(Utilities, MonteCarlo) is False
+    # Make sure that Utilities does not inherit from MonteCarlo
+    def test_utilities_does_not_inherit_from_montecarlo():
+        assert not issubclass(Utilities, MonteCarlo), "Utilities should not inherit from MonteCarlo"
+        print("Utilities does not inherit from MonteCarlo, as expected")
+
+    test_utilities_does_not_inherit_from_montecarlo()
+    test_montecarlo_inherits_from_utilities()
 
 .. label:: end_test_1a_class
 
-This script should return the four following messages without any *AssertionError*:
+When run with Python, this script should return the following messages without
+any *AssertionError*:
 
 .. code-block:: bw
 
-    MonteCarlo correctly inherits from Measurements.
-    MonteCarlo correctly inherits from Utilities.
-    MonteCarlo correctly inherits from InitializeSimulation.
-    Utilities does not inherit from MonteCarlo.
+    Utilities does not inherit from MonteCarlo, as expected
+    MonteCarlo correctly inherits from Utilities
+
+Alternatively, this test can also be launched using Pytest by typing in a terminal:
+
+.. code-block:: bash
+
+    pytest .
 
 We can also test that calling the *__init__*
 method of the *MonteCarlo* class does not return any error. In new Python file
@@ -310,21 +310,17 @@ called *test_1b.py*, copy the following lines:
     # Import the MonteCarlo class
     from MonteCarlo import MonteCarlo
 
-    # Define a function that try to call the *__init__()* method, return
-    # a variable "success", and print a message.
-    def test_init_method(method):
+    # Define a function that try to call the *__init__()* method
+    def test_init_method():
         try:
-            method.__init__()  # Call the method
+            MonteCarlo().__init__()  # Call the method
             print("Method call succeeded")
-            success = True
         except Exception as e:
             print(f"Method call raised an error: {e}")
-            success = False
-        return success
 
-    # Make sure the function return "True"
-    assert test_init_method(MonteCarlo())
+    # Make sure that the method call succeeded
+    test_init_method()
 
 .. label:: end_test_1b_class
 
-Running this second test should return "Method call succeeded".
+Running this second test with Python should return "Method call succeeded".
