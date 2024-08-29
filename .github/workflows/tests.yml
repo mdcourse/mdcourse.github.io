@@ -25,5 +25,6 @@ jobs:
           pip install scipy
           pip install MDAnalysis
           pip install pint
+          pip install pytest
           cd tests/
           python build-documentation.py
