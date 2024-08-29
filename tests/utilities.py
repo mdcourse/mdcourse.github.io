@@ -330,6 +330,5 @@ def run_the_test(folder, created_tests, chapter_id):
     mycwd = os.getcwd() # initial path
     os.chdir(folder)
     for test_file in created_tests:
-        print("TEST --", "chapter"+str(chapter_id)+".rst", "--", test_file)
         subprocess.call(["pytest", test_file])
     os.chdir(mycwd)
