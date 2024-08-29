@@ -33,6 +33,12 @@ Once you've made your changes:
 Only PRs that pass all tests will be merged into the main branch. Please ensure
 that your code passes all existing tests from the *tests/* folder.
 
+The [tests/](tests/) folder contains a series of tests for the Python code written in the
+documentation. In short,  the Python code is extracted from the documentation.
+Only the Python script written in between labels similar to *label:: start_myfile_class*
+will be converted to the code. This is used to ensuring that the code from the
+documentation is always valid as well as up to date.
+
 ### 6. Code Review
 Your PR will undergo a code review. Feedback will be provided, and some revisions
 may be requested. Once all issues are addressed and all tests pass, your PR will

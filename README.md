@@ -22,12 +22,6 @@ We welcome contributions from the community. Before you start, please read our
 [Contributing Guidelines](./CONTRIBUTING.md). These guidelines will help you
 understand the process and expectations for contributing to the project.
 
-### Automated tests
-
-The [tests/](tests/) folder contains a series of tests for the Python code written in the
-documentation. In short, the Python code is extracted from the documentation
-and executed, thus ensuring that the code from the documentation is always valid.
-
 ### Prerequisite
 
 The target audience includes people who are either completely new to molecular simulations
