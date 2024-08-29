@@ -66,33 +66,51 @@ between atoms. Although more complicated options exist, potentials are usually
 defined as functions of the distance :math:`r` between two atoms.
 
 Within a dedicated folder, create the first file named *potentials.py*. This
-file will contain a function named *LJ_potential* for the Lennard-Jones
-potential (LJ). Copy the following into *potentials.py*:
+file will contain a function called *potentials*. Two types of potential can 
+be returned by this function: the Lennard-Jones potential (LJ), and the
+hard-sphere potential.
+
+Copy the following lines into *potentials.py*:
 
 .. label:: start_potentials_class
 
 .. code-block:: python
 
-    def LJ_potential(epsilon, sigma, r, derivative = False):
-        if derivative:
-            return 48*epsilon*((sigma/r)**12-0.5*(sigma/r)**6)/r
+    def potentials(potential_type, epsilon, sigma, r, derivative=False):
+        if potential_type == "Lennard-Jones":
+            if derivative:
+                return 48 * epsilon * ((sigma / r) ** 12 - 0.5 * (sigma / r) ** 6) / r
+            else:
+                return 4 * epsilon * ((sigma / r) ** 12 - (sigma / r) ** 6)
+        elif potential_type == "Hard-Sphere":
+            if derivative:
+                raise ValueError("Derivative is not defined for Hard-Sphere potential.")
+            else:
+                return 1000 if r < sigma else 0
         else:
-            return 4*epsilon*((sigma/r)**12-(sigma/r)**6)
+            raise ValueError(f"Unknown potential type: {potential_type}")
 
 .. label:: end_potentials_class
 
-Depending on the value of the optional argument *derivative*, which can be
-either *False* or *True*, the *LJ_potential* function will return the force:
+The hard-sphere potential either returns a value of 0 when the distance between
+the two particles is larger than the parameter, :math:`r > \sigma`, or 1000 when
+:math:`r < \sigma`. The value of *1000* was chosen to be large enough to ensure
+that any Monte Carlo move that would lead to the two particles to overlap will
+be rejected.
+
+In the case of the LJ potential, depending on the value of the optional
+argument *derivative*, which can be either *False* or *True*, the *LJ_potential*
+function will return the force:
 
 .. math::
 
-    F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left[ \left( \frac{\sigma}{r} \right)^{12}- \frac{1}{2} \left( \frac{\sigma}{r} \right)^6 \right],
+    F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left[ \left( \frac{\sigma}{r} \right)^{12} - \frac{1}{2} \left( \frac{\sigma}{r} \right)^6 \right],
 
 or the potential energy:
 
 .. math::
 
-    U_\text{LJ} = 4 \epsilon \left[ \left( \frac{\sigma}{r} \right)^{12}- \left( \frac{\sigma}{r} \right)^6 \right].
+    U_\text{LJ} = 4 \epsilon \left[ \left( \frac{\sigma}{r} \right)^{12} - \left( \frac{\sigma}{r} \right)^6 \right].
 
 Create the Classes
 ------------------
@@ -124,7 +142,7 @@ copy the following lines:
 
 .. code-block:: python
 
-    from potentials import LJ_potential
+    from potentials import potentials
 
 
     class Utilities:

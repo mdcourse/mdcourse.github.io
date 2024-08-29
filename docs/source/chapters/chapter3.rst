@@ -35,7 +35,8 @@ Let us improve the previously created *InitializeSimulation* class:
                     ):
             super().__init__(*args, **kwargs)
             self.box_dimensions = box_dimensions
-            self.dimensions = len(box_dimensions)
+            # If a box dimension was entered as 0, dimensions will be 2
+            self.dimensions = len(list(filter(lambda x: x > 0, box_dimensions)))
             self.seed = seed
             self.initial_positions = initial_positions
             self.thermo_period = thermo_period
@@ -137,9 +138,14 @@ method to the *InitializeSimulation* class:
 .. code-block:: python
 
     def define_box(self):
-        box_boundaries = np.zeros((self.dimensions, 2))
-        for dim, L in zip(range(self.dimensions), self.box_dimensions):
+        """Define the simulation box.
+        For 2D simulations, the third dimensions only contains 0.
+        """
+        box_boundaries = np.zeros((3, 2))
+        dim = 0
+        for L in self.box_dimensions:
             box_boundaries[dim] = -L/2, L/2
+            dim += 1
         self.box_boundaries = box_boundaries
         box_size = np.diff(self.box_boundaries).reshape(3)
         box_geometry = np.array([90, 90, 90])
@@ -183,9 +189,8 @@ case, the array must be of size 'number of atoms' times 'number of dimensions'.
 
     def populate_box(self):
         if self.initial_positions is None:
-            atoms_positions = np.zeros((self.total_number_atoms,
-                                        self.dimensions))
-            for dim in np.arange(self.dimensions):
+            atoms_positions = np.zeros((self.total_number_atoms, 3))
+            for dim in np.arange(3):
                 diff_box = np.diff(self.box_boundaries[dim])
                 random_pos = np.random.random(self.total_number_atoms)
                 atoms_positions[:, dim] = random_pos*diff_box-diff_box/2
