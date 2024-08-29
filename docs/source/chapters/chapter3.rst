@@ -147,7 +147,7 @@ method to the *InitializeSimulation* class:
             box_boundaries[dim] = -L/2, L/2
             dim += 1
         self.box_boundaries = box_boundaries
-        box_size = np.diff(self.box_boundaries).reshape(self.dimension)
+        box_size = np.diff(self.box_boundaries).reshape(3)
         box_geometry = np.array([90, 90, 90])
         self.box_size = np.array(box_size.tolist()+box_geometry.tolist())
 
