@@ -16,6 +16,12 @@ The Python code that is written here is used to realize molecular
 scientific projects. Note that the code is slow and that efficiency is not the
 primary objective here.
 
+### Contributing
+
+We welcome contributions from the community. Before you start, please read our
+[Contributing Guidelines](./CONTRIBUTING.md). These guidelines will help you
+understand the process and expectations for contributing to the project.
+
 ### Automated tests
 
 The [tests/](tests/) folder contains a series of tests for the Python code written in the
@@ -35,6 +41,8 @@ readings are provided as needed.
 ### What is not (yet) in the code
 
 - molecules/shake,
+- electrostatic
+- Monte Carlo
 - thermostats and barostats other than Berendsen,
 - energy minimization methods other than the steepest descent.
 
@@ -63,5 +71,3 @@ GNU general public license v3.0.
 - Choose a different title? (Build Your Own Molecular Simulations with Python,
   Create Molecular Simulations with Python, Construct Molecular Simulations with Python)
 - Find a cool acronym. MS-PyLearn, LMS-py ?
-- add references
-- implement Nose-Hoover?
