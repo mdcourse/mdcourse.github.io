@@ -331,5 +331,5 @@ def run_the_test(folder, created_tests, chapter_id):
     os.chdir(folder)
     for test_file in created_tests:
         print("TEST --", "chapter"+str(chapter_id)+".rst", "--", test_file)
-        subprocess.call(["python3", test_file])
+        subprocess.call(["pytest", test_file])
     os.chdir(mycwd)
