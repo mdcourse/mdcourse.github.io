@@ -1,5 +1,7 @@
 [![DOI](https://zenodo.org/badge/443812727.svg)](https://zenodo.org/doi/10.5281/zenodo.13354423)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+![Workflow Status](https://github.com/mdcourse/mdcourse.github.io/actions/workflows/tests.yml/badge.svg)
+![Workflow Status](https://github.com/mdcourse/mdcourse.github.io/actions/workflows/gh-pages.yml/badge.svg)
 
 # Learn Molecular Simulations with Python
 
