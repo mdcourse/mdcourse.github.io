@@ -99,12 +99,14 @@ Modify the *Prepare* class as follows:
                     epsilon=[0.1],  # List - Kcal/mol
                     sigma=[3],  # List - Angstrom
                     atom_mass=[10],  # List - g/mol
+                    potential_type="Lennard-Jones",
                     *args,
                     **kwargs):
             self.number_atoms = number_atoms
             self.epsilon = epsilon
             self.sigma = sigma
             self.atom_mass = atom_mass
+            self.potential_type = potential_type
             super().__init__(*args, **kwargs)
 
 .. label:: end_Prepare_class
@@ -114,7 +116,10 @@ Here, the four lists *number_atoms* :math:`N`, *epsilon* :math:`\epsilon`,
 :math:`10`, :math:`0.1~\text{[Kcal/mol]}`, :math:`3~\text{[Å]}`, and
 :math:`10~\text{[g/mol]}`, respectively.
 
-All four parameters are assigned to *self*, allowing other methods to access
+The type of potential is also specified, with Lennard-Jones being closen as
+the default option.
+
+All the parameters are assigned to *self*, allowing other methods to access
 them. The *args* and *kwargs* parameters are used to accept an arbitrary number
 of positional and keyword arguments, respectively.
 
@@ -130,7 +135,7 @@ unit system to the *LJ* unit system:
 .. code-block:: python
 
     def calculate_LJunits_prefactors(self):
-        """Calculate the Lennard-Jones units prefacors."""
+        """Calculate the Lennard-Jones units prefactors."""
         # Define the reference distance, energy, and mass
         self.reference_distance = self.sigma[0]  # Angstrom
         self.reference_energy = self.epsilon[0]  # kcal/mol
