@@ -86,9 +86,11 @@ Copy the following lines into *potentials.py*:
                 return 4 * epsilon * ((sigma / r) ** 12 - (sigma / r) ** 6)
         elif potential_type == "Hard-Sphere":
             if derivative:
-                raise ValueError("Derivative is not defined for Hard-Sphere potential.")
+                # Derivative is not defined for Hard-Sphere potential.
+                # --> return 0
+                return np.zeros(len(r))
             else:
-                return np.where(r < sigma, 0, 1000)
+                return np.where(r > sigma, 0, 1000)
         else:
             raise ValueError(f"Unknown potential type: {potential_type}")
 
