@@ -84,7 +84,7 @@ All quantities are re-dimensionalized before getting outputed.
         if code.thermo_period is not None:
             if code.step % code.thermo_period == 0:
                 if code.step == 0:
-                    Epot = code.compute_potential(output="potential") \
+                    Epot = code.compute_potential() \
                         * code.reference_energy  # kcal/mol
                 else:
                     Epot = code.Epot * code.reference_energy  # kcal/mol

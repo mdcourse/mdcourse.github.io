@@ -50,7 +50,7 @@ Let us add a method named *monte_carlo_move* to the *MonteCarlo* class:
             try: # try using the last saved Epot, if it exists
                 initial_Epot = self.Epot
             except: # If self.Epot does not exists yet, calculate it
-                initial_Epot = self.compute_potential(output="potential")
+                initial_Epot = self.compute_potential()
             # Make a copy of the initial atoms positions
             initial_positions = copy.deepcopy(self.atoms_positions)
             # Pick an atom id randomly
@@ -63,7 +63,7 @@ Let us add a method named *monte_carlo_move* to the *MonteCarlo* class:
                 move = np.append((np.random.random(2) - 0.5) * self.displace_mc, 0)
             self.atoms_positions[atom_id] += move
             # Measure the optential energy of the new configuration
-            trial_Epot = self.compute_potential(output="potential")
+            trial_Epot = self.compute_potential()
             # Evaluate whether the new configuration should be kept or not
             beta =  1/self.desired_temperature
             delta_E = trial_Epot-initial_Epot

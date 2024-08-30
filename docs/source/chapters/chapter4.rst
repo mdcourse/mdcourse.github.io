@@ -146,25 +146,21 @@ following *run()* method to the *MinimizeEnergy* class:
             # First, meevaluate the initial energy and max force
             self.update_neighbor_lists() # Rebuild neighbor list, if necessary
             self.update_cross_coefficients() # Recalculate the cross coefficients, if necessary
-            try: # try using the last saved Epot and MaxF, if it exists
-                init_Epot = self.Epot
-                init_MaxF = self.MaxF
-            except: # If Epot/MaxF do not exists yet, calculate them both
-                init_Epot = self.compute_potential(output="potential")
-                forces = self.compute_potential(output="force-vector")
-                init_MaxF = np.max(np.abs(forces))
+            if self.step == 0: # At the first step, Epot/MaxF do not exists yet, calculate them both
+                init_Epot = self.compute_potential()
+                forces, init_MaxF = self.compute_force()
             # Save the current atom positions
             init_positions = copy.deepcopy(self.atoms_positions)
             # Move the atoms in the opposite direction of the maximum force
             self.atoms_positions = self.atoms_positions \
                 + forces/init_MaxF*self.displacement
             # Recalculate the energy
-            trial_Epot = self.compute_potential(output="potential")
+            trial_Epot = self.compute_potential()
             # Keep the more favorable energy
             if trial_Epot < init_Epot: # accept new position
                 self.Epot = trial_Epot
                 # calculate the new max force and save it
-                forces = self.compute_potential(output="force-vector")
+                forces, init_MaxF = self.compute_force()
                 self.MaxF = np.max(np.abs(forces))
                 self.wrap_in_box()  # Wrap atoms in the box, if necessary
                 self.displacement *= 1.2 # Multiply the displacement by a factor 1.2
@@ -268,56 +264,99 @@ Compute_potential
 Computing the potential energy of the system is central to the energy minimizer,
 as the value of the potential is used to decide if the trial is accepted or
 rejected. Add the following method called *compute_potential()*  to the *Utilities*
-class.
+class:
 
 .. label:: start_Utilities_class
 
 .. code-block:: python
 
-    def compute_potential(self, output):
-        if output == "force-vector":
-            forces = np.zeros((self.total_number_atoms,3))
-        elif output == "force-matrix":
-            forces = np.zeros((self.total_number_atoms,self.total_number_atoms,3))
+    def compute_potential(self):
+        """Compute the potential energy by summing up all pair contributions."""
         energy_potential = 0
-        box_size = self.box_size[:3]
-        half_box_size = self.box_size[:3]/2.0
         for Ni in np.arange(self.total_number_atoms-1):
-            # Read information about atom i
-            position_i = self.atoms_positions[Ni]
+            # Read neighbor list
             neighbor_of_i = self.neighbor_lists[Ni]
-            # Read information about neighbors j and cross coefficient
-            positions_j = self.atoms_positions[neighbor_of_i]
+            # Measure distance
+            rij = self.compute_distance(self.atoms_positions[Ni],
+                                        self.atoms_positions[neighbor_of_i],
+                                        self.box_size[:3])
+            # Measure potential using information about cross coefficients
             sigma_ij = self.sigma_ij_list[Ni]
             epsilon_ij = self.epsilon_ij_list[Ni]
-            # Measure distances
-            # Measure distances
-            # The nan_to_num is crutial in 2D to avoid nan value along third dimension
-            rij_xyz = np.nan_to_num(np.remainder(position_i - positions_j
-                                                 + half_box_size, box_size) - half_box_size)
-            rij = np.linalg.norm(rij_xyz, axis=1)
-            # Measure potential
-            if output == "potential":
-                energy_potential += np.sum(potentials(self.potential_type, epsilon_ij, sigma_ij, rij))
-            else:
-                derivative_potential = potentials(self.potential_type, epsilon_ij, sigma_ij, rij, derivative = True)
-                if output == "force-vector":
-                    forces[Ni] += np.sum((derivative_potential*rij_xyz.T/rij).T, axis=0)
-                    forces[neighbor_of_i] -= (derivative_potential*rij_xyz.T/rij).T 
-                elif output == "force-matrix":
-                    forces[Ni][neighbor_of_i] += (derivative_potential*rij_xyz.T/rij).T
-        if output=="potential":
-            return energy_potential
-        elif (output == "force-vector") | (output == "force-matrix"):
-            return forces
+            energy_potential += np.sum(potentials(self.potential_type,
+                                                  epsilon_ij, sigma_ij, rij))
+        return energy_potential
+    
+.. label:: end_Utilities_class
+
+Measuring the distance is an important step of computing the potential. Let us
+do it using a dedicated method. Add the following method to the *Utilities*
+class as well:
+
+.. label:: start_Utilities_class
+
+.. code-block:: python
+
+    def compute_distance(self,position_i, positions_j, box_size, only_norm = True):
+        """
+        Measure the distances between two particles.
+        The nan_to_num is crutial in 2D to avoid nan value along third dimension.
+        # TOFIX: Move as function instead of a method?
+        """
+        rij_xyz = np.nan_to_num(np.remainder(position_i - positions_j
+                                + box_size[:3]/2.0, box_size) - box_size[:3]/2.0)
+        if only_norm:
+            return np.linalg.norm(rij_xyz, axis=1)
+        else:
+            return np.linalg.norm(rij_xyz, axis=1), rij_xyz
 
 .. label:: end_Utilities_class
 
-Here, the method is a little bit complicated, because three types of outputs can
-be requested by the user: *force-vector*, *force-matrix*, and *potential*. The last
-one, *potential*, simply returns the value of the potential energy for the entire system.
-If *force-vector* or *force-matrix* are selected instead, then the individual forces
-between atoms are returned.
+Finally, the energy minimization requires the computation of the minimum
+force in the system. Although not very different from the potential measurement,
+let us create a new method that is dedicated solely to measuring forces:
+
+.. label:: start_Utilities_class
+
+.. code-block:: python
+
+    def compute_force(self, return_vector = True):
+        if return_vector: # return a N-size vector
+            force_vector = np.zeros((self.total_number_atoms,3))
+        else: # return a N x N matrix
+            force_matrix = np.zeros((self.total_number_atoms,
+                                    self.total_number_atoms,3))
+        for Ni in np.arange(self.total_number_atoms-1):
+            # Read neighbor list
+            neighbor_of_i = self.neighbor_lists[Ni]
+            # Measure distance
+            rij, rij_xyz = self.compute_distance(self.atoms_positions[Ni],
+                                        self.atoms_positions[neighbor_of_i],
+                                        self.box_size[:3], only_norm = False)
+            # Measure force using information about cross coefficients
+            sigma_ij = self.sigma_ij_list[Ni]
+            epsilon_ij = self.epsilon_ij_list[Ni]       
+            fij_xyz = potentials(self.potential_type, epsilon_ij,
+                                 sigma_ij, rij, derivative = True)
+            if return_vector:
+                # Add the contribution to both Ni and its neighbors
+                force_vector[Ni] += np.sum((fij_xyz*rij_xyz.T/rij).T, axis=0)
+                force_vector[neighbor_of_i] -= (fij_xyz*rij_xyz.T/rij).T 
+            else:
+                # Add the contribution to the matrix
+                force_matrix[Ni][neighbor_of_i] += (fij_xyz*rij_xyz.T/rij).T
+        if return_vector:
+            max_force = np.max(np.abs(force_vector))
+            return force_vector, max_force
+        else:
+            return force_matrix
+    
+.. label:: end_Utilities_class
+
+Here, two types of outputs can
+be requested by the user: *force-vector*, and *force-matrix*. 
+The *force-matrix* option will be useful for pressure calculation, see
+:ref:`chapter7-label`.
 
 Wrap in box
 -----------
