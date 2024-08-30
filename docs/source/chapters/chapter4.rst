@@ -264,7 +264,7 @@ Compute_potential
 Computing the potential energy of the system is central to the energy minimizer,
 as the value of the potential is used to decide if the trial is accepted or
 rejected. Add the following method called *compute_potential()*  to the *Utilities*
-class.
+class:
 
 .. label:: start_Utilities_class
 
@@ -289,6 +289,10 @@ class.
     
 .. label:: end_Utilities_class
 
+Measuring the distance is an important step of computing the potential. Let us
+do it using a dedicated method. Add the following method to the *Utilities*
+class as well:
+
 .. label:: start_Utilities_class
 
 .. code-block:: python
@@ -307,6 +311,10 @@ class.
             return np.linalg.norm(rij_xyz, axis=1), rij_xyz
 
 .. label:: end_Utilities_class
+
+Finally, the energy minimization requires the computation of the minimum
+force in the system. Although not very different from the potential measurement,
+let us create a new method that is dedicated solely to measuring forces:
 
 .. label:: start_Utilities_class
 
@@ -345,11 +353,10 @@ class.
     
 .. label:: end_Utilities_class
 
-Here, the method is a little bit complicated, because three types of outputs can
-be requested by the user: *force-vector*, *force-matrix*, and *potential*. The last
-one, *potential*, simply returns the value of the potential energy for the entire system.
-If *force-vector* or *force-matrix* are selected instead, then the individual forces
-between atoms are returned.
+Here, two types of outputs can
+be requested by the user: *force-vector*, and *force-matrix*. 
+The *force-matrix* option will be useful for pressure calculation, see
+:ref:`chapter7-label`.
 
 Wrap in box
 -----------
