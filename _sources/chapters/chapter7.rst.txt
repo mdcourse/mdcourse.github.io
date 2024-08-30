@@ -49,7 +49,7 @@ Let us add the following method to the *Utilities* class.
             temperature = self.desired_temperature # for MC, simply use the desired temperature
         p_ideal = Ndof*temperature/(volume*self.dimensions)
         # Compute the non-ideal contribution
-        distances_forces = np.sum(self.compute_potential(output="force-matrix")*self.evaluate_rij_matrix())
+        distances_forces = np.sum(self.compute_force(return_vector = False)*self.evaluate_rij_matrix())
         p_nonideal = distances_forces/(volume*self.dimensions)
         # Final pressure
         self.pressure = p_ideal+p_nonideal
