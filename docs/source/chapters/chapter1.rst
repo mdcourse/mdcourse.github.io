@@ -76,6 +76,8 @@ Copy the following lines into *potentials.py*:
 
 .. code-block:: python
 
+    import numpy as np
+
     def potentials(potential_type, epsilon, sigma, r, derivative=False):
         if potential_type == "Lennard-Jones":
             if derivative:
@@ -86,7 +88,7 @@ Copy the following lines into *potentials.py*:
             if derivative:
                 raise ValueError("Derivative is not defined for Hard-Sphere potential.")
             else:
-                return 1000 if r < sigma else 0
+                return np.where(r < sigma, 0, 1000)
         else:
             raise ValueError(f"Unknown potential type: {potential_type}")
 

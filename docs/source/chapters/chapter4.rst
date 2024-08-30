@@ -146,9 +146,9 @@ following *run()* method to the *MinimizeEnergy* class:
             # First, meevaluate the initial energy and max force
             self.update_neighbor_lists() # Rebuild neighbor list, if necessary
             self.update_cross_coefficients() # Recalculate the cross coefficients, if necessary
-            if self.step == 0: # At the first step, Epot/MaxF do not exists yet, calculate them both
-                init_Epot = self.compute_potential()
-                forces, init_MaxF = self.compute_force()
+            # Compute Epot/MaxF/force
+            init_Epot = self.compute_potential()
+            forces, init_MaxF = self.compute_force()
             # Save the current atom positions
             init_positions = copy.deepcopy(self.atoms_positions)
             # Move the atoms in the opposite direction of the maximum force
