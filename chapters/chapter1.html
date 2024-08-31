@@ -338,7 +338,9 @@ file will contain a function called <em>potentials</em>. Two types of potential 
 be returned by this function: the Lennard-Jones potential (LJ), and the
 hard-sphere potential.</p>
 <p>Copy the following lines into <em>potentials.py</em>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">potentials</span><span class="p">(</span><span class="n">potential_type</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">derivative</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">potentials</span><span class="p">(</span><span class="n">potential_type</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">derivative</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">potential_type</span> <span class="o">==</span> <span class="s2">&quot;Lennard-Jones&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">derivative</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">48</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">((</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">12</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="n">r</span>
@@ -346,9 +348,11 @@ hard-sphere potential.</p>
             <span class="k">return</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">((</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">12</span> <span class="o">-</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">potential_type</span> <span class="o">==</span> <span class="s2">&quot;Hard-Sphere&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">derivative</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Derivative is not defined for Hard-Sphere potential.&quot;</span><span class="p">)</span>
+            <span class="c1"># Derivative is not defined for Hard-Sphere potential.</span>
+            <span class="c1"># --&gt; return 0</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">1000</span> <span class="k">if</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">sigma</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">r</span> <span class="o">&gt;</span> <span class="n">sigma</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown potential type: </span><span class="si">{</span><span class="n">potential_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>

@@ -143,7 +143,7 @@ a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.
                 f.write("ITEM: NUMBER OF ATOMS\n")
                 f.write(str(code.total_number_atoms) + "\n")
                 f.write("ITEM: BOX BOUNDS pp pp pp\n")
-                for dim in np.arange(code.dimensions):
+                for dim in np.arange(3):
                     f.write(str(box_boundaries[dim][0]) + " "
                             + str(box_boundaries[dim][1]) + "\n")
                 cpt = 1

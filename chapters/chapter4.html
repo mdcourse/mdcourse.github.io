@@ -382,9 +382,9 @@ following <em>run()</em> method to the <em>MinimizeEnergy</em> class:</p>
         <span class="c1"># First, meevaluate the initial energy and max force</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span> <span class="c1"># Rebuild neighbor list, if necessary</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_cross_coefficients</span><span class="p">()</span> <span class="c1"># Recalculate the cross coefficients, if necessary</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># At the first step, Epot/MaxF do not exists yet, calculate them both</span>
-            <span class="n">init_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">()</span>
-            <span class="n">forces</span><span class="p">,</span> <span class="n">init_MaxF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_force</span><span class="p">()</span>
+        <span class="c1"># Compute Epot/MaxF/force</span>
+        <span class="n">init_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">()</span>
+        <span class="n">forces</span><span class="p">,</span> <span class="n">init_MaxF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_force</span><span class="p">()</span>
         <span class="c1"># Save the current atom positions</span>
         <span class="n">init_positions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span>
         <span class="c1"># Move the atoms in the opposite direction of the maximum force</span>
