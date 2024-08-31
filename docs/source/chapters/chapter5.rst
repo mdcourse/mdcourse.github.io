@@ -85,9 +85,9 @@ All quantities are re-dimensionalized before getting outputed.
             if code.step % code.thermo_period == 0:
                 if code.step == 0:
                     Epot = code.compute_potential() \
-                        * code.reference_energy  # kcal/mol
+                        * code.ref_energy  # kcal/mol
                 else:
-                    Epot = code.Epot * code.reference_energy  # kcal/mol
+                    Epot = code.Epot * code.ref_energy  # kcal/mol
                 if code.step == 0:
                     if code.thermo_outputs == "Epot":
                         logger.info(f"step Epot")
@@ -101,7 +101,7 @@ All quantities are re-dimensionalized before getting outputed.
                     logger.info(f"{code.step} {Epot:.2f} {code.MaxF:.2f}")
                 elif code.thermo_outputs == "Epot-press":
                     code.calculate_pressure()
-                    press = code.pressure * code.reference_pressure  # Atm
+                    press = code.pressure * code.ref_pressure  # Atm
                     logger.info(f"{code.step} {Epot:.2f} {press:.2f}")
 
 .. label:: end_logger_class
@@ -125,14 +125,12 @@ a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.
         if code.dumping_period is not None:
             if code.step % code.dumping_period == 0:
                 # Convert units to the *real* dimensions
-                box_boundaries = code.box_boundaries\
-                    * code.reference_distance # Angstrom
-                atoms_positions = code.atoms_positions\
-                    * code.reference_distance # Angstrom
+                box_boundaries = code.box_boundaries*code.ref_length # Angstrom
+                atoms_positions = code.atoms_positions*code.ref_length # Angstrom
                 atoms_types = code.atoms_type
                 if velocity:
                     atoms_velocities = code.atoms_velocities \
-                        * code.reference_distance/code.reference_time # Angstrom/femtosecond
+                        * code.ref_length/code.ref_time # Angstrom/femtosecond
                 # Start writting the file
                 if code.step == 0: # Create new file
                     f = open(code.data_folder + filename, "w")
@@ -141,18 +139,18 @@ a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.
                 f.write("ITEM: TIMESTEP\n")
                 f.write(str(code.step) + "\n")
                 f.write("ITEM: NUMBER OF ATOMS\n")
-                f.write(str(code.total_number_atoms) + "\n")
+                f.write(str(np.sum(code.number_atoms)) + "\n")
                 f.write("ITEM: BOX BOUNDS pp pp pp\n")
                 for dim in np.arange(3):
-                    f.write(str(box_boundaries[dim][0]) + " "
-                            + str(box_boundaries[dim][1]) + "\n")
+                    f.write(str(box_boundaries[dim][0].magnitude) + " "
+                            + str(box_boundaries[dim][1].magnitude) + "\n")
                 cpt = 1
                 if velocity:
                     f.write("ITEM: ATOMS id type x y z vx vy vz\n")
                     characters = "%d %d %.3f %.3f %.3f %.3f %.3f %.3f %s"
                     for type, xyz, vxyz in zip(atoms_types,
-                                            atoms_positions,
-                                            atoms_velocities):
+                                            atoms_positions.magnitude,
+                                            atoms_velocities.magnitude):
                         v = [cpt, type, xyz[0], xyz[1], xyz[2],
                                 vxyz[0], vxyz[1], vxyz[2]]
                         f.write(characters % (v[0], v[1], v[2], v[3], v[4],
@@ -162,7 +160,7 @@ a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.
                     f.write("ITEM: ATOMS id type x y z\n")
                     characters = "%d %d %.3f %.3f %.3f %s"
                     for type, xyz in zip(atoms_types,
-                                        atoms_positions):
+                                        atoms_positions.magnitude):
                         v = [cpt, type, xyz[0], xyz[1], xyz[2]]
                         f.write(characters % (v[0], v[1], v[2],
                                             v[3], v[4], '\n'))
@@ -197,6 +195,35 @@ Add the same lines at the top of the *MinimizeEnergy.py* file:
 
 .. label:: end_MinimizeEnergy_class
 
+Finally, let us make sure that *thermo_period*, *dumping_period*, and *thermo_outputs*
+parameters are passed the InitializeSimulation method:
+
+.. label:: start_InitializeSimulation_class
+
+.. code-block:: python
+
+    def __init__(self,
+            (...)
+                neighbor=1, # Integer
+                thermo_period = None,
+                dumping_period = None,
+                thermo_outputs = None,
+
+.. label:: end_InitializeSimulation_class
+
+.. label:: start_InitializeSimulation_class
+
+.. code-block:: python
+
+    def __init__(self,
+        (...)
+        self.initial_positions = initial_positions
+        self.thermo_period = thermo_period
+        self.dumping_period = dumping_period
+        self.thermo_outputs = thermo_outputs
+
+.. label:: end_InitializeSimulation_class
+
 Test the code
 -------------
 
@@ -208,21 +235,38 @@ files were indeed created without the *Outputs/* folder:
 
 .. code-block:: python
 
-    import os
     from MinimizeEnergy import MinimizeEnergy
+    from pint import UnitRegistry
+    ureg = UnitRegistry()
+    import os
 
-    # Initialize the MinimizeEnergy object and run the minimization
+    # Define atom number of each group
+    nmb_1, nmb_2= [2, 3]
+    # Define LJ parameters (sigma)
+    sig_1, sig_2 = [3, 4]*ureg.angstrom
+    # Define LJ parameters (epsilon)
+    eps_1, eps_2 = [0.2, 0.4]*ureg.kcal/ureg.mol
+    # Define atom mass
+    mss_1, mss_2 = [10, 20]*ureg.gram/ureg.mol
+    # Define box size
+    L = 20*ureg.angstrom
+    # Define a cut off
+    rc = 2.5*sig_1
+
+    # Initialize the prepare object
     minimizer = MinimizeEnergy(
+        ureg = ureg,
         maximum_steps=100,
         thermo_period=25,
         dumping_period=25,
-        thermo_outputs="Epot-MaxF",
-        number_atoms=[2, 3],
-        epsilon=[0.1, 1.0], # kcal/mol
-        sigma=[3, 4], # A
-        atom_mass=[10, 20], # g/mol
-        box_dimensions=[20, 20, 20], # A
+        number_atoms=[nmb_1, nmb_2],
+        epsilon=[eps_1, eps_2], # kcal/mol
+        sigma=[sig_1, sig_2], # A
+        atom_mass=[mss_1, mss_2], # g/mol
+        box_dimensions=[L, L, L], # A
+        cut_off=rc,
         data_folder="Outputs/",
+        thermo_outputs="Epot-MaxF",
     )
     minimizer.run()
 

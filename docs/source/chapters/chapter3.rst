@@ -23,7 +23,7 @@ Let us improve the previously created *InitializeSimulation* class:
 
 .. code-block:: python
 
-    class InitializeSimulation(Prepare):
+    class InitializeSimulation(Prepare, Utilities):
         def __init__(self,
                     box_dimensions,  # List - Angstroms
                     cut_off, # Angstroms
@@ -192,7 +192,6 @@ neighboring atoms, the simulation becomes more efficient. Add the following
 
     def update_neighbor_lists(self):
         if (self.step % self.neighbor == 0):
-            print(self.cut_off)
             matrix = distances.contact_matrix(self.atoms_positions,
                 cutoff=self.cut_off, #+2,
                 returntype="numpy",

@@ -68,22 +68,17 @@ Then, let us fill the *__init__()* method:
     class MinimizeEnergy(Measurements):
         def __init__(self,
                     maximum_steps,
-                    cut_off=9,
-                    neighbor=1,
-                    displacement=0.01,
                     thermo_outputs="MaxF",
-                    data_folder=None,
+                    data_folder="Outputs/",
                     *args,
                     **kwargs):
-            self.displacement = displacement
             self.maximum_steps = maximum_steps
             self.thermo_outputs = thermo_outputs
             self.data_folder = data_folder
-            if self.data_folder is not None:
-                if os.path.exists(self.data_folder) is False:
-                    os.mkdir(self.data_folder)
+            if os.path.exists(self.data_folder) is False:
+                os.mkdir(self.data_folder)
             super().__init__(*args, **kwargs)
-
+            
 .. label:: end_MinimizeEnergy_class
 
 An important parameter is *maximum_steps*, which sets the maximum number
@@ -93,37 +88,6 @@ displacement value.
 
 The *thermo_outputs* and *data_folder* parameters are used for printing data
 to files. These two parameters will be useful in the next chapter, :ref:`chapter5-label`.
-
-Nondimensionalize units
------------------------
-
-As was done previously, some parameters from the *MinimizeEnergy* class
-must be non-dimensionalized: *cut_off* and *displacement*. Add the following
-method to the *MinimizeEnergy* class:
-
-.. label:: start_MinimizeEnergy_class
-
-.. code-block:: python
-
-    def nondimensionalize_units_2(self):
-        """Use LJ prefactors to convert units into non-dimensional."""
-        self.displacement = self.displacement/self.reference_distance
-
-.. label:: end_MinimizeEnergy_class
-
-Let us call the *nondimensionalize_units_2()* method from the *__init__()*
-method:
-
-.. label:: start_MinimizeEnergy_class
-
-.. code-block:: python
-
-    def __init__(self,
-        (...)
-        super().__init__(*args, **kwargs)
-        self.nondimensionalize_units_2()
-
-.. label:: end_MinimizeEnergy_class
 
 Energy minimizer
 ----------------
@@ -136,6 +100,7 @@ following *run()* method to the *MinimizeEnergy* class:
 .. code-block:: python
 
     def run(self):
+        self.displacement = 0.01 # pick a random initial displacement (dimentionless)
         # *step* loops for 0 to *maximum_steps*+1
         for self.step in range(0, self.maximum_steps+1):
             # First, meevaluate the initial energy and max force
@@ -185,7 +150,7 @@ class:
     def compute_potential(self):
         """Compute the potential energy by summing up all pair contributions."""
         energy_potential = 0
-        for Ni in np.arange(self.total_number_atoms-1):
+        for Ni in np.arange(np.sum(self.number_atoms)-1):
             # Read neighbor list
             neighbor_of_i = self.neighbor_lists[Ni]
             # Measure distance
@@ -234,11 +199,11 @@ let us create a new method that is dedicated solely to measuring forces:
 
     def compute_force(self, return_vector = True):
         if return_vector: # return a N-size vector
-            force_vector = np.zeros((self.total_number_atoms,3))
+            force_vector = np.zeros((np.sum(self.number_atoms),3))
         else: # return a N x N matrix
-            force_matrix = np.zeros((self.total_number_atoms,
-                                    self.total_number_atoms,3))
-        for Ni in np.arange(self.total_number_atoms-1):
+            force_matrix = np.zeros((np.sum(self.number_atoms),
+                                    np.sum(self.number_atoms),3))
+        for Ni in np.arange(np.sum(self.number_atoms)-1):
             # Read neighbor list
             neighbor_of_i = self.neighbor_lists[Ni]
             # Measure distance
@@ -282,7 +247,7 @@ within the *Utilities* class:
 .. code-block:: python
 
     def wrap_in_box(self):
-        for dim in np.arange(self.dimensions):
+        for dim in np.arange(3):
             out_ids = self.atoms_positions[:, dim] \
                 > self.box_boundaries[dim][1]
             self.atoms_positions[:, dim][out_ids] \
@@ -306,15 +271,32 @@ typically negative.
 .. code-block:: python
 
     from MinimizeEnergy import MinimizeEnergy
+    from pint import UnitRegistry
+    ureg = UnitRegistry()
 
-    # Initialize the MinimizeEnergy object and run the minimization
+    # Define atom number of each group
+    nmb_1, nmb_2= [2, 3]
+    # Define LJ parameters (sigma)
+    sig_1, sig_2 = [3, 4]*ureg.angstrom
+    # Define LJ parameters (epsilon)
+    eps_1, eps_2 = [0.2, 0.4]*ureg.kcal/ureg.mol
+    # Define atom mass
+    mss_1, mss_2 = [10, 20]*ureg.gram/ureg.mol
+    # Define box size
+    L = 20*ureg.angstrom
+    # Define a cut off
+    rc = 2.5*sig_1
+
+    # Initialize the prepare object
     minimizer = MinimizeEnergy(
+        ureg = ureg,
         maximum_steps=100,
-        number_atoms=[2, 3],
-        epsilon=[0.2, 0.4], # kcal/mol
-        sigma=[3, 4], # A
-        atom_mass=[10, 20], # g/mol
-        box_dimensions=[20, 20, 20], # A
+        number_atoms=[nmb_1, nmb_2],
+        epsilon=[eps_1, eps_2], # kcal/mol
+        sigma=[sig_1, sig_2], # A
+        atom_mass=[mss_1, mss_2], # g/mol
+        box_dimensions=[L, L, L], # A
+        cut_off=rc,
     )
     minimizer.run()
 
