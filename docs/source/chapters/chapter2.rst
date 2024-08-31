@@ -210,7 +210,8 @@ class:
 .. code-block:: python
 
     def nondimensionalize_units(self, quantities_to_normalise):
-        for quantity in quantities_to_normalise:
+        for name in quantities_to_normalise:
+            quantity = getattr(self, name)  # Get the attribute by name
             if isinstance(quantity, list):
                 for i, element in enumerate(quantity):
                     assert element.units in self.ref_units, \
@@ -220,8 +221,19 @@ class:
                     assert quantity[i].units == self.ureg.dimensionless, \
                         f"Error: Quantities are not properly nondimensionalized"
                     quantity[i] = quantity[i].magnitude # get rid of ureg
+                setattr(self, name, quantity)
             else:
-                print("NON ANTICIPATED!")
+                if quantity is not None:
+                    assert np.shape(quantity) == (), \
+                        f"Error: The quantity is a list or an array"
+                    assert quantity.units in self.ref_units, \
+                        f"Error: Units not part of the reference units"
+                    ref_value = self.ref_quantities[self.ref_units.index(quantity.units)]
+                    quantity = quantity/ref_value
+                    assert quantity.units == self.ureg.dimensionless, \
+                        f"Error: Quantities are not properly nondimensionalized"
+                    quantity = quantity.magnitude # get rid of ureg
+                    setattr(self, name, quantity)
 
 .. label:: end_Prepare_class
 
@@ -241,7 +253,7 @@ of the *Prepare* class:
     def __init__(self,
         (...)
         self.calculate_LJunits_prefactors()
-        self.nondimensionalize_units([self.epsilon, self.sigma, self.atom_mass])
+        self.nondimensionalize_units(["epsilon", "sigma", "atom_mass"])
 
 .. label:: end_Prepare_class
 
@@ -270,8 +282,7 @@ within the *Prepare* class:
 .. code-block:: python
 
     def identify_atom_properties(self):
-        """Identify the atom properties for each atom."""
-        self.total_number_atoms = np.sum(self.number_atoms)
+        """Identify the properties for each atom."""
         atoms_sigma = []
         atoms_epsilon = []
         atoms_mass = []
@@ -301,7 +312,7 @@ Let us call the *identify_atom_properties* from the *__init__()* method:
 
     def __init__(self,
         (...)
-        self.nondimensionalize_units([self.epsilon, self.sigma, self.atom_mass])
+        self.nondimensionalize_units(["epsilon", "sigma", "atom_mass"])
         self.identify_atom_properties()
 
 .. label:: end_Prepare_class
@@ -309,9 +320,9 @@ Let us call the *identify_atom_properties* from the *__init__()* method:
 Test the code
 -------------
 
-Let us test the *Prepare* class to make sure that it does what is expected.
-Just like in the previous example, let us initiates a system with 2 atoms of
-type 1, and 3 atoms of type 2:
+Let's test the *Prepare* class to make sure that it does what is expected.
+Here, a system containing 2 atoms of type 1, and 3 atoms of type 2 is
+prepared. LJs parameters and masses for each groups are also defined.
 
 .. label:: start_test_2a_class
 

@@ -25,27 +25,19 @@ Let us improve the previously created *InitializeSimulation* class:
 
     class InitializeSimulation(Prepare):
         def __init__(self,
-                    box_dimensions=[10, 10, 10],  # List - Angstroms
-                    seed=None,  # Int
+                    box_dimensions,  # List - Angstroms
+                    cut_off, # Angstroms
                     initial_positions=None,  # Array - Angstroms
-                    #thermo_period=None, # TOFIX to be added later
-                    #dumping_period=None, # TOFIX to be added later
-                    neighbor=1,
-                    cut_off=10,
+                    neighbor=1, # Integer
                     *args,
                     **kwargs,
                     ):
             super().__init__(*args, **kwargs)
             self.box_dimensions = box_dimensions
-            # If a box dimension was entered as 0, dimensions will be 2
-            self.dimensions = len(list(filter(lambda x: x > 0, box_dimensions)))
-            self.seed = seed
-            self.neighbor = neighbor
             self.cut_off = cut_off
+            self.neighbor = neighbor
             self.step = 0 # initialize simulation step
             self.initial_positions = initial_positions
-            #self.thermo_period = thermo_period # TOFIX to be added later
-            #self.dumping_period = dumping_period # TOFIX to be added later
 
 .. label:: end_InitializeSimulation_class
 
@@ -76,15 +68,11 @@ Several parameters are provided to the *InitializeSimulation* class:
 Finally, the *dimensions* of the system are calculated as the length of
 *box_dimensions*.
 
-Set a random seed
------------------
+Nondimensionalize units
+-----------------------
 
-Providing a *seed* allows for reproducible simulations. When a seed is
-specified, the simulation will produce the exact same results each time it
-is run, including identical atom positions and velocities. This can be
-particularly useful for debugging purposes.
-
-Add the following *if* condition to the *__init__()* method:
+Just like we did in :ref:`chapter2-label`, let us nondimensionalize the provided
+parameters, here the *box_dimensions*, the *cut_off*, as well as the *initial_positions*:
 
 .. label:: start_InitializeSimulation_class
 
@@ -93,50 +81,8 @@ Add the following *if* condition to the *__init__()* method:
     def __init__(self,
         (...)
         self.initial_positions = initial_positions
-        if self.seed is not None:
-            np.random.seed(self.seed)
-
-.. label:: end_InitializeSimulation_class
-
-If a *seed* is provided, it is used to initialize the *random.seed()* function
-from *NumPy*. If *seed* is set to its default value of *None*, the simulation
-will proceed with randomization.
-
-Nondimensionalize units
------------------------
-
-Just like we did in :ref:`chapter2-label`, let us nondimensionalize the provided
-parameters, here the *box_dimensions* as well as the *initial_positions*:
-
-.. label:: start_InitializeSimulation_class
-
-.. code-block:: python
-
-    def nondimensionalize_units_1(self):
-        """Use LJ prefactors to convert units into non-dimensional."""
-        # Normalize box dimensions
-        box_dimensions = []
-        for L in self.box_dimensions:
-            box_dimensions.append(L/self.reference_distance)
-        self.box_dimensions = box_dimensions # errase the previously defined box_dimensions
-        # Normalize the box dimensions
-        if self.initial_positions is not None:
-            self.initial_positions = self.initial_positions/self.reference_distance
-        self.cut_off /= self.reference_distance
-
-.. label:: end_InitializeSimulation_class
-
-Let us call the *nondimensionalize_units_1* method from the *__init__* class:
-
-.. label:: start_InitializeSimulation_class
-
-.. code-block:: python
-
-    def __init__(self,
-        (...)
-        if self.seed is not None:
-            np.random.seed(self.seed)
-        self.nondimensionalize_units_1()
+        self.nondimensionalize_units(["box_dimensions", "cut_off",
+                                      "initial_positions"])
 
 .. label:: end_InitializeSimulation_class
 
@@ -151,9 +97,7 @@ method to the *InitializeSimulation* class:
 .. code-block:: python
 
     def define_box(self):
-        """Define the simulation box.
-        For 2D simulations, the third dimensions only contains 0.
-        """
+        """Define the simulation box. Only 3D boxes are supported."""
         box_boundaries = np.zeros((3, 2))
         dim = 0
         for L in self.box_dimensions:
@@ -182,7 +126,8 @@ Let us call the *define_box* method from the *__init__* class:
 
     def __init__(self,
         (...)
-        self.nondimensionalize_units_1()
+        self.nondimensionalize_units(["box_dimensions", "cut_off",
+                                      "initial_positions"])
         self.define_box()
 
 .. label:: end_InitializeSimulation_class
@@ -202,10 +147,10 @@ case, the array must be of size 'number of atoms' times 'number of dimensions'.
 
     def populate_box(self):
         if self.initial_positions is None:
-            atoms_positions = np.zeros((self.total_number_atoms, 3))
+            atoms_positions = np.zeros((np.sum(self.number_atoms), 3))
             for dim in np.arange(3):
                 diff_box = np.diff(self.box_boundaries[dim])
-                random_pos = np.random.random(self.total_number_atoms)
+                random_pos = np.random.random(np.sum(self.number_atoms))
                 atoms_positions[:, dim] = random_pos*diff_box-diff_box/2
             self.atoms_positions = atoms_positions
         else:
@@ -247,6 +192,7 @@ neighboring atoms, the simulation becomes more efficient. Add the following
 
     def update_neighbor_lists(self):
         if (self.step % self.neighbor == 0):
+            print(self.cut_off)
             matrix = distances.contact_matrix(self.atoms_positions,
                 cutoff=self.cut_off, #+2,
                 returntype="numpy",
@@ -281,7 +227,7 @@ more practical (see below).
             # Precalculte LJ cross-coefficients
             sigma_ij_list = []
             epsilon_ij_list = []
-            for Ni in np.arange(self.total_number_atoms-1): # tofix error for GCMC
+            for Ni in np.arange(np.sum(self.number_atoms)-1): # tofix error for GCMC
                 # Read information about atom i
                 sigma_i = self.atoms_sigma[Ni]
                 epsilon_i = self.atoms_epsilon[Ni]
@@ -344,14 +290,31 @@ boundaries along all 3 dimensions of space:
 
     import numpy as np
     from InitializeSimulation import InitializeSimulation
+    from pint import UnitRegistry
+    ureg = UnitRegistry()
 
-    # Initialize the InitializeSimulation object
+    # Define atom number of each group
+    nmb_1, nmb_2= [2, 3]
+    # Define LJ parameters (sigma)
+    sig_1, sig_2 = [3, 4]*ureg.angstrom
+    # Define LJ parameters (epsilon)
+    eps_1, eps_2 = [0.2, 0.4]*ureg.kcal/ureg.mol
+    # Define atom mass
+    mss_1, mss_2 = [10, 20]*ureg.gram/ureg.mol
+    # Define box size
+    L = 20*ureg.angstrom
+    # Define a cut off
+    rc = 2.5*sig_1
+
+    # Initialize the prepare object
     init = InitializeSimulation(
-        number_atoms=[2, 3],
-        epsilon=[0.2, 0.4], # kcal/mol
-        sigma=[3, 4], # A
-        atom_mass=[10, 20], # g/mol
-        box_dimensions=[20, 20, 20], # A
+        ureg = ureg,
+        number_atoms=[nmb_1, nmb_2],
+        epsilon=[eps_1, eps_2], # kcal/mol
+        sigma=[sig_1, sig_2], # A
+        atom_mass=[mss_1, mss_2], # g/mol
+        box_dimensions=[L, L, L], # A
+        cut_off=rc,
     )
 
     # Test function using pytest
