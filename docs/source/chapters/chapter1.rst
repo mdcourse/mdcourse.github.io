@@ -1,7 +1,12 @@
 .. _chapter1-label:
 
-Start coding
+Start Coding
 ============
+
+Let's start with the Python script. During this first chapter, some Python
+files will be created and filled in a minimal fashion. At the end of this
+chapter, a small test will be set up to ensure that the files were correctly
+created.
 
 Presentation
 ------------
@@ -38,7 +43,8 @@ containing either Python functions or classes:
      - *Prepare* class: Methods for preparing the non-dimensionalization of the
        units
    * - *Utilities.py* 
-     - *Utilities* class: General-purpose methods, inherited by all other classes
+     - *Utilities* class: General-purpose methods, inherited by all other
+       classes
    * - *InitializeSimulation.py*
      - *InitializeSimulation* class: Methods necessary to set up the system and
        prepare the simulation, inherited by all the classes below
@@ -54,21 +60,27 @@ containing either Python functions or classes:
      - Functions for performing specific measurements on the system
    * - *potentials.py* 
      - Functions for calculating the potentials and forces between atoms
-   * - *tools.py*
+   * - *logger.py*
      - Functions for outputting data into text files
+   * - *dumper.py*
+     - Functions for outputting data into trajectory files for visualization
+   * - *reader.py*
+     - Functions for importing data from text files
 
+Some of these files are created in this chapter; others will be created later
+on. All of these files must be created within the same folder.
 
-Potential for inter-atomic interaction
+Potential for Inter-Atomic Interaction
 --------------------------------------
 
 In molecular simulations, potential functions are used to mimic the interaction
 between atoms. Although more complicated options exist, potentials are usually
 defined as functions of the distance :math:`r` between two atoms.
 
-Within a dedicated folder, create the first file named *potentials.py*. This
-file will contain a function called *potentials*. Two types of potential can 
-be returned by this function: the Lennard-Jones potential (LJ), and the
-hard-sphere potential.
+Create the first file named *potentials.py*. This file will contain a function
+called *potentials*. For the moment, the only potential that can be returned by
+this function is the Lennard-Jones potential (LJ). This may change in the
+future.
 
 Copy the following lines into *potentials.py*:
 
@@ -84,44 +96,33 @@ Copy the following lines into *potentials.py*:
                 return 48 * epsilon * ((sigma / r) ** 12 - 0.5 * (sigma / r) ** 6) / r
             else:
                 return 4 * epsilon * ((sigma / r) ** 12 - (sigma / r) ** 6)
-        elif potential_type == "Hard-Sphere":
-            if derivative:
-                # Derivative is not defined for Hard-Sphere potential.
-                # --> return 0
-                return np.zeros(len(r))
-            else:
-                return np.where(r > sigma, 0, 1000)
         else:
             raise ValueError(f"Unknown potential type: {potential_type}")
 
 .. label:: end_potentials_class
 
-The hard-sphere potential either returns a value of 0 when the distance between
-the two particles is larger than the parameter, :math:`r > \sigma`, or 1000 when
-:math:`r < \sigma`. The value of *1000* was chosen to be large enough to ensure
-that any Monte Carlo move that would lead to the two particles to overlap will
-be rejected.
-
-In the case of the LJ potential, depending on the value of the optional
-argument *derivative*, which can be either *False* or *True*, the *LJ_potential*
-function will return the force:
+Depending on the value of the optional argument *derivative*, which can be
+either *False* or *True*, this function returns the derivative of the potential,
+i.e., the force, :math:`F_\text{LJ} = - \mathrm{d} U_\text{LJ} / \mathrm{d} r`:
 
 .. math::
 
-    F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left[ \left( \frac{\sigma}{r} \right)^{12} - \frac{1}{2} \left( \frac{\sigma}{r} \right)^6 \right],
+    F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left[ \left( \frac{\sigma}{r} \right)^{12}
+    - \frac{1}{2} \left( \frac{\sigma}{r} \right)^6 \right],
 
 or the potential energy:
 
 .. math::
 
-    U_\text{LJ} = 4 \epsilon \left[ \left( \frac{\sigma}{r} \right)^{12} - \left( \frac{\sigma}{r} \right)^6 \right].
+    U_\text{LJ} = 4 \epsilon \left[ \left( \frac{\sigma}{r} \right)^{12}
+    - \left( \frac{\sigma}{r} \right)^6 \right].
 
 Create the Classes
 ------------------
 
-Let's create the files with the minimal information about the classes and
-their inheritance. The classes will be developed progressively in the
-following chapters.
+Let's create the files with some minimal details about the classes and their
+inheritance. The classes will be developed progressively in the following
+chapters.
 
 The first class is the *Prepare* class, which will be used for the
 nondimensionalization of the parameters. In the same folder as *potentials.py*,
@@ -157,8 +158,8 @@ copy the following lines:
 
 .. label:: end_Utilities_class
 
-The line *from potentials import LJ_potential* is used to import the
-*LJ_potential* function.
+The line *from potentials import potentials* is used to import the
+previously created *potentials* function.
 
 Within the *InitializeSimulation.py* file, copy the following lines:
 
@@ -168,9 +169,10 @@ Within the *InitializeSimulation.py* file, copy the following lines:
 
     import numpy as np
     from Prepare import Prepare
+    from Utilities import Utilities
 
 
-    class InitializeSimulation(Prepare):
+    class InitializeSimulation(Prepare, Utilities):
         def __init__(self,
                     *args,
                     **kwargs,
@@ -180,7 +182,8 @@ Within the *InitializeSimulation.py* file, copy the following lines:
 .. label:: end_InitializeSimulation_class
 
 The *InitializeSimulation* class inherits from the previously created
-*Prepare* class. Additionally, we anticipate that *NumPy* will be required.
+*Prepare* and Utilities classes. Additionally, we anticipate that *NumPy* will
+be required.
 
 Within the *Measurements.py* file, copy the following lines:
 
@@ -189,10 +192,9 @@ Within the *Measurements.py* file, copy the following lines:
 .. code-block:: python
 
     from InitializeSimulation import InitializeSimulation
-    from Utilities import Utilities
 
 
-    class Measurements(InitializeSimulation, Utilities):
+    class Measurements(InitializeSimulation):
         def __init__(self,
                     *args,
                     **kwargs):
@@ -206,7 +208,9 @@ The *Measurements* class inherits both the *InitializeSimulation* and
 Finally, let us create the three remaining classes, named *MinimizeEnergy*,
 *MonteCarlo*, and *MolecularDynamics*. Each of these three classes inherits
 from the *Measurements* class, and thus from the classes inherited by
-*Measurements*. Within the *MinimizeEnergy.py* file, copy the following lines:
+*Measurements*.
+
+Within the *MinimizeEnergy.py* file, copy the following lines:
 
 .. label:: start_MinimizeEnergy_class
 
@@ -317,7 +321,7 @@ any *AssertionError*:
     Utilities does not inherit from MonteCarlo, as expected
     MonteCarlo correctly inherits from Utilities
 
-Alternatively, this test can also be launched using Pytest by typing in a terminal:
+Alternatively, this test can also be launched using *Pytest* by typing in a terminal:
 
 .. code-block:: bash
 

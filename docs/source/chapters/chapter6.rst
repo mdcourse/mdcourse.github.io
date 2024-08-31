@@ -47,6 +47,10 @@ Let us add a method named *monte_carlo_move* to the *MonteCarlo* class:
     def monte_carlo_move(self):
         """Monte Carlo move trial."""
         if self.displace_mc is not None: # only trigger if displace_mc was provided by the user
+            # If needed, recalculate neighbor/coeff lists
+            self.update_neighbor_lists()
+            self.identify_atom_properties()
+            self.update_cross_coefficients()
             try: # try using the last saved Epot, if it exists
                 initial_Epot = self.Epot
             except: # If self.Epot does not exists yet, calculate it
@@ -146,16 +150,13 @@ perform a loop over the desired number of steps *maximum_steps*:
     def run(self):
         """Perform the loop over time."""
         for self.step in range(0, self.maximum_steps+1):
-            self.update_neighbor_lists()
-            self.update_cross_coefficients()
             self.monte_carlo_move()
             self.wrap_in_box()
 
 .. label:: end_MonteCarlo_class
 
 At each step, the *monte_carlo_move* method is called. The previously defined
-methods *update_neighbor_lists* and *wrap_in_box* are also called to ensure that
-the neighbor lists are kept up to date despite the motion of the atoms, and that
+mthe *wrap_in_box* method is also called to ensure that
 the atoms remain inside the box, respectively.
 
 Let us call *update_log_md_mc* from the run method of the MonteCarlo class.

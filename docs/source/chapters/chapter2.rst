@@ -95,13 +95,15 @@ Modify the *Prepare* class as follows:
 
     class Prepare:
         def __init__(self,
-                    number_atoms=[10],  # List - no unit
-                    epsilon=[0.1],  # List - Kcal/mol
-                    sigma=[3],  # List - Angstrom
-                    atom_mass=[10],  # List - g/mol
+                    ureg, # Pint unit registry
+                    number_atoms, # List - no unit
+                    epsilon, # List - Kcal/mol
+                    sigma, # List - Angstrom
+                    atom_mass,  # List - g/mol
                     potential_type="Lennard-Jones",
                     *args,
                     **kwargs):
+            self.ureg = ureg
             self.number_atoms = number_atoms
             self.epsilon = epsilon
             self.sigma = sigma
@@ -116,7 +118,7 @@ Here, the four lists *number_atoms* :math:`N`, *epsilon* :math:`\epsilon`,
 :math:`10`, :math:`0.1~\text{[Kcal/mol]}`, :math:`3~\text{[Å]}`, and
 :math:`10~\text{[g/mol]}`, respectively.
 
-The type of potential is also specified, with Lennard-Jones being closen as
+The type of potential is also specified, with Lennard-Jones being chosen as
 the default option.
 
 All the parameters are assigned to *self*, allowing other methods to access
@@ -136,25 +138,33 @@ unit system to the *LJ* unit system:
 
     def calculate_LJunits_prefactors(self):
         """Calculate the Lennard-Jones units prefactors."""
-        # Define the reference distance, energy, and mass
-        self.reference_distance = self.sigma[0]  # Angstrom
-        self.reference_energy = self.epsilon[0]  # kcal/mol
-        self.reference_mass = self.atom_mass[0]  # g/mol
-
-        # Calculate the prefactor for the time
-        mass_kg = self.atom_mass[0]/cst.kilo/cst.Avogadro  # kg
-        epsilon_J = self.epsilon[0]*cst.calorie*cst.kilo/cst.Avogadro  # J
-        sigma_m = self.sigma[0]*cst.angstrom  # m
-        time_s = np.sqrt(mass_kg*sigma_m**2/epsilon_J)  # s
-        self.reference_time = time_s / cst.femto  # fs
-
-        # Calculate the prefactor for the temperature
+        # First define constants
         kB = cst.Boltzmann*cst.Avogadro/cst.calorie/cst.kilo  # kcal/mol/K
-        self.reference_temperature = self.epsilon[0]/kB  # K
-
-        # Calculate the prefactor for the pressure
-        pressure_pa = epsilon_J/sigma_m**3  # Pa
-        self.reference_pressure = pressure_pa/cst.atm  # atm
+        kB *= self.ureg.kcal/self.ureg.mol/self.ureg.kelvin
+        Na = cst.Avogadro/self.ureg.mol
+        # Define the reference distance, energy, and mass
+        self.ref_length = self.sigma[0]  # Angstrom
+        self.ref_energy = self.epsilon[0]  # kcal/mol
+        self.ref_mass = self.atom_mass[0]  # g/mol
+        # Optional: assert that units were correctly provided by users
+        assert self.ref_length.units == self.ureg.angstrom, \
+            f"Error: Provided sigma has wrong units, should be angstrom"
+        assert self.ref_energy.units == self.ureg.kcal/self.ureg.mol, \
+            f"Error: Provided epsilon has wrong units, should be kcal/mol"
+        assert self.ref_mass.units == self.ureg.g/self.ureg.mol, \
+            f"Error: Provided mass has wrong units, should be g/mol"
+        # Calculate the prefactor for the time (in femtosecond)
+        self.ref_time = np.sqrt(self.ref_mass \
+            *self.ref_length**2/self.ref_energy).to(self.ureg.femtosecond)
+        # Calculate the prefactor for the temperature (in Kelvin)
+        self.ref_temperature = self.ref_energy/kB  # Kelvin
+        # Calculate the prefactor for the pressure (in Atmosphere)
+        self.ref_pressure = (self.ref_energy \
+            /self.ref_length**3/Na).to(self.ureg.atmosphere)
+        # Regroup all the reference quantities in list, for practicality
+        self.ref_quantities = [self.ref_length, self.ref_energy,
+            self.ref_mass, self.ref_time, self.ref_pressure]
+        self.ref_units = [ref.units for ref in self.ref_quantities]
 
 .. label:: end_Prepare_class
 
@@ -192,23 +202,26 @@ Let us take advantage of the calculated reference values and normalize the
 three inputs of the *Prepare* class that have physical dimensions, i.e.,
 *epsilon*, *sigma*, and *atom_mass*.
 
-Create a new method called *nondimensionalize_units_0* within the *Prepare*
+Create a new method called *nondimensionalize_units* within the *Prepare*
 class:
 
 .. label:: start_Prepare_class
 
 .. code-block:: python
 
-    def nondimensionalize_units_0(self):
-        # Normalize LJ properties
-        epsilon, sigma, atom_mass = [], [], []
-        for e0, s0, m0 in zip(self.epsilon, self.sigma, self.atom_mass):
-            epsilon.append(e0/self.reference_energy)
-            sigma.append(s0/self.reference_distance)
-            atom_mass.append(m0/self.reference_mass)
-        self.epsilon = epsilon
-        self.sigma = sigma
-        self.atom_mass = atom_mass
+    def nondimensionalize_units(self, quantities_to_normalise):
+        for quantity in quantities_to_normalise:
+            if isinstance(quantity, list):
+                for i, element in enumerate(quantity):
+                    assert element.units in self.ref_units, \
+                        f"Error: Units not part of the reference units"
+                    ref_value = self.ref_quantities[self.ref_units.index(element.units)]
+                    quantity[i] = element/ref_value
+                    assert quantity[i].units == self.ureg.dimensionless, \
+                        f"Error: Quantities are not properly nondimensionalized"
+                    quantity[i] = quantity[i].magnitude # get rid of ureg
+            else:
+                print("NON ANTICIPATED!")
 
 .. label:: end_Prepare_class
 
@@ -218,7 +231,7 @@ will be used to nondimensionalize units in future classes. We anticipate that
 each element is normalized with the corresponding reference value. The
 *zip()* function allows us to loop over all three lists at once.
 
-Let us also call the *nondimensionalize_units_0* from the *__init__()* method
+Let us also call the *nondimensionalize_units* from the *__init__()* method
 of the *Prepare* class:
 
 .. label:: start_Prepare_class
@@ -228,7 +241,7 @@ of the *Prepare* class:
     def __init__(self,
         (...)
         self.calculate_LJunits_prefactors()
-        self.nondimensionalize_units_0()
+        self.nondimensionalize_units([self.epsilon, self.sigma, self.atom_mass])
 
 .. label:: end_Prepare_class
 
@@ -288,7 +301,7 @@ Let us call the *identify_atom_properties* from the *__init__()* method:
 
     def __init__(self,
         (...)
-        self.nondimensionalize_units_0()
+        self.nondimensionalize_units([self.epsilon, self.sigma, self.atom_mass])
         self.identify_atom_properties()
 
 .. label:: end_Prepare_class
@@ -306,13 +319,25 @@ type 1, and 3 atoms of type 2:
 
     import numpy as np
     from Prepare import Prepare
+    from pint import UnitRegistry
+    ureg = UnitRegistry()
 
-    # Initialize the Prepare object
+    # Define atom number of each group
+    nmb_1, nmb_2= [2, 3]
+    # Define LJ parameters (sigma)
+    sig_1, sig_2 = [3, 4]*ureg.angstrom
+    # Define LJ parameters (epsilon)
+    eps_1, eps_2 = [0.2, 0.4]*ureg.kcal/ureg.mol
+    # Define atom mass
+    mss_1, mss_2 = [10, 20]*ureg.gram/ureg.mol
+
+    # Initialize the prepare object
     prep = Prepare(
-        number_atoms=[2, 3],
-        epsilon=[0.2, 0.4], # kcal/mol
-        sigma=[3, 4], # A
-        atom_mass=[10, 20], # g/mol
+        ureg = ureg,
+        number_atoms=[nmb_1, nmb_2],
+        epsilon=[eps_1, eps_2], # kcal/mol
+        sigma=[sig_1, sig_2], # A
+        atom_mass=[mss_1, mss_2], # g/mol
     )
 
     # Test function using pytest

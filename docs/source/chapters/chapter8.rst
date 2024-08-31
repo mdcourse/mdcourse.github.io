@@ -3,64 +3,131 @@
 Monte Carlo insert
 ==================
 
-In the Grand Canonical ensemble, the number of atom in the
-simulation box is not constant. 
+Here, a *Monte Carlo* simulation is implemented in the Grand Canonical ensemble,
+where the number of atoms in the system fluctuates. The principle of the
+simulation resemble the Monte Carlo move from :ref:`chapter6-label`:
 
-Let us add the following method to the MonteCarlo class:
+- 1) We start from a given intial configuration, and measure the potential
+  energy, :math:`E_\text{pot}^\text{initial}`.
+- 2) A random number is chosen, and depending on its value, either a new particle
+  will tried to be inserted, or an existing particle will tried to be deleted.
+- 3) The energy of the system after the insersion/deletion,
+  :math:`E_\text{pot}^\text{trial}`, is measured.
+- 4) We then decide to keep or reject the move by calculating
+  the difference in energy between the trial and the initial configurations:
+  :math:`\Delta E = E_\text{pot}^\text{trial} - E_\text{pot}^\text{initial}`.
+  
+  - If :math:`\Delta E < 0`, then the move is automatically accepted. 
+  - If :math:`\Delta E > 0`, then the move is accepted with a probability given
+    by the Boltzmann factor :math:`\exp{- \beta \Delta E}`, where
+    :math:`\beta = 1 / k_\text{B} T` and :math:`T` is the imposed temperature.
+
+- 5) Steps 1-4 are repeated a large number of times, generating a broad range of
+     possible configurations.
+
+Implementation
+--------------
+
+Let us add the following method called *monte_carlo_exchange* to the *MonteCarlo* class:
 
 .. label:: start_MonteCarlo_class
 
 .. code-block:: python
 
-    def monte_carlo_insert_delete(self):
-        if self.desired_mu is not None: # trigger method if desired_mu was entered
-            initial_Epot = self.compute_potential(output="potential")
-            initial_positions = copy.deepcopy(self.atoms_positions)
-            initial_number_atoms = copy.deepcopy(self.number_atoms)
-            initial_neighbor_lists = copy.deepcopy(self.neighbor_lists)
-            volume = np.prod(np.diff(self.box_boundaries))
-            if np.random.random() < 0.5:
-                # Try adding an atom
-                self.number_atoms[self.inserted_type] += 1
-                atom_position = np.zeros((1, self.dimensions))
-                for dim in np.arange(self.dimensions):
-                    atom_position[:, dim] = np.random.random(1)*np.diff(self.box_boundaries[dim]) - np.diff(self.box_boundaries[dim])/2
-                shift_id = 0
-                for N in self.number_atoms[:self.inserted_type]:
-                    shift_id += N
-                self.atoms_positions = np.vstack([self.atoms_positions[:shift_id], atom_position, self.atoms_positions[shift_id:]])
-                self.update_neighbor_lists()
-                self.calculate_cross_coefficients()
-                trial_Epot = self.compute_potential(output="potential")
-                Lambda = self.calculate_Lambda(self.atom_mass[self.inserted_type])
-                beta =  1/self.desired_temperature
-                acceptation_probability = np.min([1, volume/(Lambda**self.dimensions*(self.total_number_atoms))*np.exp(beta*(self.desired_mu-trial_Epot+initial_Epot))])
-            else:
-                # Pick one atom to delete randomly
-                atom_id = np.random.randint(self.number_atoms[self.inserted_type])
-                self.number_atoms[self.inserted_type] -= 1
-                if self.number_atoms[self.inserted_type] > 0:
-                    shift_id = 0
-                    for N in self.number_atoms[:self.inserted_type]:
-                        shift_id += N
-                    self.atoms_positions = np.delete(self.atoms_positions, shift_id+atom_id, axis=0)
-                    self.update_neighbor_lists()
-                    self.calculate_cross_coefficients()
-                    trial_Epot = self.compute_potential(output="potential")
-                    Lambda = self.calculate_Lambda(self.atom_mass[self.inserted_type])
-                    beta =  1/self.desired_temperature
-                    acceptation_probability = np.min([1, (Lambda**self.dimensions*(self.total_number_atoms-1)/volume)*np.exp(-beta*(self.desired_mu+trial_Epot-initial_Epot))])
-                else:
-                    acceptation_probability = 0
-            if np.random.random() < acceptation_probability:
-                # Accept the new position
-                pass
-            else:
-                # Reject the new position
-                self.neighbor_lists = initial_neighbor_lists
-                self.atoms_positions = initial_positions
-                self.number_atoms = initial_number_atoms
-                self.calculate_cross_coefficients()
+    def monte_carlo_exchange(self):
+        # The first step is to make a copy of the previous state
+        # Since atoms numbers are evolving, its also important to store the
+        # neighbor, sigma, and epsilon lists
+        self.Epot = self.compute_potential()
+        initial_positions = copy.deepcopy(self.atoms_positions)
+        initial_number_atoms = copy.deepcopy(self.number_atoms)
+        initial_neighbor_lists = copy.deepcopy(self.neighbor_lists)
+        initial_sigma_lists = copy.deepcopy(self.sigma_ij_list)
+        initial_epsilon_lists = copy.deepcopy(self.epsilon_ij_list)
+        # Apply a 50-50 probability to insert or delete
+        if np.random.random() < 0.5:
+            self.monte_carlo_insert()
+        else:
+            self.monte_carlo_delete()
+        # If np.random.random() < self.acceptation_probability, do nothing
+        if np.random.random() > self.acceptation_probability:
+            # Reject the new position, revert to inital position
+            self.neighbor_lists = initial_neighbor_lists
+            self.sigma_ij_list = initial_sigma_lists
+            self.epsilon_ij_list = initial_epsilon_lists
+            self.atoms_positions = initial_positions
+            self.number_atoms = initial_number_atoms
+
+.. label:: end_MonteCarlo_class
+
+First, the potential energy is calculated, and the current state of the
+simulations, such as positions and atom numbers, are saved. Then, an insertion
+try or a deletion trial is made, each with a probability of 0.5. The
+*monte_carlo_insert* and *monte_carlo_delete*, that are implemented here below,
+are both calculting the *acceptation_probability*. A random number is again selected,
+and if that number is larger than the acceptation probability, then the system
+revert to its previous position. If the random number is lower than the acceptation
+probability, nothing appends, which means that the last trial is accepted.
+
+Then, let us write the *monte_carlo_insert* method:
+
+.. label:: start_MonteCarlo_class
+
+.. code-block:: python
+
+    def monte_carlo_insert(self):
+        self.number_atoms[self.inserted_type] += 1
+        new_atom_position = np.random.random(3)*np.diff(self.box_boundaries).T \
+            - np.diff(self.box_boundaries).T/2
+        shift_id = 0 
+        for N in self.number_atoms[:self.inserted_type]:
+            shift_id += N
+        self.atoms_positions = np.vstack([self.atoms_positions[:shift_id],
+                                        new_atom_position,
+                                        self.atoms_positions[shift_id:]])
+        self.total_number_atoms = np.sum(self.number_atoms)
+        self.update_neighbor_lists()
+        self.identify_atom_properties()
+        self.update_cross_coefficients()
+        trial_Epot = self.compute_potential()
+        Lambda = self.calculate_Lambda(self.atom_mass[self.inserted_type])
+        beta =  1/self.desired_temperature
+        Nat = np.sum(self.number_atoms) # NUmber atoms, should it relly be N? of N (type) ?
+        Vol = np.prod(self.box_size[:3]) # box volume
+        # dimension of 3 is enforced in the power of the Lambda
+        self.acceptation_probability = np.min([1, Vol/(Lambda**3*Nat) \
+            *np.exp(beta*(self.desired_mu-trial_Epot+self.Epot))])
+
+.. label:: end_MonteCarlo_class
+
+as well as the *monte_carlo_delete* method:
+
+.. label:: start_MonteCarlo_class
+
+.. code-block:: python
+
+    def monte_carlo_delete(self):
+        # Pick one atom to delete randomly
+        atom_id = np.random.randint(self.number_atoms[self.inserted_type])
+        self.number_atoms[self.inserted_type] -= 1
+        if self.number_atoms[self.inserted_type] > 0:
+            shift_id = 0
+            for N in self.number_atoms[:self.inserted_type]:
+                shift_id += N
+            self.atoms_positions = np.delete(self.atoms_positions, shift_id+atom_id, axis=0)
+            self.update_neighbor_lists()
+            self.identify_atom_properties()
+            self.update_cross_coefficients()
+            trial_Epot = self.compute_potential()
+            Lambda = self.calculate_Lambda(self.atom_mass[self.inserted_type])
+            beta =  1/self.desired_temperature
+            Nat = np.sum(self.number_atoms) # NUmber atoms, should it relly be N? of N (type) ?
+            Vol = np.prod(self.box_size[:3]) # box volume
+            # dimension of 3 is enforced in the power of the Lambda
+            self.acceptation_probability = np.min([1, (Lambda**3 *(Nat-1)/Vol) \
+                *np.exp(-beta*(self.desired_mu+trial_Epot-self.Epot))])
+        else:
+            print("Error: no more atoms to delete")
 
 .. label:: end_MonteCarlo_class
 
@@ -113,7 +180,7 @@ Let us non-dimentionalize desired_mu by adding:
 
 .. label:: end_MonteCarlo_class
 
-Finally, *monte_carlo_insert_delete* must be included in the run:
+Finally, the *monte_carlo_insert_delete()* method must be included in the run:
 
 .. label:: start_MonteCarlo_class
 
@@ -121,8 +188,8 @@ Finally, *monte_carlo_insert_delete* must be included in the run:
 
     def run(self):
         (...)
-            self.monte_carlo_displacement()
-            self.monte_carlo_insert_delete()
+            self.monte_carlo_move()
+            self.monte_carlo_exchange()
             self.wrap_in_box()
         (...)
 
@@ -172,6 +239,7 @@ One can use a similar test as previously. Let us use a displace distance of
         sigma=[3], # A
         atom_mass=[1], # g/mol
         box_dimensions=[20, 20, 20], # A
+        data_folder = "outputs/",
         )
     mc.run()
 
