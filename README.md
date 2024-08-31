@@ -58,9 +58,10 @@ readings are provided as needed.
 This project has received funding from the European
 Union's Horizon 2020 research and innovation programme
 under the Marie Skłodowska-Curie grant agreement No 101065060.
-
-All the inputs, scripts, and data files are released under the 
-GNU general public license v3.0.
+All inputs, scripts, and data files are released under the GNU
+General Public License v3.0. The released files have been uploaded
+to [Zenodo](https://zenodo.org/), under the DOI
+[10.5281/zenodo.13354423](10.5281/zenodo.13354423).
 
 ### TODO
 
