@@ -49,22 +49,17 @@ Let us add a method named *monte_carlo_move* to the *MonteCarlo* class:
         if self.displace_mc is not None: # only trigger if displace_mc was provided by the user
             # If needed, recalculate neighbor/coeff lists
             self.update_neighbor_lists()
-            self.identify_atom_properties()
             self.update_cross_coefficients()
-            try: # try using the last saved Epot, if it exists
-                initial_Epot = self.Epot
-            except: # If self.Epot does not exists yet, calculate it
-                initial_Epot = self.compute_potential()
+            if hasattr(self, 'Epot') is False: # If self.Epot does not exists yet, calculate it
+                self.Epot = self.compute_potential()
+            initial_Epot = self.Epot
             # Make a copy of the initial atoms positions
             initial_positions = copy.deepcopy(self.atoms_positions)
             # Pick an atom id randomly
-            atom_id = np.random.randint(self.total_number_atoms)
+            atom_id = np.random.randint(np.sum(self.number_atoms))
             # Move the chosen atom in a random direction
             # The maximum displacement is set by self.displace_mc
-            if self.dimensions == 3:
-                move = (np.random.random(3)-0.5)*self.displace_mc 
-            elif self.dimensions == 2: # the third value will be 0
-                move = np.append((np.random.random(2) - 0.5) * self.displace_mc, 0)
+            move = (np.random.random(3)-0.5)*self.displace_mc 
             self.atoms_positions[atom_id] += move
             # Measure the optential energy of the new configuration
             trial_Epot = self.compute_potential()
@@ -76,7 +71,6 @@ Let us add a method named *monte_carlo_move* to the *MonteCarlo* class:
             if random_number <= acceptation_probability: # Accept new position
                 self.Epot = trial_Epot
             else: # Reject new position
-                self.Epot = initial_Epot
                 self.atoms_positions = initial_positions # Revert to initial positions
 
 .. label:: end_MonteCarlo_class
@@ -98,13 +92,11 @@ and the desired temperature (:math:`T`). Let us add these parameters to the
                     maximum_steps,
                     desired_temperature,
                     displace_mc = None,
-                    thermo_outputs = "press",
                     *args,
                     **kwargs):
             self.maximum_steps = maximum_steps
             self.displace_mc = displace_mc
             self.desired_temperature = desired_temperature
-            self.thermo_outputs = thermo_outputs
             super().__init__(*args, **kwargs)
             self.nondimensionalize_units(["desired_temperature", "displace_mc"])
 
@@ -193,6 +185,8 @@ One can use a similar test as previously. Let us use a displace distance of
     rc = 2.5*sig_1
     # Pick the desired temperature
     T = 300*ureg.kelvin
+    # choose the displace_mc
+    displace_mc = sig_1/4
 
     # Initialize the prepare object
     mc = MonteCarlo(
@@ -208,6 +202,8 @@ One can use a similar test as previously. Let us use a displace distance of
         cut_off=rc,
         thermo_outputs="Epot",
         desired_temperature=T, # K
+        neighbor=20,
+        displace_mc = displace_mc,
     )
     mc.run()
 

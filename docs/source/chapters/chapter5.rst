@@ -96,13 +96,13 @@ All quantities are re-dimensionalized before getting outputed.
                     elif code.thermo_outputs == "Epot-press":
                         logger.info(f"step Epot press")
                 if code.thermo_outputs == "Epot":
-                    logger.info(f"{code.step} {Epot:.2f}")
+                    logger.info(f"{code.step} {Epot.magnitude:.2f}")
                 elif code.thermo_outputs == "Epot-MaxF":
-                    logger.info(f"{code.step} {Epot:.2f} {code.MaxF:.2f}")
+                    logger.info(f"{code.step} {Epot.magnitude:.2f} {code.MaxF:.2f}")
                 elif code.thermo_outputs == "Epot-press":
                     code.calculate_pressure()
                     press = code.pressure * code.ref_pressure  # Atm
-                    logger.info(f"{code.step} {Epot:.2f} {press:.2f}")
+                    logger.info(f"{code.step} {Epot.magnitude:.2f} {press.magnitude:.2f}")
 
 .. label:: end_logger_class
 

@@ -68,11 +68,9 @@ Then, let us fill the *__init__()* method:
     class MinimizeEnergy(Measurements):
         def __init__(self,
                     maximum_steps,
-                    thermo_outputs="MaxF",
                     *args,
                     **kwargs):
             self.maximum_steps = maximum_steps
-            self.thermo_outputs = thermo_outputs
             super().__init__(*args, **kwargs)
             
 .. label:: end_MinimizeEnergy_class
