@@ -96,44 +96,17 @@ and the desired temperature (:math:`T`). Let us add these parameters to the
     class MonteCarlo(Measurements):
         def __init__(self,
                     maximum_steps,
-                    cut_off = 9,
+                    desired_temperature,
                     displace_mc = None,
-                    neighbor = 1,
-                    desired_temperature = 300,
                     thermo_outputs = "press",
-                    data_folder = None,
                     *args,
                     **kwargs):
             self.maximum_steps = maximum_steps
-            self.cut_off = cut_off
             self.displace_mc = displace_mc
-            self.neighbor = neighbor
             self.desired_temperature = desired_temperature
             self.thermo_outputs = thermo_outputs
-            self.data_folder = data_folder
-            if self.data_folder is not None:
-                if os.path.exists(self.data_folder) is False:
-                    os.mkdir(self.data_folder)
             super().__init__(*args, **kwargs)
-            self.nondimensionalize_units_3()
-
-.. label:: end_MonteCarlo_class
-
-Here, we anticipate that some of the parameters have to be nondimensionalized, which
-is done with the *nondimensionalize_units_3* method that must also be added to
-the *MonteCarlo* class:
-
-.. label:: start_MonteCarlo_class
-
-.. code-block:: python
-
-    def nondimensionalize_units_3(self):
-        """Use LJ prefactors to convert units into non-dimensional."""
-        self.cut_off = self.cut_off/self.reference_distance
-        self.desired_temperature = self.desired_temperature \
-            /self.reference_temperature
-        if self.displace_mc is not None:
-            self.displace_mc /= self.reference_distance
+            self.nondimensionalize_units(["desired_temperature", "displace_mc"])
 
 .. label:: end_MonteCarlo_class
 
@@ -201,21 +174,41 @@ One can use a similar test as previously. Let us use a displace distance of
 
 .. code-block:: python
 
-    import os
     from MonteCarlo import MonteCarlo
+    from pint import UnitRegistry
+    ureg = UnitRegistry()
+    import os
 
-    mc = MonteCarlo(maximum_steps=1000,
-        dumping_period=100,
+    # Define atom number of each group
+    nmb_1= 50
+    # Define LJ parameters (sigma)
+    sig_1 = 3*ureg.angstrom
+    # Define LJ parameters (epsilon)
+    eps_1 = 0.1*ureg.kcal/ureg.mol
+    # Define atom mass
+    mss_1 = 10*ureg.gram/ureg.mol
+    # Define box size
+    L = 20*ureg.angstrom
+    # Define a cut off
+    rc = 2.5*sig_1
+    # Pick the desired temperature
+    T = 300*ureg.kelvin
+
+    # Initialize the prepare object
+    mc = MonteCarlo(
+        ureg = ureg,
+        maximum_steps=1000,
         thermo_period=100,
-        thermo_outputs = "Epot",
-        displace_mc = 0.5,
-        number_atoms=[50],
-        epsilon=[0.1], # kcal/mol
-        sigma=[3], # A
-        atom_mass=[10], # g/mol
-        box_dimensions=[20, 20, 20], # A
-        data_folder="Outputs/",
-        )
+        dumping_period=100,
+        number_atoms=[nmb_1],
+        epsilon=[eps_1], # kcal/mol
+        sigma=[sig_1], # A
+        atom_mass=[mss_1], # g/mol
+        box_dimensions=[L, L, L], # A
+        cut_off=rc,
+        thermo_outputs="Epot",
+        desired_temperature=T, # K
+    )
     mc.run()
 
 .. label:: end_test_6a_class

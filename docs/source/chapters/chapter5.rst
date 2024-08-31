@@ -208,6 +208,7 @@ parameters are passed the InitializeSimulation method:
                 thermo_period = None,
                 dumping_period = None,
                 thermo_outputs = None,
+                data_folder="Outputs/",
 
 .. label:: end_InitializeSimulation_class
 
@@ -221,6 +222,9 @@ parameters are passed the InitializeSimulation method:
         self.thermo_period = thermo_period
         self.dumping_period = dumping_period
         self.thermo_outputs = thermo_outputs
+        self.data_folder = data_folder
+        if os.path.exists(self.data_folder) is False:
+            os.mkdir(self.data_folder)
 
 .. label:: end_InitializeSimulation_class
 

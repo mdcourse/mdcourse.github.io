@@ -163,7 +163,7 @@ unit system to the *LJ* unit system:
             /self.ref_length**3/Na).to(self.ureg.atmosphere)
         # Regroup all the reference quantities in list, for practicality
         self.ref_quantities = [self.ref_length, self.ref_energy,
-            self.ref_mass, self.ref_time, self.ref_pressure]
+            self.ref_mass, self.ref_time, self.ref_pressure, self.ref_temperature]
         self.ref_units = [ref.units for ref in self.ref_quantities]
 
 .. label:: end_Prepare_class

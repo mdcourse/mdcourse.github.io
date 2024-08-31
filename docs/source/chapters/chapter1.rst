@@ -167,6 +167,7 @@ Within the *InitializeSimulation.py* file, copy the following lines:
 
 .. code-block:: python
 
+    import os
     import numpy as np
     from Prepare import Prepare
     from Utilities import Utilities
@@ -298,12 +299,14 @@ and copy the following lines into it:
 
     # Make sure that MonteCarlo correctly inherits from Utilities
     def test_montecarlo_inherits_from_utilities():
-        assert issubclass(MonteCarlo, Utilities), "MonteCarlo should inherit from Utilities"
+        assert issubclass(MonteCarlo, Utilities), \
+            "MonteCarlo should inherit from Utilities"
         print("MonteCarlo correctly inherits from Utilities")
 
     # Make sure that Utilities does not inherit from MonteCarlo
     def test_utilities_does_not_inherit_from_montecarlo():
-        assert not issubclass(Utilities, MonteCarlo), "Utilities should not inherit from MonteCarlo"
+        assert not issubclass(Utilities, MonteCarlo), \
+            "Utilities should not inherit from MonteCarlo"
         print("Utilities does not inherit from MonteCarlo, as expected")
 
     # In the script is launched with Python, call Pytest

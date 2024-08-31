@@ -69,14 +69,10 @@ Then, let us fill the *__init__()* method:
         def __init__(self,
                     maximum_steps,
                     thermo_outputs="MaxF",
-                    data_folder="Outputs/",
                     *args,
                     **kwargs):
             self.maximum_steps = maximum_steps
             self.thermo_outputs = thermo_outputs
-            self.data_folder = data_folder
-            if os.path.exists(self.data_folder) is False:
-                os.mkdir(self.data_folder)
             super().__init__(*args, **kwargs)
             
 .. label:: end_MinimizeEnergy_class
