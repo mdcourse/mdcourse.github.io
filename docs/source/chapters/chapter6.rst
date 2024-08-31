@@ -70,8 +70,10 @@ Let us add a method named *monte_carlo_move* to the *MonteCarlo* class:
             acceptation_probability = np.min([1, np.exp(-beta*delta_E)])
             if random_number <= acceptation_probability: # Accept new position
                 self.Epot = trial_Epot
+                self.successful_move += 1
             else: # Reject new position
                 self.atoms_positions = initial_positions # Revert to initial positions
+                self.failed_move += 1
 
 .. label:: end_MonteCarlo_class
 
@@ -99,6 +101,8 @@ and the desired temperature (:math:`T`). Let us add these parameters to the
             self.desired_temperature = desired_temperature
             super().__init__(*args, **kwargs)
             self.nondimensionalize_units(["desired_temperature", "displace_mc"])
+            self.successful_move = 0
+            self.failed_move = 0
 
 .. label:: end_MonteCarlo_class
 
