@@ -215,7 +215,6 @@ We need to calculate Lambda:
 
     def calculate_Lambda(self, mass):
         """Estimate the de Broglie wavelength."""
-        m = mass/cst.Avogadro*cst.milli  # kg
         T = self.desired_temperature  # N
         return 1/np.sqrt(2*np.pi*mass*T)
 

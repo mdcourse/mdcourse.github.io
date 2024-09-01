@@ -29,7 +29,7 @@ The *real* unit system follows the conventions outlined in the |lammps-unit-syst
 - Forces are in (kcal/mol)/Ångström,
 - Temperature is in Kelvin,
 - Pressure is in atmospheres,
-- Density is in g/cm\ :sup:`3` (in 3D).
+- Density is in g/cm\ :sup:`3`.
 
 .. |lammps-unit-systems| raw:: html
 
@@ -56,12 +56,8 @@ where :math:`k_\text{B}` is the Boltzmann constant.
 Start coding
 ------------
 
-Let's fill in the previously created class named Prepare. To facilitate unit
-conversion, we will import |NumPy| and the constants module from |SciPy|.
-
-.. |NumPy| raw:: html
-
-   <a href="https://numpy.org/" target="_blank">NumPy</a>
+Let's fill in the previously created class named *Prepare*. To facilitate unit
+conversion, we will import NumPy and the constants module from |SciPy|.
 
 .. |SciPy| raw:: html
 
@@ -78,7 +74,7 @@ In the file named *Prepare.py*, add the following lines:
 
 .. label:: end_Prepare_class
 
-Four parameters are provided to the *Prepare* class:
+Four atom parameters are provided to the *Prepare* class:
 
 - the atom masses :math:`m`,
 - the LJ parameters :math:`\sigma` and :math:`\epsilon`,
@@ -100,7 +96,6 @@ Modify the *Prepare* class as follows:
                     epsilon, # List - Kcal/mol
                     sigma, # List - Angstrom
                     atom_mass,  # List - g/mol
-                    potential_type="Lennard-Jones",
                     *args,
                     **kwargs):
             self.ureg = ureg
@@ -108,18 +103,19 @@ Modify the *Prepare* class as follows:
             self.epsilon = epsilon
             self.sigma = sigma
             self.atom_mass = atom_mass
-            self.potential_type = potential_type
             super().__init__(*args, **kwargs)
 
 .. label:: end_Prepare_class
 
-Here, the four lists *number_atoms* :math:`N`, *epsilon* :math:`\epsilon`,
-*sigma* :math:`\sigma`, and *atom_mass* :math:`m` are given default values of
-:math:`10`, :math:`0.1~\text{[Kcal/mol]}`, :math:`3~\text{[Å]}`, and
-:math:`10~\text{[g/mol]}`, respectively.
+Here, *number_atoms* :math:`N`, *epsilon* :math:`\epsilon`,
+*sigma* :math:`\sigma`, and *atom_mass* :math:`m` must be provided as lists
+where the elements have no units, kcal/mol, angstrom, and g/mol units,
+respectively. The units will be enforced with the |Pint| unit registry, *ureg*,
+which must also be provided as a parameter.
 
-The type of potential is also specified, with Lennard-Jones being chosen as
-the default option.
+.. |Pint| raw:: html
+
+   <a href="https://pint.readthedocs.io" target="_blank">Pint</a>
 
 All the parameters are assigned to *self*, allowing other methods to access
 them. The *args* and *kwargs* parameters are used to accept an arbitrary number

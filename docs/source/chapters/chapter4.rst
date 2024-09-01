@@ -47,19 +47,7 @@ minimized energy state.
 Prepare the minimization
 ------------------------
 
-Let us start by importing NumPy and the copy libraries. Add the following
-to the beginning of the *MinimizeEnergy.py* file:
-
-.. label:: start_MinimizeEnergy_class
-
-.. code-block:: python
-
-    import numpy as np
-    import copy
-
-.. label:: end_MinimizeEnergy_class
-
-Then, let us fill the *__init__()* method:
+Let us fill the *__init__()* method:
 
 .. label:: start_MinimizeEnergy_class
 
@@ -154,8 +142,7 @@ class:
             # Measure potential using information about cross coefficients
             sigma_ij = self.sigma_ij_list[Ni]
             epsilon_ij = self.epsilon_ij_list[Ni]
-            energy_potential += np.sum(potentials(self.potential_type,
-                                                  epsilon_ij, sigma_ij, rij))
+            energy_potential += np.sum(potentials(epsilon_ij, sigma_ij, rij))
         return energy_potential
     
 .. label:: end_Utilities_class
@@ -207,8 +194,7 @@ let us create a new method that is dedicated solely to measuring forces:
             # Measure force using information about cross coefficients
             sigma_ij = self.sigma_ij_list[Ni]
             epsilon_ij = self.epsilon_ij_list[Ni]       
-            fij_xyz = potentials(self.potential_type, epsilon_ij,
-                                 sigma_ij, rij, derivative = True)
+            fij_xyz = potentials(epsilon_ij, sigma_ij, rij, derivative = True)
             if return_vector:
                 # Add the contribution to both Ni and its neighbors
                 force_vector[Ni] += np.sum((fij_xyz*rij_xyz.T/rij).T, axis=0)
