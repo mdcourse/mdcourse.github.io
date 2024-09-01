@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Bibliography" href="../divers/bibliography.html" /><link rel="prev" title="Pressure measurement" href="../chapters/chapter7.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Bibliography" href="../divers/bibliography.html" /><link rel="prev" title="Monte Carlo insert" href="../chapters/chapter8.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
         <title>A Monte Carlo study of argon - </title>
@@ -204,13 +204,14 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Code implementation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../chapters/chapter1.html">Start coding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapters/chapter1.html">Start Coding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chapters/chapter2.html">Setting Up the Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chapters/chapter3.html">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chapters/chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chapters/chapter5.html">Output the simulation state</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chapters/chapter6.html">Monte Carlo move</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../chapters/chapter7.html">Pressure measurement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapters/chapter7.html">Pressure Measurement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapters/chapter8.html">Monte Carlo insert</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Illustration</span></p>
 <ul class="current">
@@ -274,14 +275,14 @@ for a large range of density.</p>
 <p>In 1957, Wood and Parker reported the first numerical study of a 3D fluid that was
 using an attractive Lennard-Jones potential <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">1</a>]</span> (before
 them, Metropolis et al. used repulsive hard-sphere
-potentials only <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id5" title="Nicholas Metropolis, Arianna W Rosenbluth, Marshall N Rosenbluth, Augusta H Teller, and Edward Teller. Equation of state calculations by fast computing machines. The journal of chemical physics, 21(6):1087–1092, 1953.">4</a>, <a class="reference internal" href="../divers/bibliography.html#id6" title="Nicholas Metropolis, AWRMN Rosenbluth, M Rosenbluth, A Teller, and E Teller. Simulated annealing. Journal of Chemical Physics, 21(161-162):1087–1092, 1953.">5</a>]</span>).
+potentials only <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id5" title="Nicholas Metropolis, Arianna W Rosenbluth, Marshall N Rosenbluth, Augusta H Teller, and Edward Teller. Equation of state calculations by fast computing machines. The journal of chemical physics, 21(6):1087–1092, 1953.">8</a>, <a class="reference internal" href="../divers/bibliography.html#id6" title="Nicholas Metropolis, AWRMN Rosenbluth, M Rosenbluth, A Teller, and E Teller. Simulated annealing. Journal of Chemical Physics, 21(161-162):1087–1092, 1953.">9</a>]</span>).
 In their study, Wood and Parker used a Monte Carlo algorithm to predict the
 Equation of State (EoS) of neutral particles interacting with Lennard-Jones potential,
 whose parameters were chosen to match those of argon gas. Their results show
-good agreement with experimental measurements of Michels on argon <span id="id3">[<a class="reference internal" href="../divers/bibliography.html#id3" title="A Michels, Hub Wijker, and HK Wijker. Isotherms of argon between 0 c and 150 c and pressures up to 2900 atmospheres. Physica, 15(7):627–633, 1949.">6</a>]</span>.</p>
+good agreement with experimental measurements of Michels on argon <span id="id3">[<a class="reference internal" href="../divers/bibliography.html#id3" title="A Michels, Hub Wijker, and HK Wijker. Isotherms of argon between 0 c and 150 c and pressures up to 2900 atmospheres. Physica, 15(7):627–633, 1949.">10</a>]</span>.</p>
 <p>Here, we take advantage of our code and try to reproduce the results of Wood and Parker
 for varying density. To follow this project, only Monte Carlo moves are needed,
-and all the chapters up to <a class="reference internal" href="../chapters/chapter7.html#chapter7-label"><span class="std std-ref">Pressure measurement</span></a> must have been followed.</p>
+and all the chapters up to <a class="reference internal" href="../chapters/chapter7.html#chapter7-label"><span class="std std-ref">Pressure Measurement</span></a> must have been followed.</p>
 <section id="parameters-choice">
 <h2>Parameters choice<a class="headerlink" href="#parameters-choice" title="Link to this heading">¶</a></h2>
 <p>Some parameters are taken <em>exactly</em> the same as those from Wood and Parker:</p>
@@ -465,14 +466,14 @@ the data obtained using LAMMPS were also added.</p>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../chapters/chapter7.html">
+          <a class="prev-page" href="../chapters/chapter8.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Pressure measurement</div>
+                <div class="title">Monte Carlo insert</div>
                 
               </div>
             </a>

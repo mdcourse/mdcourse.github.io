@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Setting Up the Simulation" href="chapter2.html" /><link rel="prev" title="Learn molecular simulations with Python" href="../index.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
-        <title>Start coding - </title>
+        <title>Start Coding - </title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
@@ -204,13 +204,14 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Code implementation</span></p>
 <ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Start coding</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Start Coding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter2.html">Setting Up the Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter3.html">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter5.html">Output the simulation state</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter6.html">Monte Carlo move</a></li>
-<li class="toctree-l1"><a class="reference internal" href="chapter7.html">Pressure measurement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter7.html">Pressure Measurement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter8.html">Monte Carlo insert</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Illustration</span></p>
 <ul>
@@ -260,7 +261,11 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="start-coding">
-<span id="chapter1-label"></span><h1>Start coding<a class="headerlink" href="#start-coding" title="Link to this heading">¶</a></h1>
+<span id="chapter1-label"></span><h1>Start Coding<a class="headerlink" href="#start-coding" title="Link to this heading">¶</a></h1>
+<p>Let’s start with the Python script. During this first chapter, some Python
+files will be created and filled in a minimal fashion. At the end of this
+chapter, a small test will be set up to ensure that the files were correctly
+created.</p>
 <section id="presentation">
 <h2>Presentation<a class="headerlink" href="#presentation" title="Link to this heading">¶</a></h2>
 <p>To perform the molecular simulations, three key steps will be followed:</p>
@@ -293,93 +298,90 @@ containing either Python functions or classes:</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><em>Prepare.py</em></p></td>
+<tr class="row-even"><td><p>Prepare.py</p></td>
 <td><p><em>Prepare</em> class: Methods for preparing the non-dimensionalization of the
 units</p></td>
 </tr>
-<tr class="row-odd"><td><p><em>Utilities.py</em></p></td>
-<td><p><em>Utilities</em> class: General-purpose methods, inherited by all other classes</p></td>
+<tr class="row-odd"><td><p>Utilities.py</p></td>
+<td><p><em>Utilities</em> class: General-purpose methods, inherited by all other
+classes</p></td>
 </tr>
-<tr class="row-even"><td><p><em>InitializeSimulation.py</em></p></td>
+<tr class="row-even"><td><p>InitializeSimulation.py</p></td>
 <td><p><em>InitializeSimulation</em> class: Methods necessary to set up the system and
 prepare the simulation, inherited by all the classes below</p></td>
 </tr>
-<tr class="row-odd"><td><p><em>MinimizeEnergy.py</em></p></td>
+<tr class="row-odd"><td><p>MinimizeEnergy.py</p></td>
 <td><p><em>MinimizeEnergy</em> class: Methods for performing energy minimization</p></td>
 </tr>
-<tr class="row-even"><td><p><em>MonteCarlo.py</em></p></td>
+<tr class="row-even"><td><p>MonteCarlo.py</p></td>
 <td><p><em>MonteCarlo</em> class: Methods for performing Monte Carlo simulations in
 different ensembles (e.g., Grand Canonical, Canonical)</p></td>
 </tr>
-<tr class="row-odd"><td><p><em>MolecularDynamics.py</em></p></td>
+<tr class="row-odd"><td><p>MolecularDynamics.py</p></td>
 <td><p><em>MolecularDynamics</em> class: Methods for performing molecular dynamics in
 different ensembles (NVE, NPT, NVT)</p></td>
 </tr>
-<tr class="row-even"><td><p><em>measurements.py</em></p></td>
-<td><p>Functions for performing specific measurements on the system</p></td>
+<tr class="row-even"><td><p>Measurements.py</p></td>
+<td><p><em>Measurements</em> class: Methods for for performing specific measurements on the system</p></td>
 </tr>
 <tr class="row-odd"><td><p><em>potentials.py</em></p></td>
 <td><p>Functions for calculating the potentials and forces between atoms</p></td>
 </tr>
-<tr class="row-even"><td><p><em>tools.py</em></p></td>
+<tr class="row-even"><td><p>logger.py</p></td>
 <td><p>Functions for outputting data into text files</p></td>
+</tr>
+<tr class="row-odd"><td><p>dumper.py</p></td>
+<td><p>Functions for outputting data into trajectory files for visualization</p></td>
+</tr>
+<tr class="row-even"><td><p>reader.py</p></td>
+<td><p>Functions for importing data from text files</p></td>
 </tr>
 </tbody>
 </table>
 </div>
+<p>Some of these files are created in this chapter; others will be created later
+on. All of these files must be created within the same folder.</p>
 </section>
 <section id="potential-for-inter-atomic-interaction">
-<h2>Potential for inter-atomic interaction<a class="headerlink" href="#potential-for-inter-atomic-interaction" title="Link to this heading">¶</a></h2>
-<p>In molecular simulations, potential functions are used to mimic the interaction
-between atoms. Although more complicated options exist, potentials are usually
+<h2>Potential for Inter-Atomic Interaction<a class="headerlink" href="#potential-for-inter-atomic-interaction" title="Link to this heading">¶</a></h2>
+<p>In molecular simulations, potential functions are used to model the interaction
+between atoms. Although more complex options exist, potentials are usually
 defined as functions of the distance <span class="math notranslate nohighlight">\(r\)</span> between two atoms.</p>
-<p>Within a dedicated folder, create the first file named <em>potentials.py</em>. This
-file will contain a function called <em>potentials</em>. Two types of potential can
-be returned by this function: the Lennard-Jones potential (LJ), and the
-hard-sphere potential.</p>
+<p>Create a file named <em>potentials.py</em>. This file will contain a function called
+<em>potentials</em>. For now, the only potential that can be returned by this function
+is the Lennard-Jones (LJ) potential, but this may change in the future.</p>
 <p>Copy the following lines into <em>potentials.py</em>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
-<span class="k">def</span> <span class="nf">potentials</span><span class="p">(</span><span class="n">potential_type</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">derivative</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">potential_type</span> <span class="o">==</span> <span class="s2">&quot;Lennard-Jones&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">derivative</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">48</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">((</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">12</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="n">r</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">((</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">12</span> <span class="o">-</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">potential_type</span> <span class="o">==</span> <span class="s2">&quot;Hard-Sphere&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">derivative</span><span class="p">:</span>
-            <span class="c1"># Derivative is not defined for Hard-Sphere potential.</span>
-            <span class="c1"># --&gt; return 0</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">r</span> <span class="o">&gt;</span> <span class="n">sigma</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">potentials</span><span class="p">(</span><span class="n">epsilon</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">derivative</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">derivative</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">48</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">((</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">12</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="n">r</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown potential type: </span><span class="si">{</span><span class="n">potential_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">((</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">12</span> <span class="o">-</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">/</span> <span class="n">r</span><span class="p">)</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The hard-sphere potential either returns a value of 0 when the distance between
-the two particles is larger than the parameter, <span class="math notranslate nohighlight">\(r &gt; \sigma\)</span>, or 1000 when
-<span class="math notranslate nohighlight">\(r &lt; \sigma\)</span>. The value of <em>1000</em> was chosen to be large enough to ensure
-that any Monte Carlo move that would lead to the two particles to overlap will
-be rejected.</p>
-<p>In the case of the LJ potential, depending on the value of the optional
-argument <em>derivative</em>, which can be either <em>False</em> or <em>True</em>, the <em>LJ_potential</em>
-function will return the force:</p>
+<p>Depending on the value of the optional argument <em>derivative</em>, which can be
+either <em>False</em> or <em>True</em>, this function returns the derivative of the potential,
+i.e., the force, <span class="math notranslate nohighlight">\(F_\text{LJ} = - \mathrm{d} U_\text{LJ} / \mathrm{d} r\)</span>:</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left[ \left( \frac{\sigma}{r} \right)^{12} - \frac{1}{2} \left( \frac{\sigma}{r} \right)^6 \right],\]</div>
+\[F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left[ \left( \frac{\sigma}{r} \right)^{12}
+- \frac{1}{2} \left( \frac{\sigma}{r} \right)^6 \right], ~ \text{for} ~ r &lt; r_\text{c},\]</div>
 </div>
 <p>or the potential energy:</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[U_\text{LJ} = 4 \epsilon \left[ \left( \frac{\sigma}{r} \right)^{12} - \left( \frac{\sigma}{r} \right)^6 \right].\]</div>
+\[U_\text{LJ} = 4 \epsilon \left[ \left( \frac{\sigma}{r} \right)^{12}
+- \left( \frac{\sigma}{r} \right)^6 \right], ~ \text{for} ~ r &lt; r_\text{c}.\]</div>
 </div>
+<p>Here, <span class="math notranslate nohighlight">\(\sigma\)</span> is the distance at which the potential <span class="math notranslate nohighlight">\(U_\text{LJ}\)</span>
+is zero, <span class="math notranslate nohighlight">\(\epsilon\)</span> is the depth of the potential well, and
+<span class="math notranslate nohighlight">\(r_\text{c}\)</span> is a cutoff distance. For <span class="math notranslate nohighlight">\(r &gt; r_\text{c}\)</span>,
+<span class="math notranslate nohighlight">\(U_\text{LJ} = 0\)</span> and <span class="math notranslate nohighlight">\(F_\text{LJ} = 0\)</span>.</p>
 </section>
 <section id="create-the-classes">
 <h2>Create the Classes<a class="headerlink" href="#create-the-classes" title="Link to this heading">¶</a></h2>
-<p>Let’s create the files with the minimal information about the classes and
-their inheritance. The classes will be developed progressively in the
-following chapters.</p>
+<p>Let’s create the files with some minimal details about the classes and their
+inheritance. The classes will be developed progressively in the following
+chapters.</p>
 <p>The first class is the <em>Prepare</em> class, which will be used for the
 nondimensionalization of the parameters. In the same folder as <em>potentials.py</em>,
 create the <em>Prepare.py</em> file and copy the following lines into it:</p>
@@ -402,14 +404,16 @@ copy the following lines:</p>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The line <em>from potentials import LJ_potential</em> is used to import the
-<em>LJ_potential</em> function.</p>
+<p>The line <em>from potentials import potentials</em> is used to import the
+previously created <em>potentials</em> function.</p>
 <p>Within the <em>InitializeSimulation.py</em> file, copy the following lines:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">Prepare</span> <span class="kn">import</span> <span class="n">Prepare</span>
+<span class="kn">from</span> <span class="nn">Utilities</span> <span class="kn">import</span> <span class="n">Utilities</span>
 
 
-<span class="k">class</span> <span class="nc">InitializeSimulation</span><span class="p">(</span><span class="n">Prepare</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">InitializeSimulation</span><span class="p">(</span><span class="n">Prepare</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
@@ -418,26 +422,32 @@ copy the following lines:</p>
 </pre></div>
 </div>
 <p>The <em>InitializeSimulation</em> class inherits from the previously created
-<em>Prepare</em> class. Additionally, we anticipate that <em>NumPy</em> will be required.</p>
+<em>Prepare</em> and <em>Utilities</em> classes. Additionally, we anticipate that <a href="https://numpy.org/" target="_blank">NumPy</a>
+will be required <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id8" title="Charles R. Harris, K. Jarrod Millman, Stéfan J. van der Walt, Ralf Gommers, Pauli Virtanen, David Cournapeau, Eric Wieser, Julian Taylor, Sebastian Berg, Nathaniel J. Smith, Robert Kern, Matti Picus, Stephan Hoyer, Marten H. van Kerkwijk, Matthew Brett, Allan Haldane, Jaime Fernández del Río, Mark Wiebe, Pearu Peterson, Pierre Gérard-Marchant, Kevin Sheppard, Tyler Reddy, Warren Weckesser, Hameer Abbasi, Christoph Gohlke, and Travis E. Oliphant. Array programming with NumPy. Nature, 585(7825):357–362, September 2020. URL: https://doi.org/10.1038/s41586-020-2649-2, doi:10.1038/s41586-020-2649-2.">2</a>]</span>. We also anticipate that the <em>os</em>
+module, which provides a way to interact with the operating system, will
+be required <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id7" title="Guido Van Rossum and Fred L. Drake. Python 3 Reference Manual. CreateSpace, Scotts Valley, CA, 2009. ISBN 1441412697.">3</a>]</span>.</p>
 <p>Within the <em>Measurements.py</em> file, copy the following lines:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
-<span class="kn">from</span> <span class="nn">Utilities</span> <span class="kn">import</span> <span class="n">Utilities</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
 
 
-<span class="k">class</span> <span class="nc">Measurements</span><span class="p">(</span><span class="n">InitializeSimulation</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Measurements</span><span class="p">(</span><span class="n">InitializeSimulation</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The <em>Measurements</em> class inherits both the <em>InitializeSimulation</em> and
-<em>Utilities</em> classes.</p>
-<p>Finally, let us create the three remaining classes, named <em>MinimizeEnergy</em>,
-<em>MonteCarlo</em>, and <em>MolecularDynamics</em>. Each of these three classes inherits
-from the <em>Measurements</em> class, and thus from the classes inherited by
-<em>Measurements</em>. Within the <em>MinimizeEnergy.py</em> file, copy the following lines:</p>
+<p>The <em>Measurements</em> class inherits from <em>InitializeSimulation</em> (and thus
+also inherits from the <em>Prepare</em> and <em>Utilities</em> classes).</p>
+<p>Finally, let us create the three remaining classes: <em>MinimizeEnergy</em>,
+<em>MonteCarlo</em>, and <em>MolecularDynamics</em>. Each of these classes inherits
+from the <em>Measurements</em> class (and thus also from the <em>Prepare</em>, <em>Utilities</em>,
+and <em>InitializeSimulation</em> classes).</p>
+<p>Within the <em>MinimizeEnergy.py</em> file, copy the following lines:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Measurements</span> <span class="kn">import</span> <span class="n">Measurements</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 
@@ -448,13 +458,11 @@ from the <em>Measurements</em> class, and thus from the classes inherited by
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>We anticipate that the <em>os</em> module, which provides a way to interact with the
-operating system, will be required <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id7" title="Guido Van Rossum and Fred L. Drake. Python 3 Reference Manual. CreateSpace, Scotts Valley, CA, 2009. ISBN 1441412697.">2</a>]</span>.</p>
+<p>The <em>copy</em> library, which provides functions to create shallow or deep copies of
+objects, is imported, along with <em>NumPy</em> and <em>os</em>.</p>
 <p>Within the <em>MonteCarlo.py</em> file, copy the following lines:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">Measurements</span> <span class="kn">import</span> <span class="n">Measurements</span>
 
 <span class="kn">import</span> <span class="nn">warnings</span>
@@ -468,11 +476,10 @@ operating system, will be required <span id="id1">[<a class="reference internal"
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Several libraries were imported, namely <em>Constants</em> from <em>SciPy</em>, <em>NumPy</em>, <em>copy</em>
-and <em>os</em>.</p>
-<p>The <em>warnings</em> was placed to avoid the anoying message “<em>RuntimeWarning: overflow
-encountered in exp</em>” that is sometimes triggered by the exponential of the
-<em>acceptation_probability</em> (see <a class="reference internal" href="chapter6.html#chapter6-label"><span class="std std-ref">Monte Carlo move</span></a>).</p>
+<p>The <em>ignore warnings</em> commands are optional; they were added to avoid the
+annoying message “<em>RuntimeWarning: overflow encountered in exp</em>” that is sometimes
+triggered by the exponential function of <em>acceptation_probability</em> (see the
+<a class="reference internal" href="chapter6.html#chapter6-label"><span class="std std-ref">Monte Carlo move</span></a> chapter).</p>
 <p>Finally, within the <em>MolecularDynamics.py</em> file, copy the following lines:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">Measurements</span> <span class="kn">import</span> <span class="n">Measurements</span>
@@ -498,12 +505,14 @@ and copy the following lines into it:</p>
 
 <span class="c1"># Make sure that MonteCarlo correctly inherits from Utilities</span>
 <span class="k">def</span> <span class="nf">test_montecarlo_inherits_from_utilities</span><span class="p">():</span>
-    <span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">),</span> <span class="s2">&quot;MonteCarlo should inherit from Utilities&quot;</span>
+    <span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">MonteCarlo</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">),</span> \
+        <span class="s2">&quot;MonteCarlo should inherit from Utilities&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MonteCarlo correctly inherits from Utilities&quot;</span><span class="p">)</span>
 
 <span class="c1"># Make sure that Utilities does not inherit from MonteCarlo</span>
 <span class="k">def</span> <span class="nf">test_utilities_does_not_inherit_from_montecarlo</span><span class="p">():</span>
-    <span class="k">assert</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">Utilities</span><span class="p">,</span> <span class="n">MonteCarlo</span><span class="p">),</span> <span class="s2">&quot;Utilities should not inherit from MonteCarlo&quot;</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">Utilities</span><span class="p">,</span> <span class="n">MonteCarlo</span><span class="p">),</span> \
+        <span class="s2">&quot;Utilities should not inherit from MonteCarlo&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Utilities does not inherit from MonteCarlo, as expected&quot;</span><span class="p">)</span>
 
 <span class="c1"># In the script is launched with Python, call Pytest</span>
@@ -518,13 +527,13 @@ any <em>AssertionError</em>:</p>
 MonteCarlo correctly inherits from Utilities
 </pre></div>
 </div>
-<p>Alternatively, this test can also be launched using Pytest by typing in a terminal:</p>
+<p>Alternatively, this test can also be launched using <em>Pytest</em> by typing in a terminal:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest<span class="w"> </span>.
 </pre></div>
 </div>
-<p>We can also test that calling the <em>__init__</em>
-method of the <em>MonteCarlo</em> class does not return any error. In new Python file
-called <em>test_1b.py</em>, copy the following lines:</p>
+<p>We can also test that calling the <em>__init__</em> method of the <em>MonteCarlo</em> class
+does not return any error. In new Python file called <em>test_1b.py</em>, copy the
+following lines:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import the MonteCarlo class</span>
 <span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
 
@@ -597,10 +606,10 @@ called <em>test_1b.py</em>, copy the following lines:</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Start coding</a><ul>
+<li><a class="reference internal" href="#">Start Coding</a><ul>
 <li><a class="reference internal" href="#presentation">Presentation</a></li>
 <li><a class="reference internal" href="#list-of-files">List of Files</a></li>
-<li><a class="reference internal" href="#potential-for-inter-atomic-interaction">Potential for inter-atomic interaction</a></li>
+<li><a class="reference internal" href="#potential-for-inter-atomic-interaction">Potential for Inter-Atomic Interaction</a></li>
 <li><a class="reference internal" href="#create-the-classes">Create the Classes</a></li>
 <li><a class="reference internal" href="#test-the-code">Test the code</a></li>
 </ul>

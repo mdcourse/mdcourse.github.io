@@ -1,7 +1,12 @@
 .. _chapter1-label:
 
-Start coding
+Start Coding
 ============
+
+Let's start with the Python script. During this first chapter, some Python
+files will be created and filled in a minimal fashion. At the end of this
+chapter, a small test will be set up to ensure that the files were correctly
+created.
 
 Presentation
 ------------
@@ -34,41 +39,47 @@ containing either Python functions or classes:
 
    * - File Name 
      - Content
-   * - *Prepare.py* 
+   * - Prepare.py 
      - *Prepare* class: Methods for preparing the non-dimensionalization of the
        units
-   * - *Utilities.py* 
-     - *Utilities* class: General-purpose methods, inherited by all other classes
-   * - *InitializeSimulation.py*
+   * - Utilities.py
+     - *Utilities* class: General-purpose methods, inherited by all other
+       classes
+   * - InitializeSimulation.py
      - *InitializeSimulation* class: Methods necessary to set up the system and
        prepare the simulation, inherited by all the classes below
-   * - *MinimizeEnergy.py* 
+   * - MinimizeEnergy.py
      - *MinimizeEnergy* class: Methods for performing energy minimization
-   * - *MonteCarlo.py*
+   * - MonteCarlo.py
      - *MonteCarlo* class: Methods for performing Monte Carlo simulations in
        different ensembles (e.g., Grand Canonical, Canonical)
-   * - *MolecularDynamics.py*
+   * - MolecularDynamics.py
      - *MolecularDynamics* class: Methods for performing molecular dynamics in
        different ensembles (NVE, NPT, NVT)
-   * - *measurements.py* 
-     - Functions for performing specific measurements on the system
+   * - Measurements.py
+     - *Measurements* class: Methods for for performing specific measurements on the system
    * - *potentials.py* 
      - Functions for calculating the potentials and forces between atoms
-   * - *tools.py*
+   * - logger.py
      - Functions for outputting data into text files
+   * - dumper.py
+     - Functions for outputting data into trajectory files for visualization
+   * - reader.py
+     - Functions for importing data from text files
 
+Some of these files are created in this chapter; others will be created later
+on. All of these files must be created within the same folder.
 
-Potential for inter-atomic interaction
+Potential for Inter-Atomic Interaction
 --------------------------------------
 
-In molecular simulations, potential functions are used to mimic the interaction
-between atoms. Although more complicated options exist, potentials are usually
+In molecular simulations, potential functions are used to model the interaction
+between atoms. Although more complex options exist, potentials are usually
 defined as functions of the distance :math:`r` between two atoms.
 
-Within a dedicated folder, create the first file named *potentials.py*. This
-file will contain a function called *potentials*. Two types of potential can 
-be returned by this function: the Lennard-Jones potential (LJ), and the
-hard-sphere potential.
+Create a file named *potentials.py*. This file will contain a function called
+*potentials*. For now, the only potential that can be returned by this function
+is the Lennard-Jones (LJ) potential, but this may change in the future.
 
 Copy the following lines into *potentials.py*:
 
@@ -76,52 +87,41 @@ Copy the following lines into *potentials.py*:
 
 .. code-block:: python
 
-    import numpy as np
-
-    def potentials(potential_type, epsilon, sigma, r, derivative=False):
-        if potential_type == "Lennard-Jones":
-            if derivative:
-                return 48 * epsilon * ((sigma / r) ** 12 - 0.5 * (sigma / r) ** 6) / r
-            else:
-                return 4 * epsilon * ((sigma / r) ** 12 - (sigma / r) ** 6)
-        elif potential_type == "Hard-Sphere":
-            if derivative:
-                # Derivative is not defined for Hard-Sphere potential.
-                # --> return 0
-                return np.zeros(len(r))
-            else:
-                return np.where(r > sigma, 0, 1000)
+    def potentials(epsilon, sigma, r, derivative=False):
+        if derivative:
+            return 48 * epsilon * ((sigma / r) ** 12 - 0.5 * (sigma / r) ** 6) / r
         else:
-            raise ValueError(f"Unknown potential type: {potential_type}")
+            return 4 * epsilon * ((sigma / r) ** 12 - (sigma / r) ** 6)
 
 .. label:: end_potentials_class
 
-The hard-sphere potential either returns a value of 0 when the distance between
-the two particles is larger than the parameter, :math:`r > \sigma`, or 1000 when
-:math:`r < \sigma`. The value of *1000* was chosen to be large enough to ensure
-that any Monte Carlo move that would lead to the two particles to overlap will
-be rejected.
-
-In the case of the LJ potential, depending on the value of the optional
-argument *derivative*, which can be either *False* or *True*, the *LJ_potential*
-function will return the force:
+Depending on the value of the optional argument *derivative*, which can be
+either *False* or *True*, this function returns the derivative of the potential,
+i.e., the force, :math:`F_\text{LJ} = - \mathrm{d} U_\text{LJ} / \mathrm{d} r`:
 
 .. math::
 
-    F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left[ \left( \frac{\sigma}{r} \right)^{12} - \frac{1}{2} \left( \frac{\sigma}{r} \right)^6 \right],
+    F_\text{LJ} = 48 \dfrac{\epsilon}{r} \left[ \left( \frac{\sigma}{r} \right)^{12}
+    - \frac{1}{2} \left( \frac{\sigma}{r} \right)^6 \right], ~ \text{for} ~ r < r_\text{c},
 
 or the potential energy:
 
 .. math::
 
-    U_\text{LJ} = 4 \epsilon \left[ \left( \frac{\sigma}{r} \right)^{12} - \left( \frac{\sigma}{r} \right)^6 \right].
+    U_\text{LJ} = 4 \epsilon \left[ \left( \frac{\sigma}{r} \right)^{12}
+    - \left( \frac{\sigma}{r} \right)^6 \right], ~ \text{for} ~ r < r_\text{c}.
+
+Here, :math:`\sigma` is the distance at which the potential :math:`U_\text{LJ}`
+is zero, :math:`\epsilon` is the depth of the potential well, and
+:math:`r_\text{c}` is a cutoff distance. For :math:`r > r_\text{c}`,
+:math:`U_\text{LJ} = 0` and :math:`F_\text{LJ} = 0`.
 
 Create the Classes
 ------------------
 
-Let's create the files with the minimal information about the classes and
-their inheritance. The classes will be developed progressively in the
-following chapters.
+Let's create the files with some minimal details about the classes and their
+inheritance. The classes will be developed progressively in the following
+chapters.
 
 The first class is the *Prepare* class, which will be used for the
 nondimensionalization of the parameters. In the same folder as *potentials.py*,
@@ -157,8 +157,8 @@ copy the following lines:
 
 .. label:: end_Utilities_class
 
-The line *from potentials import LJ_potential* is used to import the
-*LJ_potential* function.
+The line *from potentials import potentials* is used to import the
+previously created *potentials* function.
 
 Within the *InitializeSimulation.py* file, copy the following lines:
 
@@ -166,11 +166,13 @@ Within the *InitializeSimulation.py* file, copy the following lines:
 
 .. code-block:: python
 
+    import os
     import numpy as np
     from Prepare import Prepare
+    from Utilities import Utilities
 
 
-    class InitializeSimulation(Prepare):
+    class InitializeSimulation(Prepare, Utilities):
         def __init__(self,
                     *args,
                     **kwargs,
@@ -180,7 +182,14 @@ Within the *InitializeSimulation.py* file, copy the following lines:
 .. label:: end_InitializeSimulation_class
 
 The *InitializeSimulation* class inherits from the previously created
-*Prepare* class. Additionally, we anticipate that *NumPy* will be required.
+*Prepare* and *Utilities* classes. Additionally, we anticipate that |NumPy|
+will be required :cite:`harris2020array`. We also anticipate that the *os*
+module, which provides a way to interact with the operating system, will
+be required :cite:`Rossum2009Python3`.
+
+.. |NumPy| raw:: html
+
+   <a href="https://numpy.org/" target="_blank">NumPy</a>
 
 Within the *Measurements.py* file, copy the following lines:
 
@@ -188,11 +197,11 @@ Within the *Measurements.py* file, copy the following lines:
 
 .. code-block:: python
 
+    import numpy as np
     from InitializeSimulation import InitializeSimulation
-    from Utilities import Utilities
 
 
-    class Measurements(InitializeSimulation, Utilities):
+    class Measurements(InitializeSimulation):
         def __init__(self,
                     *args,
                     **kwargs):
@@ -200,19 +209,23 @@ Within the *Measurements.py* file, copy the following lines:
           
 .. label:: end_Measurements_class
 
-The *Measurements* class inherits both the *InitializeSimulation* and
-*Utilities* classes. 
+The *Measurements* class inherits from *InitializeSimulation* (and thus
+also inherits from the *Prepare* and *Utilities* classes).
 
-Finally, let us create the three remaining classes, named *MinimizeEnergy*,
-*MonteCarlo*, and *MolecularDynamics*. Each of these three classes inherits
-from the *Measurements* class, and thus from the classes inherited by
-*Measurements*. Within the *MinimizeEnergy.py* file, copy the following lines:
+Finally, let us create the three remaining classes: *MinimizeEnergy*,
+*MonteCarlo*, and *MolecularDynamics*. Each of these classes inherits
+from the *Measurements* class (and thus also from the *Prepare*, *Utilities*,
+and *InitializeSimulation* classes).
+
+Within the *MinimizeEnergy.py* file, copy the following lines:
 
 .. label:: start_MinimizeEnergy_class
 
 .. code-block:: python
 
     from Measurements import Measurements
+    import numpy as np
+    import copy
     import os
 
 
@@ -224,8 +237,8 @@ from the *Measurements* class, and thus from the classes inherited by
 
 .. label:: end_MinimizeEnergy_class
 
-We anticipate that the *os* module, which provides a way to interact with the
-operating system, will be required :cite:`Rossum2009Python3`.
+The *copy* library, which provides functions to create shallow or deep copies of
+objects, is imported, along with *NumPy* and *os*.
 
 Within the *MonteCarlo.py* file, copy the following lines:
 
@@ -233,10 +246,8 @@ Within the *MonteCarlo.py* file, copy the following lines:
 
 .. code-block:: python
 
-    from scipy import constants as cst
     import numpy as np
     import copy
-    import os
     from Measurements import Measurements
 
     import warnings
@@ -251,12 +262,10 @@ Within the *MonteCarlo.py* file, copy the following lines:
 
 .. label:: end_MonteCarlo_class
 
-Several libraries were imported, namely *Constants* from *SciPy*, *NumPy*, *copy*
-and *os*.
-
-The *warnings* was placed to avoid the anoying message "*RuntimeWarning: overflow
-encountered in exp*" that is sometimes triggered by the exponential of the
-*acceptation_probability* (see :ref:`chapter6-label`).
+The *ignore warnings* commands are optional; they were added to avoid the
+annoying message "*RuntimeWarning: overflow encountered in exp*" that is sometimes
+triggered by the exponential function of *acceptation_probability* (see the
+:ref:`chapter6-label` chapter).
 
 Finally, within the *MolecularDynamics.py* file, copy the following lines:
 
@@ -294,12 +303,14 @@ and copy the following lines into it:
 
     # Make sure that MonteCarlo correctly inherits from Utilities
     def test_montecarlo_inherits_from_utilities():
-        assert issubclass(MonteCarlo, Utilities), "MonteCarlo should inherit from Utilities"
+        assert issubclass(MonteCarlo, Utilities), \
+            "MonteCarlo should inherit from Utilities"
         print("MonteCarlo correctly inherits from Utilities")
 
     # Make sure that Utilities does not inherit from MonteCarlo
     def test_utilities_does_not_inherit_from_montecarlo():
-        assert not issubclass(Utilities, MonteCarlo), "Utilities should not inherit from MonteCarlo"
+        assert not issubclass(Utilities, MonteCarlo), \
+            "Utilities should not inherit from MonteCarlo"
         print("Utilities does not inherit from MonteCarlo, as expected")
 
     # In the script is launched with Python, call Pytest
@@ -317,15 +328,15 @@ any *AssertionError*:
     Utilities does not inherit from MonteCarlo, as expected
     MonteCarlo correctly inherits from Utilities
 
-Alternatively, this test can also be launched using Pytest by typing in a terminal:
+Alternatively, this test can also be launched using *Pytest* by typing in a terminal:
 
 .. code-block:: bash
 
     pytest .
 
-We can also test that calling the *__init__*
-method of the *MonteCarlo* class does not return any error. In new Python file
-called *test_1b.py*, copy the following lines:
+We can also test that calling the *__init__* method of the *MonteCarlo* class
+does not return any error. In new Python file called *test_1b.py*, copy the
+following lines:
 
 .. label:: start_test_1b_class
 

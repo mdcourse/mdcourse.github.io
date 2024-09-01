@@ -204,13 +204,14 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Code implementation</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="chapter1.html">Start coding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter1.html">Start Coding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter2.html">Setting Up the Simulation</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter5.html">Output the simulation state</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter6.html">Monte Carlo move</a></li>
-<li class="toctree-l1"><a class="reference internal" href="chapter7.html">Pressure measurement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter7.html">Pressure Measurement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter8.html">Monte Carlo insert</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Illustration</span></p>
 <ul>
@@ -269,104 +270,63 @@
 <a class="only-light reference internal image-reference" href="../_images/avatar.png"><img alt="Fluid made of argon atoms in a cubic box." class="only-light" src="../_images/avatar.png" style="height: 200px;" />
 </a>
 </figure>
-<p>Here, the <em>InitializeSimulation</em> class is created. This class is used to
-prepare the simulation box and populate the box randomly with atoms.
-Let us improve the previously created <em>InitializeSimulation</em> class:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">InitializeSimulation</span><span class="p">(</span><span class="n">Prepare</span><span class="p">):</span>
+<p>Here, the <em>InitializeSimulation</em> class is completed. This class is used to
+prepare the simulation box and populate it randomly with atoms. Improve the
+previously created <em>InitializeSimulation</em> class as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">InitializeSimulation</span><span class="p">(</span><span class="n">Prepare</span><span class="p">,</span> <span class="n">Utilities</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>  <span class="c1"># List - Angstroms</span>
-                <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Int</span>
+                <span class="n">box_dimensions</span><span class="p">,</span>  <span class="c1"># List - Angstroms</span>
+                <span class="n">cut_off</span><span class="p">,</span> <span class="c1"># Angstroms</span>
                 <span class="n">initial_positions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Array - Angstroms</span>
-                <span class="n">thermo_period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">dumping_period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">neighbor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># Integer</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                 <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">box_dimensions</span> <span class="o">=</span> <span class="n">box_dimensions</span>
-        <span class="c1"># If a box dimension was entered as 0, dimensions will be 2</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">box_dimensions</span><span class="p">)))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cut_off</span> <span class="o">=</span> <span class="n">cut_off</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neighbor</span> <span class="o">=</span> <span class="n">neighbor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># initialize simulation step</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="o">=</span> <span class="n">initial_positions</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">thermo_period</span> <span class="o">=</span> <span class="n">thermo_period</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dumping_period</span> <span class="o">=</span> <span class="n">dumping_period</span>
 </pre></div>
 </div>
 <p>Several parameters are provided to the <em>InitializeSimulation</em> class:</p>
 <ul class="simple">
-<li><p>The first parameter is the box dimensions, which is a list with a length
-corresponding to the dimension of the system. Each element of the list
-corresponds to a dimension of the box in Ångström in the x, y, and z
-directions, respectively.</p></li>
-<li><p>Optionally, a seed can be provided as an integer. If the seed is given
-by the user, the random number generator will always produce the same
-displacements.</p></li>
+<li><p>The box dimensions, which is a list with 3 elements. Each element of
+the list corresponds to a dimension of the box in Ångström in the <span class="math notranslate nohighlight">\(x\)</span>,
+<span class="math notranslate nohighlight">\(y\)</span>, and <span class="math notranslate nohighlight">\(z`\)</span> directions, respectively.</p></li>
+<li><p>The cutoff <span class="math notranslate nohighlight">\(r_\text{c}\)</span> for the potential interaction.</p></li>
 <li><p>Optionally, initial positions for the atoms can be provided as an array
 of length corresponding to the number of atoms. If <em>initial_positions</em>
-is left equal to <em>None</em>, positions will be randomly assigned to the
-atoms (see below).</p></li>
-<li><p>Optionally, a thermo period and a dumping_period can be provided to
-control the outputs from the simulation (it will be implemented
-in <a class="reference internal" href="chapter5.html#chapter5-label"><span class="std std-ref">Output the simulation state</span></a>).</p></li>
+is set to <em>None</em>, positions will be randomly assigned to the atoms (see
+below).</p></li>
+<li><p>The <em>neighbor</em> parameter determines the interval between recalculations
+of the neighbor lists. By default, a value of 1 is used, meaning that the
+neighbor list will be reconstructed every step. In certain cases, this
+number may be increased to reduce computation time.</p></li>
 </ul>
-<p>Finally, the <em>dimensions</em> of the system are calculated as the length of
-<em>box_dimensions</em>.</p>
-<section id="set-a-random-seed">
-<h2>Set a random seed<a class="headerlink" href="#set-a-random-seed" title="Link to this heading">¶</a></h2>
-<p>Providing a <em>seed</em> allows for reproducible simulations. When a seed is
-specified, the simulation will produce the exact same results each time it
-is run, including identical atom positions and velocities. This can be
-particularly useful for debugging purposes.</p>
-<p>Add the following <em>if</em> condition to the <em>__init__()</em> method:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="o">=</span> <span class="n">initial_positions</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>If a <em>seed</em> is provided, it is used to initialize the <em>random.seed()</em> function
-from <em>NumPy</em>. If <em>seed</em> is set to its default value of <em>None</em>, the simulation
-will proceed with randomization.</p>
-</section>
+<p>Note that the simulation step is initialized to 0.</p>
 <section id="nondimensionalize-units">
 <h2>Nondimensionalize units<a class="headerlink" href="#nondimensionalize-units" title="Link to this heading">¶</a></h2>
 <p>Just like we did in <a class="reference internal" href="chapter2.html#chapter2-label"><span class="std std-ref">Setting Up the Simulation</span></a>, let us nondimensionalize the provided
-parameters, here the <em>box_dimensions</em> as well as the <em>initial_positions</em>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">nondimensionalize_units_1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Use LJ prefactors to convert units into non-dimensional.&quot;&quot;&quot;</span>
-    <span class="c1"># Normalize box dimensions</span>
-    <span class="n">box_dimensions</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">L</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_dimensions</span><span class="p">:</span>
-        <span class="n">box_dimensions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">box_dimensions</span> <span class="o">=</span> <span class="n">box_dimensions</span> <span class="c1"># errase the previously defined box_dimensions</span>
-    <span class="c1"># Normalize the box dimensions</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span>
-</pre></div>
-</div>
-<p>Let us call the <em>nondimensionalize_units_1</em> method from the <em>__init__</em> class:</p>
+parameters, here the <em>box_dimensions</em>, the <em>cut_off</em>, as well as the <em>initial_positions</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units_1</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="o">=</span> <span class="n">initial_positions</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units</span><span class="p">([</span><span class="s2">&quot;box_dimensions&quot;</span><span class="p">,</span> <span class="s2">&quot;cut_off&quot;</span><span class="p">,</span>
+                                  <span class="s2">&quot;initial_positions&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </section>
 <section id="define-the-box">
 <h2>Define the box<a class="headerlink" href="#define-the-box" title="Link to this heading">¶</a></h2>
-<p>Let us define the simulation box using the values from <em>box_dimensions</em>. Add the following
-method to the <em>InitializeSimulation</em> class:</p>
+<p>Let us define the simulation box using the values from <em>box_dimensions</em>. Add the
+following method to the <em>InitializeSimulation</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">define_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the simulation box.</span>
-<span class="sd">    For 2D simulations, the third dimensions only contains 0.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define the simulation box. Only 3D boxes are supported.&quot;&quot;&quot;</span>
     <span class="n">box_boundaries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-    <span class="n">dim</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">L</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_dimensions</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">dim</span><span class="p">,</span> <span class="n">L</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_dimensions</span><span class="p">):</span>
         <span class="n">box_boundaries</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">L</span><span class="o">/</span><span class="mi">2</span>
-        <span class="n">dim</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span> <span class="o">=</span> <span class="n">box_boundaries</span>
     <span class="n">box_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
     <span class="n">box_geometry</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">])</span>
@@ -376,44 +336,46 @@ method to the <em>InitializeSimulation</em> class:</p>
 <p>The <em>box_boundaries</em> are calculated from the <em>box_dimensions</em>. They
 represent the lowest and highest coordinates in all directions. By symmetry,
 the box is centered at 0 along all axes. A <em>box_size</em> is also defined,
-following the MDAnalysis conventions: Lx, Ly, Lz, 90, 90, 90, where the
-last three numbers are angles in degrees. Values different from <em>90</em> for
-the angles would define a triclinic (non-orthogonal) box, which is not
-currently supported by the existing code.</p>
-<p>Let us call the <em>define_box</em> method from the <em>__init__</em> class:</p>
+following the MDAnalysis <a href="https://docs.mdanalysis.org/stable/documentation_pages/transformations/boxdimensions.html" target="_blank">conventions</a>: Lx, Ly, Lz, 90, 90, 90, where
+the last three numbers are angles in degrees <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id9" title="Naveen Michaud-Agrawal, Elizabeth J Denning, Thomas B Woolf, and Oliver Beckstein. Mdanalysis: a toolkit for the analysis of molecular dynamics simulations. Journal of computational chemistry, 32(10):2319–2327, 2011.">4</a>]</span>.
+Values different from <em>90</em> for the angles would define a triclinic (non-orthogonal)
+box, which is not currently supported by the existing code.</p>
+<p>Let us call <em>define_box()</em> from the <em>__init__()</em> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units_1</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units</span><span class="p">([</span><span class="s2">&quot;box_dimensions&quot;</span><span class="p">,</span> <span class="s2">&quot;cut_off&quot;</span><span class="p">,</span>
+                                  <span class="s2">&quot;initial_positions&quot;</span><span class="p">])</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">define_box</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 <section id="populate-the-box">
-<h2>Populate the box<a class="headerlink" href="#populate-the-box" title="Link to this heading">¶</a></h2>
+<h2>Populate the Box<a class="headerlink" href="#populate-the-box" title="Link to this heading">¶</a></h2>
 <p>Here, the atoms are placed within the simulation box. If initial
 positions were not provided (i.e., <em>initial_positions = None</em>), atoms
-are placed randomly within the box. If <em>initial_positions</em> was provided
-as an array, the provided positions are used instead. Note that, in this
+are placed randomly within the box. If <em>initial_positions</em> is provided
+as an array, the provided positions are used instead. Note that in this
 case, the array must be of size ‘number of atoms’ times ‘number of dimensions’.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">populate_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">Nat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span> <span class="c1"># total number of atoms</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nat</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
             <span class="n">diff_box</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
-            <span class="n">random_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">)</span>
+            <span class="n">random_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">Nat</span><span class="p">)</span>
             <span class="n">atoms_positions</span><span class="p">[:,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">random_pos</span><span class="o">*</span><span class="n">diff_box</span><span class="o">-</span><span class="n">diff_box</span><span class="o">/</span><span class="mi">2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">atoms_positions</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_positions</span>
 </pre></div>
 </div>
-<p>In case <em>initial_positions is None</em>, and array is first created. Then, random
-positions that are constrained within the box boundaries are defined using the
-random function of NumPy. Note that, here, the newly added atoms are added
-randomly within the box, without taking care of avoiding overlaps with
-existing atoms. Overlaps will be dealt with using energy minimization,
-see <a class="reference internal" href="chapter4.html#chapter4-label"><span class="std std-ref">Minimize the energy</span></a>.</p>
-<p>Let us call the <em>populate_box</em> method from the <em>__init__</em> class:</p>
+<p>In case <em>initial_positions</em> is None, an array is first created. Then,
+random positions constrained within the box boundaries are defined using
+the random function from NumPy. Note that newly added atoms are placed
+randomly within the box, without considering overlaps with existing
+atoms. Overlaps will be addressed using energy minimization (see
+the <a class="reference internal" href="chapter4.html#chapter4-label"><span class="std std-ref">Minimize the energy</span></a> chapter).</p>
+<p>Let us call <em>populate_box</em> from the <em>__init__</em> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">define_box</span><span class="p">()</span>
@@ -421,21 +383,112 @@ see <a class="reference internal" href="chapter4.html#chapter4-label"><span clas
 </pre></div>
 </div>
 </section>
+<section id="build-neighbor-lists">
+<h2>Build Neighbor Lists<a class="headerlink" href="#build-neighbor-lists" title="Link to this heading">¶</a></h2>
+<p>In molecular simulations, it is common practice to identify neighboring atoms
+to save computational time. By focusing only on interactions between
+neighboring atoms, the simulation becomes more efficient. Add the following
+<em>update_neighbor_lists()</em> method to the <em>Utilities</em> class:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">update_neighbor_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighbor</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">contact_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">,</span>
+            <span class="n">cutoff</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cut_off</span><span class="p">,</span> <span class="c1">#+2,</span>
+            <span class="n">returntype</span><span class="o">=</span><span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
+            <span class="n">box</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">)</span>
+        <span class="n">neighbor_lists</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">cpt</span><span class="p">,</span> <span class="n">array</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">matrix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="nb">list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">array</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="n">ele</span> <span class="k">for</span> <span class="n">ele</span> <span class="ow">in</span> <span class="nb">list</span> <span class="k">if</span> <span class="n">ele</span> <span class="o">&gt;</span> <span class="n">cpt</span><span class="p">]</span>
+            <span class="n">neighbor_lists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_lists</span> <span class="o">=</span> <span class="n">neighbor_lists</span>
+</pre></div>
+</div>
+<p>The <em>update_neighbor_lists()</em> method generates neighbor lists for each
+atom, ensuring that only relevant interactions are considered in the
+calculations. These lists will be recalculated at intervals specified by
+the <em>neighbor</em> input parameter.</p>
+<p>For efficiency, the <em>contact_matrix</em> function from MDAnalysis is
+used <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id9" title="Naveen Michaud-Agrawal, Elizabeth J Denning, Thomas B Woolf, and Oliver Beckstein. Mdanalysis: a toolkit for the analysis of molecular dynamics simulations. Journal of computational chemistry, 32(10):2319–2327, 2011.">4</a>]</span>. The <em>contact_matrix</em> function returns
+information about atoms located at a distance less than the cutoff from one another.</p>
+</section>
+<section id="update-cross-coefficients">
+<h2>Update Cross Coefficients<a class="headerlink" href="#update-cross-coefficients" title="Link to this heading">¶</a></h2>
+<p>As the neighbor lists are being built, let us also pre-calculate the cross
+coefficients. This will make the force calculation more efficient (see
+below).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">update_cross_coefficients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighbor</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="c1"># Precalculte LJ cross-coefficients</span>
+        <span class="n">sigma_ij_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">epsilon_ij_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">Ni</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span> <span class="c1"># tofix error for GCMC</span>
+            <span class="c1"># Read information about atom i</span>
+            <span class="n">sigma_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
+            <span class="n">epsilon_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
+            <span class="n">neighbor_of_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_lists</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
+            <span class="c1"># Read information about neighbors j</span>
+            <span class="n">sigma_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span><span class="p">[</span><span class="n">neighbor_of_i</span><span class="p">]</span>
+            <span class="n">epsilon_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span><span class="p">[</span><span class="n">neighbor_of_i</span><span class="p">]</span>
+            <span class="c1"># Calculare cross parameters</span>
+            <span class="n">sigma_ij_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">sigma_i</span><span class="o">+</span><span class="n">sigma_j</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">epsilon_ij_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">epsilon_i</span><span class="o">+</span><span class="n">epsilon_j</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma_ij_list</span> <span class="o">=</span> <span class="n">sigma_ij_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_ij_list</span> <span class="o">=</span> <span class="n">epsilon_ij_list</span>
+</pre></div>
+</div>
+<p>Here, the values of the cross coefficients between atom of type 1 and 2,
+<span class="math notranslate nohighlight">\(\sigma_{12}\)</span> and <span class="math notranslate nohighlight">\(\epsilon_{12}\)</span>, are assumed to follow the arithmetic mean:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}\sigma_{12} = (\sigma_{11}+\sigma_{22})/2 \\
+\epsilon_{12} = (\epsilon_{11}+\epsilon_{22})/2\end{split}\]</div>
+</div>
+<p>Finally, import the following libraries in the <em>Utilities.py</em> file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">MDAnalysis.analysis</span> <span class="kn">import</span> <span class="n">distances</span>
+</pre></div>
+</div>
+<p>Let us call <em>update_neighbor_lists</em> and <em>update_cross_coefficients</em>
+from the <em>__init__</em> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">populate_box</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">update_cross_coefficients</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
 <section id="test-the-code">
-<h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
-<p>Let us test the <em>InitializeSimulation</em> class to make sure that it does what
-is expected, i.e. that it does create atoms that are located within the box
-boundaries along all 3 dimensions of space:</p>
+<h2>Test the Code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
+<p>Let us test the <em>InitializeSimulation</em> class to ensure that it behaves as
+expected, i.e., that it creates atoms located within the box boundaries:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">InitializeSimulation</span> <span class="kn">import</span> <span class="n">InitializeSimulation</span>
+<span class="kn">from</span> <span class="nn">pint</span> <span class="kn">import</span> <span class="n">UnitRegistry</span>
+<span class="n">ureg</span> <span class="o">=</span> <span class="n">UnitRegistry</span><span class="p">()</span>
 
-<span class="c1"># Initialize the InitializeSimulation object</span>
+<span class="c1"># Define atom number of each group</span>
+<span class="n">nmb_1</span><span class="p">,</span> <span class="n">nmb_2</span><span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="c1"># Define LJ parameters (sigma)</span>
+<span class="n">sig_1</span><span class="p">,</span> <span class="n">sig_2</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+<span class="c1"># Define LJ parameters (epsilon)</span>
+<span class="n">eps_1</span><span class="p">,</span> <span class="n">eps_2</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">]</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
+<span class="c1"># Define atom mass</span>
+<span class="n">mss_1</span><span class="p">,</span> <span class="n">mss_2</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">gram</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
+<span class="c1"># Define box size</span>
+<span class="n">L</span> <span class="o">=</span> <span class="mi">20</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+<span class="c1"># Define a cut off</span>
+<span class="n">rc</span> <span class="o">=</span> <span class="mf">2.5</span><span class="o">*</span><span class="n">sig_1</span>
+
+<span class="c1"># Initialize the prepare object</span>
 <span class="n">init</span> <span class="o">=</span> <span class="n">InitializeSimulation</span><span class="p">(</span>
-    <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
-    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
-    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="c1"># A</span>
-    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># g/mol</span>
-    <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">ureg</span> <span class="o">=</span> <span class="n">ureg</span><span class="p">,</span>
+    <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="n">nmb_1</span><span class="p">,</span> <span class="n">nmb_2</span><span class="p">],</span>
+    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">eps_1</span><span class="p">,</span> <span class="n">eps_2</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="n">sig_1</span><span class="p">,</span> <span class="n">sig_2</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="n">mss_1</span><span class="p">,</span> <span class="n">mss_2</span><span class="p">],</span> <span class="c1"># g/mol</span>
+    <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">cut_off</span><span class="o">=</span><span class="n">rc</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Test function using pytest</span>
@@ -444,7 +497,8 @@ boundaries along all 3 dimensions of space:</p>
     <span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">init</span><span class="o">.</span><span class="n">atoms_positions</span>
     <span class="k">for</span> <span class="n">atom_position</span> <span class="ow">in</span> <span class="n">atoms_positions</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">boundary</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">atom_position</span><span class="p">,</span> <span class="n">box_boundaries</span><span class="p">):</span>
-            <span class="k">assert</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="sa">f</span><span class="s2">&quot;Test failed: Atoms outside of the box at position </span><span class="si">{</span><span class="n">atom_position</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> \
+            <span class="sa">f</span><span class="s2">&quot;Test failed: Atoms outside of the box at position </span><span class="si">{</span><span class="n">atom_position</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test passed&quot;</span><span class="p">)</span>
 
 <span class="c1"># If the script is run directly, execute the tests</span>
@@ -454,6 +508,8 @@ boundaries along all 3 dimensions of space:</p>
     <span class="n">pytest</span><span class="o">.</span><span class="n">main</span><span class="p">([</span><span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="vm">__file__</span><span class="p">])</span>
 </pre></div>
 </div>
+<p>The value of the cutoff, chosen as <span class="math notranslate nohighlight">\(2.5 \sigma_{11}\)</span>, is relatively
+common for Lennard-Jones fluids and will often be the default choice for us.</p>
 </section>
 </section>
 
@@ -509,11 +565,12 @@ boundaries along all 3 dimensions of space:</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Initialize the simulation</a><ul>
-<li><a class="reference internal" href="#set-a-random-seed">Set a random seed</a></li>
 <li><a class="reference internal" href="#nondimensionalize-units">Nondimensionalize units</a></li>
 <li><a class="reference internal" href="#define-the-box">Define the box</a></li>
-<li><a class="reference internal" href="#populate-the-box">Populate the box</a></li>
-<li><a class="reference internal" href="#test-the-code">Test the code</a></li>
+<li><a class="reference internal" href="#populate-the-box">Populate the Box</a></li>
+<li><a class="reference internal" href="#build-neighbor-lists">Build Neighbor Lists</a></li>
+<li><a class="reference internal" href="#update-cross-coefficients">Update Cross Coefficients</a></li>
+<li><a class="reference internal" href="#test-the-code">Test the Code</a></li>
 </ul>
 </li>
 </ul>
@@ -529,5 +586,6 @@ boundaries along all 3 dimensions of space:</p>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

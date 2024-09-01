@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Pressure measurement" href="chapter7.html" /><link rel="prev" title="Output the simulation state" href="chapter5.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Pressure Measurement" href="chapter7.html" /><link rel="prev" title="Output the simulation state" href="chapter5.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
         <title>Monte Carlo move - </title>
@@ -204,13 +204,14 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Code implementation</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="chapter1.html">Start coding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter1.html">Start Coding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter2.html">Setting Up the Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter3.html">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter5.html">Output the simulation state</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Monte Carlo move</a></li>
-<li class="toctree-l1"><a class="reference internal" href="chapter7.html">Pressure measurement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter7.html">Pressure Measurement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter8.html">Monte Carlo insert</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Illustration</span></p>
 <ul>
@@ -302,22 +303,23 @@ possible configurations.</p></li>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">monte_carlo_move</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Monte Carlo move trial.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># only trigger if displace_mc was provided by the user</span>
-        <span class="k">try</span><span class="p">:</span> <span class="c1"># try using the last saved Epot, if it exists</span>
-            <span class="n">initial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span>
-        <span class="k">except</span><span class="p">:</span> <span class="c1"># If self.Epot does not exists yet, calculate it</span>
-            <span class="n">initial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">()</span>
-        <span class="c1"># Make a copy of the initial atoms positions</span>
+        <span class="c1"># When needed, recalculate neighbor/coeff lists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_cross_coefficients</span><span class="p">()</span>
+        <span class="c1"># If self.Epot does not exists yet, calculate it</span>
+        <span class="c1"># It should only be necessary when step = 0</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Epot&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">()</span>
+        <span class="c1"># Make a copy of the initial atoms positions and initial energy</span>
+        <span class="n">initial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span>
         <span class="n">initial_positions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span>
         <span class="c1"># Pick an atom id randomly</span>
-        <span class="n">atom_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">)</span>
+        <span class="n">atom_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">))</span>
         <span class="c1"># Move the chosen atom in a random direction</span>
         <span class="c1"># The maximum displacement is set by self.displace_mc</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="n">move</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span> <span class="c1"># the third value will be 0</span>
-            <span class="n">move</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">move</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="n">atom_id</span><span class="p">]</span> <span class="o">+=</span> <span class="n">move</span>
-        <span class="c1"># Measure the optential energy of the new configuration</span>
+        <span class="c1"># Measure the potential energy of the new configuration</span>
         <span class="n">trial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">()</span>
         <span class="c1"># Evaluate whether the new configuration should be kept or not</span>
         <span class="n">beta</span> <span class="o">=</span>  <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span>
@@ -326,75 +328,53 @@ possible configurations.</p></li>
         <span class="n">acceptation_probability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">beta</span><span class="o">*</span><span class="n">delta_E</span><span class="p">)])</span>
         <span class="k">if</span> <span class="n">random_number</span> <span class="o">&lt;=</span> <span class="n">acceptation_probability</span><span class="p">:</span> <span class="c1"># Accept new position</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="n">trial_Epot</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">successful_move</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span> <span class="c1"># Reject new position</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="n">initial_Epot</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">initial_positions</span> <span class="c1"># Revert to initial positions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">failed_move</span> <span class="o">+=</span> <span class="mi">1</span>
 </pre></div>
 </div>
+<p>The counters <em>successful_move</em> and <em>failed_move</em> are incremented with each
+successful and failed attempt, respectively.</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h2>
-<p>The <em>monte_carlo_move</em> method requires a few parameters to be selected by the
-users, such as <em>displace_mc</em> (<span class="math notranslate nohighlight">\(d_\text{mc}\)</span>), the maximum number of steps,
-and the desired temperature (<span class="math notranslate nohighlight">\(T\)</span>). Let us add these parameters to the
-<em>__init__</em> method:</p>
+<p>The <em>monte_carlo_move</em> method requires a few parameters to be selected by
+the users, such as <em>displace_mc</em> (<span class="math notranslate nohighlight">\(d_\text{mc}\)</span>, in Ångströms), the
+maximum number of steps, and the desired temperature (<span class="math notranslate nohighlight">\(T\)</span>, in Kelvin).
+Let us add these parameters to the <em>__init__()</em> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Measurements</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">maximum_steps</span><span class="p">,</span>
-                <span class="n">cut_off</span> <span class="o">=</span> <span class="mi">9</span><span class="p">,</span>
+                <span class="n">desired_temperature</span><span class="p">,</span>
                 <span class="n">displace_mc</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="n">neighbor</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-                <span class="n">desired_temperature</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span>
-                <span class="n">thermo_outputs</span> <span class="o">=</span> <span class="s2">&quot;press&quot;</span><span class="p">,</span>
-                <span class="n">data_folder</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="o">*</span><span class="n">args</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span> <span class="o">=</span> <span class="n">maximum_steps</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cut_off</span> <span class="o">=</span> <span class="n">cut_off</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span> <span class="o">=</span> <span class="n">displace_mc</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">neighbor</span> <span class="o">=</span> <span class="n">neighbor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span> <span class="o">=</span> <span class="n">desired_temperature</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">thermo_outputs</span> <span class="o">=</span> <span class="n">thermo_outputs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="o">=</span> <span class="n">data_folder</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_folder</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units_3</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>Here, we anticipate that some of the parameters have to be nondimensionalized, which
-is done with the <em>nondimensionalize_units_3</em> method that must also be added to
-the <em>MonteCarlo</em> class:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">nondimensionalize_units_3</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Use LJ prefactors to convert units into non-dimensional.&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">cut_off</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cut_off</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span> \
-        <span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_temperature</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_distance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units</span><span class="p">([</span><span class="s2">&quot;desired_temperature&quot;</span><span class="p">,</span> <span class="s2">&quot;displace_mc&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">successful_move</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">failed_move</span> <span class="o">=</span> <span class="mi">0</span>
 </pre></div>
 </div>
 </section>
 <section id="run-method">
-<h2>Run method<a class="headerlink" href="#run-method" title="Link to this heading">¶</a></h2>
-<p>Finally, let us add a <em>run</em> method to the <em>MonteCarlo</em> class, that is used to
-perform a loop over the desired number of steps <em>maximum_steps</em>:</p>
+<h2>Run Method<a class="headerlink" href="#run-method" title="Link to this heading">¶</a></h2>
+<p>Finally, let us add a <em>run</em> method to the <em>MonteCarlo</em> class that performs
+a loop over the desired number of steps, <em>maximum_steps</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform the loop over time.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_cross_coefficients</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_move</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_box</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>At each step, the <em>monte_carlo_move</em> method is called. The previously defined
-methods <em>update_neighbor_lists</em> and <em>wrap_in_box</em> are also called to ensure that
-the neighbor lists are kept up to date despite the motion of the atoms, and that
-the atoms remain inside the box, respectively.</p>
-<p>Let us call <em>update_log_md_mc</em> from the run method of the MonteCarlo class.
-Let us add a dump too:</p>
+<p>At each step, the <em>monte_carlo_move()</em> method is called. The previously
+defined <em>wrap_in_box</em> method is also called to ensure that the atoms remain
+inside the box. Additionally, let us call <em>log_simulation_data()</em> and
+<em>update_dump_file()</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
     <span class="k">for</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximum_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
@@ -404,41 +384,70 @@ Let us add a dump too:</p>
         <span class="n">update_dump_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;dump.mc.lammpstrj&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>To output the density, let us add the following method to the <em>Utilities</em> class:
-# TOFIX: not used yet</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the mass density.&quot;&quot;&quot;</span>
-    <span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>  <span class="c1"># Unitless</span>
-    <span class="n">total_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_mass</span><span class="p">)</span>  <span class="c1"># Unitless</span>
-    <span class="k">return</span> <span class="n">total_mass</span><span class="o">/</span><span class="n">volume</span>  <span class="c1"># Unitless</span>
-</pre></div>
-</div>
 </section>
 <section id="test-the-code">
-<h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
-<p>One can use a similar test as previously. Let us use a displace distance of
-0.5 Angstrom, and make 1000 steps.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
+<h2>Test the Code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
+<p>Let us use a similar test as before. Set a displacement distance corresponding
+to a quarter of sigma, and perform a very small number of steps:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
+<span class="kn">from</span> <span class="nn">pint</span> <span class="kn">import</span> <span class="n">UnitRegistry</span>
+<span class="n">ureg</span> <span class="o">=</span> <span class="n">UnitRegistry</span><span class="p">()</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
-<span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
-    <span class="n">dumping_period</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-    <span class="n">thermo_period</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-    <span class="n">thermo_outputs</span> <span class="o">=</span> <span class="s2">&quot;Epot&quot;</span><span class="p">,</span>
-    <span class="n">displace_mc</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
-    <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="mi">50</span><span class="p">],</span>
-    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
-    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="c1"># A</span>
-    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="c1"># g/mol</span>
-    <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="c1"># A</span>
-    <span class="n">data_folder</span><span class="o">=</span><span class="s2">&quot;Outputs/&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+<span class="c1"># Define atom number of each group</span>
+<span class="n">nmb_1</span><span class="o">=</span> <span class="mi">50</span>
+<span class="c1"># Define LJ parameters (sigma)</span>
+<span class="n">sig_1</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+<span class="c1"># Define LJ parameters (epsilon)</span>
+<span class="n">eps_1</span> <span class="o">=</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
+<span class="c1"># Define atom mass</span>
+<span class="n">mss_1</span> <span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">gram</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
+<span class="c1"># Define box size</span>
+<span class="n">L</span> <span class="o">=</span> <span class="mi">20</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+<span class="c1"># Define a cut off</span>
+<span class="n">rc</span> <span class="o">=</span> <span class="mf">2.5</span><span class="o">*</span><span class="n">sig_1</span>
+<span class="c1"># Pick the desired temperature</span>
+<span class="n">T</span> <span class="o">=</span> <span class="mi">300</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span>
+<span class="c1"># choose the displace_mc</span>
+<span class="n">displace_mc</span> <span class="o">=</span> <span class="n">sig_1</span><span class="o">/</span><span class="mi">4</span>
+
+<span class="c1"># Initialize the prepare object</span>
+<span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span>
+    <span class="n">ureg</span> <span class="o">=</span> <span class="n">ureg</span><span class="p">,</span>
+    <span class="n">maximum_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">thermo_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">dumping_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="n">nmb_1</span><span class="p">],</span>
+    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">eps_1</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="n">sig_1</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="n">mss_1</span><span class="p">],</span> <span class="c1"># g/mol</span>
+    <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">cut_off</span><span class="o">=</span><span class="n">rc</span><span class="p">,</span>
+    <span class="n">thermo_outputs</span><span class="o">=</span><span class="s2">&quot;Epot&quot;</span><span class="p">,</span>
+    <span class="n">desired_temperature</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="c1"># K</span>
+    <span class="n">neighbor</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">displace_mc</span> <span class="o">=</span> <span class="n">displace_mc</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="c1"># Test function using pytest</span>
+<span class="k">def</span> <span class="nf">test_output_files</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/dump.mc.lammpstrj&quot;</span><span class="p">),</span> \
+    <span class="s2">&quot;Test failed: dump file was not created&quot;</span>
+    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/simulation.log&quot;</span><span class="p">),</span> \
+    <span class="s2">&quot;Test failed: log file was not created&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test passed&quot;</span><span class="p">)</span>
+
+<span class="c1"># If the script is run directly, execute the tests</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pytest</span>
+    <span class="c1"># Run pytest programmatically</span>
+    <span class="n">pytest</span><span class="o">.</span><span class="n">main</span><span class="p">([</span><span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="vm">__file__</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>The evolution of the potential energy as a function of the number of steps
-are written in the <em>simulation.log</em> file. The data can be used to plot
-the evolution of the system with time.</p>
+is recorded in the <em>simulation.log</em> file. The data in <em>simulation.log</em> can
+be used to plot the evolution of the system over time.</p>
 </section>
 </section>
 
@@ -452,7 +461,7 @@ the evolution of the system with time.</p>
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Pressure measurement</div>
+                <div class="title">Pressure Measurement</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -496,8 +505,8 @@ the evolution of the system with time.</p>
 <li><a class="reference internal" href="#">Monte Carlo move</a><ul>
 <li><a class="reference internal" href="#implementation">Implementation</a></li>
 <li><a class="reference internal" href="#parameters">Parameters</a></li>
-<li><a class="reference internal" href="#run-method">Run method</a></li>
-<li><a class="reference internal" href="#test-the-code">Test the code</a></li>
+<li><a class="reference internal" href="#run-method">Run Method</a></li>
+<li><a class="reference internal" href="#test-the-code">Test the Code</a></li>
 </ul>
 </li>
 </ul>

@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="A Monte Carlo study of argon" href="../projects/project1.html" /><link rel="prev" title="Monte Carlo move" href="chapter6.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Monte Carlo insert" href="chapter8.html" /><link rel="prev" title="Monte Carlo move" href="chapter6.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
-        <title>Pressure measurement - </title>
+        <title>Pressure Measurement - </title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
@@ -204,13 +204,14 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Code implementation</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="chapter1.html">Start coding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter1.html">Start Coding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter2.html">Setting Up the Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter3.html">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter5.html">Output the simulation state</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter6.html">Monte Carlo move</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Pressure measurement</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Pressure Measurement</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter8.html">Monte Carlo insert</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Illustration</span></p>
 <ul>
@@ -260,46 +261,51 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="pressure-measurement">
-<span id="chapter7-label"></span><h1>Pressure measurement<a class="headerlink" href="#pressure-measurement" title="Link to this heading">¶</a></h1>
-<p>In order to extract the equation of state in our simulation, we need to measure the
-pressure of the system, <span class="math notranslate nohighlight">\(p\)</span>. The pressure in a molecular simulation can be
-calculated from the interactions between particles. The pressure can be measured as
-the sum of the ideal contribution, <span class="math notranslate nohighlight">\(p_\text{ideal} = N_\text{DOF} k_\text{B} T / V d\)</span>,
-which comes from the ideal gas law, and a Virial term which accounts for the
-pressure contribution from the forces between particles,
+<span id="chapter7-label"></span><h1>Pressure Measurement<a class="headerlink" href="#pressure-measurement" title="Link to this heading">¶</a></h1>
+<p>To extract the equation of state in our simulation, we need to measure the
+pressure of the system, <span class="math notranslate nohighlight">\(p\)</span>. The pressure in a molecular simulation can
+be calculated from the interactions between particles. The pressure can be
+measured as the sum of the ideal contribution,
+<span class="math notranslate nohighlight">\(p_\text{ideal} = N_\text{DOF} k_\text{B} T / V d\)</span>,
+which comes from the ideal gas law, and a Virial term that
+accounts for the pressure contribution from the forces between particles,
 <span class="math notranslate nohighlight">\(p_\text{non_ideal} = \left&lt; \sum_i r_i \cdot F_i \right&gt; / V d\)</span>. The final
-expression reads:</p>
+expression reads <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id4" title="Daan Frenkel and Berend Smit. Understanding molecular simulation: from algorithms to applications. Elsevier, 2002.">7</a>]</span>:</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[p = \dfrac{1}{V d} \left[ N_\text{DOF} k_\text{B} T +  \left&lt; \sum_i r_i \cdot F_i \right&gt; \right]\]</div>
 </div>
 <p><span class="math notranslate nohighlight">\(N_\text{DOF}\)</span> is the number of degrees-of-freedom, which can be calculated
-from the number of particles, <span class="math notranslate nohighlight">\(N\)</span>, and the dimension of the system, <span class="math notranslate nohighlight">\(d\)</span>, as
-<span class="math notranslate nohighlight">\(N_\text{DOF} = d N - d\)</span> <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id4" title="Daan Frenkel and Berend Smit. Understanding molecular simulation: from algorithms to applications. Elsevier, 2002.">3</a>]</span>.</p>
-<p>The calculation of <span class="math notranslate nohighlight">\(p_\text{ideal}\)</span> is straighforward. For Monte Carlo simulation,
-as atoms do not have temperature, the <em>imposed</em> temperature will be used instead.
-The calculation of <span class="math notranslate nohighlight">\(p_\text{non_ideal}\)</span> requires the measurement of all the
-force and distance between the atoms. The calculation of the forces was already
-implemented in a previous chapter, but a new function that returns all the
-vector direction between atoms pairs will have to be written here.</p>
+from the number of particles, <span class="math notranslate nohighlight">\(N\)</span>, and the dimension of the system,
+<span class="math notranslate nohighlight">\(d = 3\)</span>, as <span class="math notranslate nohighlight">\(N_\text{DOF} = d N - d\)</span> <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id4" title="Daan Frenkel and Berend Smit. Understanding molecular simulation: from algorithms to applications. Elsevier, 2002.">7</a>]</span>.</p>
+<p>The calculation of <span class="math notranslate nohighlight">\(p_\text{ideal}\)</span> is straightforward. For Monte Carlo
+simulation, as atoms do not have a temperature, the <em>imposed</em> temperature will
+be used as “<span class="math notranslate nohighlight">\(T\)</span>”. The calculation of <span class="math notranslate nohighlight">\(p_\text{non_ideal}\)</span> requires the
+measurement of all the forces and distances between atoms. The calculation of
+the forces was already implemented in a previous chapter (see <em>compute_force</em>
+the <a class="reference internal" href="chapter4.html#chapter4-label"><span class="std std-ref">Minimize the energy</span></a> chapter), but a new function that returns all the
+vector directions between atom pairs will need to be written here.</p>
 <section id="implement-the-virial-equation">
 <h2>Implement the Virial equation<a class="headerlink" href="#implement-the-virial-equation" title="Link to this heading">¶</a></h2>
-<p>Let us add the following method to the <em>Utilities</em> class.</p>
+<p>Let us add the following method to the <em>Measurements</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smit,</span>
 <span class="sd">    Understanding molecular simulation: from algorithms to applications, 2002)&quot;&quot;&quot;</span>
     <span class="c1"># Compute the ideal contribution</span>
-    <span class="n">Ndof</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span>
-    <span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">])</span>
+    <span class="n">Nat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span> <span class="c1"># total number of atoms</span>
+    <span class="n">dimension</span> <span class="o">=</span> <span class="mi">3</span> <span class="c1"># 3D is the only possibility here</span>
+    <span class="n">Ndof</span> <span class="o">=</span> <span class="n">dimension</span><span class="o">*</span><span class="n">Nat</span><span class="o">-</span><span class="n">dimension</span>
+    <span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span> <span class="c1"># box volume</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calculate_temperature</span><span class="p">()</span> <span class="c1"># this is for later on, when velocities are computed</span>
         <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span> <span class="c1"># for MC, simply use the desired temperature</span>
-    <span class="n">p_ideal</span> <span class="o">=</span> <span class="n">Ndof</span><span class="o">*</span><span class="n">temperature</span><span class="o">/</span><span class="p">(</span><span class="n">volume</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+    <span class="n">p_ideal</span> <span class="o">=</span> <span class="n">Ndof</span><span class="o">*</span><span class="n">temperature</span><span class="o">/</span><span class="p">(</span><span class="n">volume</span><span class="o">*</span><span class="n">dimension</span><span class="p">)</span>
     <span class="c1"># Compute the non-ideal contribution</span>
-    <span class="n">distances_forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_force</span><span class="p">(</span><span class="n">return_vector</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluate_rij_matrix</span><span class="p">())</span>
-    <span class="n">p_nonideal</span> <span class="o">=</span> <span class="n">distances_forces</span><span class="o">/</span><span class="p">(</span><span class="n">volume</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dimensions</span><span class="p">)</span>
+    <span class="n">distances_forces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_force</span><span class="p">(</span><span class="n">return_vector</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> \
+                              <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluate_rij_matrix</span><span class="p">())</span>
+    <span class="n">p_nonideal</span> <span class="o">=</span> <span class="n">distances_forces</span><span class="o">/</span><span class="p">(</span><span class="n">volume</span><span class="o">*</span><span class="n">dimension</span><span class="p">)</span>
     <span class="c1"># Final pressure</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">pressure</span> <span class="o">=</span> <span class="n">p_ideal</span><span class="o">+</span><span class="n">p_nonideal</span>
 </pre></div>
@@ -308,88 +314,71 @@ vector direction between atoms pairs will have to be written here.</p>
 <em>evaluate_rij_matrix</em> method to the <em>Utilities</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">evaluate_rij_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Matrix of vectors between all particles.&quot;&quot;&quot;</span>
-    <span class="n">box_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
-    <span class="n">half_box_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="mf">2.0</span>
-    <span class="n">rij_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-    <span class="n">positions_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span>
-    <span class="k">for</span> <span class="n">Ni</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_number_atoms</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-        <span class="n">position_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
-        <span class="n">rij_xyz</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">position_i</span> <span class="o">-</span> <span class="n">positions_j</span> <span class="o">+</span> <span class="n">half_box_size</span><span class="p">,</span> <span class="n">box_size</span><span class="p">)</span> <span class="o">-</span> <span class="n">half_box_size</span><span class="p">)</span>
+    <span class="n">Nat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span>
+    <span class="n">Box</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">rij_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">Nat</span><span class="p">,</span> <span class="n">Nat</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">pos_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span>
+    <span class="k">for</span> <span class="n">Ni</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Nat</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">pos_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span>
+        <span class="n">rij_xyz</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">remainder</span><span class="p">(</span><span class="n">pos_i</span> <span class="o">-</span> <span class="n">pos_j</span> <span class="o">+</span> <span class="n">Box</span><span class="o">/</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">Box</span><span class="p">)</span> <span class="o">-</span> <span class="n">Box</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)</span>
         <span class="n">rij_matrix</span><span class="p">[</span><span class="n">Ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">rij_xyz</span>
-    <span class="c1"># use nan_to_num to avoid &quot;nan&quot; values in 2D</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">rij_matrix</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rij_matrix</span>
 </pre></div>
 </div>
 </section>
 <section id="test-the-code">
 <h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
-<p>Let us test the outputed pressure. An interesting test is to contront the output from
-our code with some data from the litterature. Let us used the same parameters
-as in Ref. <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">1</a>]</span>, where Monte Carlo simulations
-are used to simulate argon bulk phase. All we have to do is to apply our current
-code using their parameters, i.e. <span class="math notranslate nohighlight">\(\sigma = 3.405~\text{Å}\)</span>, <span class="math notranslate nohighlight">\(\epsilon = 0.238~\text{kcal/mol}\)</span>,
-and <span class="math notranslate nohighlight">\(T = 55~^\circ\text{C}\)</span>. More details are given in the first illustration, <a class="reference internal" href="../projects/project1.html#project1-label"><span class="std std-ref">A Monte Carlo study of argon</span></a>.</p>
-<p>On the side note, a relatively small cut-off as well as a small number of atoms were
-chosen to make the calculation faster.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">cst</span>
+<p>Let us test the outputed pressure.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
 <span class="kn">from</span> <span class="nn">pint</span> <span class="kn">import</span> <span class="n">UnitRegistry</span>
-<span class="kn">from</span> <span class="nn">reader</span> <span class="kn">import</span> <span class="n">import_data</span>
-
-<span class="c1"># Initialize the unit registry</span>
 <span class="n">ureg</span> <span class="o">=</span> <span class="n">UnitRegistry</span><span class="p">()</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
-<span class="c1"># Constants</span>
-<span class="n">kB</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">J</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span>  <span class="c1"># Boltzmann constant</span>
-<span class="n">Na</span> <span class="o">=</span> <span class="n">cst</span><span class="o">.</span><span class="n">Avogadro</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mole</span>  <span class="c1"># Avogadro&#39;s number</span>
-<span class="n">R</span> <span class="o">=</span> <span class="n">kB</span> <span class="o">*</span> <span class="n">Na</span>  <span class="c1"># Gas constant</span>
+<span class="c1"># Define atom number of each group</span>
+<span class="n">nmb_1</span><span class="o">=</span> <span class="mi">50</span>
+<span class="c1"># Define LJ parameters (sigma)</span>
+<span class="n">sig_1</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+<span class="c1"># Define LJ parameters (epsilon)</span>
+<span class="n">eps_1</span> <span class="o">=</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
+<span class="c1"># Define atom mass</span>
+<span class="n">mss_1</span> <span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">gram</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
+<span class="c1"># Define box size</span>
+<span class="n">L</span> <span class="o">=</span> <span class="mi">20</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+<span class="c1"># Define a cut off</span>
+<span class="n">rc</span> <span class="o">=</span> <span class="mf">2.5</span><span class="o">*</span><span class="n">sig_1</span>
+<span class="c1"># Pick the desired temperature</span>
+<span class="n">T</span> <span class="o">=</span> <span class="mi">300</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span>
+<span class="c1"># choose the displace_mc</span>
+<span class="n">displace_mc</span> <span class="o">=</span> <span class="n">sig_1</span><span class="o">/</span><span class="mi">4</span>
 
-<span class="c1"># Parameters taken from Wood1957</span>
-<span class="n">tau</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># Ratio between volume / reduced volume</span>
-<span class="n">epsilon</span> <span class="o">=</span> <span class="p">(</span><span class="mf">119.76</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span> <span class="o">*</span> <span class="n">kB</span> <span class="o">*</span> <span class="n">Na</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mol</span><span class="p">)</span>  <span class="c1"># kcal/mol</span>
-<span class="n">r_star</span> <span class="o">=</span> <span class="mf">3.822</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>  <span class="c1"># Angstrom</span>
-<span class="n">sigma</span> <span class="o">=</span> <span class="n">r_star</span> <span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">6</span><span class="p">)</span>  <span class="c1"># Angstrom</span>
-<span class="n">N_atom</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># Number of atoms</span>
-<span class="n">m_argon</span> <span class="o">=</span> <span class="mf">39.948</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">gram</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>  <span class="c1"># g/mol</span>
-<span class="n">T</span> <span class="o">=</span> <span class="mf">328.15</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">degK</span>  <span class="c1"># 328 K or 55°C</span>
-<span class="n">volume_star</span> <span class="o">=</span> <span class="n">r_star</span><span class="o">**</span><span class="mi">3</span> <span class="o">*</span> <span class="n">Na</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
-<span class="n">cut_off</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">*</span> <span class="mf">2.5</span>  <span class="c1"># Angstrom</span>
-<span class="n">displace_mc</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">/</span> <span class="mi">5</span>  <span class="c1"># Angstrom</span>
-<span class="n">volume</span> <span class="o">=</span> <span class="n">N_atom</span> <span class="o">*</span> <span class="n">volume_star</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">/</span> <span class="n">Na</span>  <span class="c1"># Angstrom^3</span>
-<span class="n">box_size</span> <span class="o">=</span> <span class="n">volume</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># Angstrom</span>
-
-<span class="c1"># Initialize and run the Monte Carlo simulation</span>
+<span class="c1"># Initialize the prepare object</span>
 <span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span>
-    <span class="n">maximum_steps</span><span class="o">=</span><span class="mi">15000</span><span class="p">,</span>
-    <span class="n">dumping_period</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
-    <span class="n">thermo_period</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">ureg</span> <span class="o">=</span> <span class="n">ureg</span><span class="p">,</span>
+    <span class="n">maximum_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">thermo_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">dumping_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="n">nmb_1</span><span class="p">],</span>
+    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">eps_1</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="n">sig_1</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="n">mss_1</span><span class="p">],</span> <span class="c1"># g/mol</span>
+    <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">cut_off</span><span class="o">=</span><span class="n">rc</span><span class="p">,</span>
     <span class="n">thermo_outputs</span><span class="o">=</span><span class="s2">&quot;Epot-press&quot;</span><span class="p">,</span>
-    <span class="n">neighbor</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-    <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="n">N_atom</span><span class="p">],</span>
-    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">epsilon</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
-    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="n">sigma</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
-    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="n">m_argon</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
-    <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
-    <span class="n">displace_mc</span><span class="o">=</span><span class="n">displace_mc</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
-    <span class="n">desired_temperature</span><span class="o">=</span><span class="n">T</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
-    <span class="n">cut_off</span><span class="o">=</span><span class="n">cut_off</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
-    <span class="n">data_folder</span><span class="o">=</span><span class="s2">&quot;Outputs/&quot;</span><span class="p">,</span>
+    <span class="n">desired_temperature</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="c1"># K</span>
+    <span class="n">neighbor</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">displace_mc</span> <span class="o">=</span> <span class="n">displace_mc</span><span class="p">,</span>
 <span class="p">)</span>
+
+<span class="c1"># Run the Monte Carlo simulation</span>
 <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
 <span class="c1"># Test function using pytest</span>
-<span class="k">def</span> <span class="nf">test_pV_over_RT</span><span class="p">():</span>
-    <span class="c1"># Import the data and calculate pV / RT</span>
-    <span class="n">pressure_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">import_data</span><span class="p">(</span><span class="s2">&quot;Outputs/simulation.log&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])[</span><span class="mi">0</span><span class="p">][:,</span><span class="mi">2</span><span class="p">][</span><span class="mi">10</span><span class="p">:]</span>  <span class="c1"># Skip initial values</span>
-    <span class="n">pressure_atm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pressure_data</span><span class="p">)</span> <span class="c1"># atm</span>
-    <span class="n">pressure_Pa</span> <span class="o">=</span> <span class="p">(</span><span class="n">pressure_atm</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">atm</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">pascal</span><span class="p">)</span> <span class="c1"># Pa</span>
-    <span class="n">volume</span> <span class="o">=</span> <span class="p">(</span><span class="n">volume_star</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">/</span> <span class="n">Na</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">meter</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># m3</span>
-    <span class="n">pV_over_RT</span> <span class="o">=</span> <span class="p">(</span><span class="n">pressure_Pa</span> <span class="o">*</span> <span class="n">volume</span> <span class="o">/</span> <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">Na</span><span class="p">)</span><span class="o">.</span><span class="n">magnitude</span>
-
-    <span class="c1"># Assert that pV_over_RT is close to 1.5</span>
-    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">pV_over_RT</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Test failed: pV/Rt = </span><span class="si">{</span><span class="n">pV_over_RT</span><span class="si">}</span><span class="s2">, expected close to 1.5&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pV/RT = </span><span class="si">{</span><span class="n">pV_over_RT</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> --- (The expected value from Wood1957 is 1.5)&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_output_files</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/dump.mc.lammpstrj&quot;</span><span class="p">),</span> \
+    <span class="s2">&quot;Test failed: dump file was not created&quot;</span>
+    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/simulation.log&quot;</span><span class="p">),</span> \
+    <span class="s2">&quot;Test failed: log file was not created&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test passed&quot;</span><span class="p">)</span>
 
 <span class="c1"># If the script is run directly, execute the tests</span>
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
@@ -398,13 +387,14 @@ chosen to make the calculation faster.</p>
     <span class="n">pytest</span><span class="o">.</span><span class="n">main</span><span class="p">([</span><span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="vm">__file__</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>Which should return a value for <span class="math notranslate nohighlight">\(p V / R T\)</span> that is close to the expected value
-of 1.5 by Wood and Parker for <span class="math notranslate nohighlight">\(\tau = V/V^* = 2\)</span> (see Fig. 4 in Ref. <span id="id3">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">1</a>]</span>):</p>
-<div class="highlight-bw notranslate"><div class="highlight"><pre><span></span>(...)
-p v / R T = 1.56  --- (The expected value from Wood1957 is 1.5)
+<p>The pressure should be returned alongside the potential energy within <em>simulation.log</em>:</p>
+<div class="highlight-bw notranslate"><div class="highlight"><pre><span></span>step Epot press
+0 134248.72 4608379.27
+10 124905.76 4287242.75
+20 124858.91 4285584.40
+(...)
 </pre></div>
 </div>
-<p>The exact value will vary from one simulation to the other due to noise.</p>
 </section>
 </section>
 
@@ -413,12 +403,12 @@ p v / R T = 1.56  --- (The expected value from Wood1957 is 1.5)
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../projects/project1.html">
+          <a class="next-page" href="chapter8.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">A Monte Carlo study of argon</div>
+                <div class="title">Monte Carlo insert</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -459,7 +449,7 @@ p v / R T = 1.56  --- (The expected value from Wood1957 is 1.5)
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Pressure measurement</a><ul>
+<li><a class="reference internal" href="#">Pressure Measurement</a><ul>
 <li><a class="reference internal" href="#implement-the-virial-equation">Implement the Virial equation</a></li>
 <li><a class="reference internal" href="#test-the-code">Test the code</a></li>
 </ul>
