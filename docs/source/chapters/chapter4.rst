@@ -138,7 +138,7 @@ class:
             # Measure distance
             rij = self.compute_distance(self.atoms_positions[Ni],
                                         self.atoms_positions[neighbor_of_i],
-                                        self.box_size[:3])
+                                        self.box_size)
             # Measure potential using information about cross coefficients
             sigma_ij = self.sigma_ij_list[Ni]
             epsilon_ij = self.epsilon_ij_list[Ni]
@@ -158,11 +158,10 @@ class as well:
     def compute_distance(self,position_i, positions_j, box_size, only_norm = True):
         """
         Measure the distances between two particles.
-        The nan_to_num is crutial in 2D to avoid nan value along third dimension.
         # TOFIX: Move as function instead of a method?
         """
         rij_xyz = np.nan_to_num(np.remainder(position_i - positions_j
-                                + box_size[:3]/2.0, box_size) - box_size[:3]/2.0)
+                  + box_size[:3]/2.0, box_size[:3]) - box_size[:3]/2.0)
         if only_norm:
             return np.linalg.norm(rij_xyz, axis=1)
         else:
@@ -190,7 +189,7 @@ let us create a new method that is dedicated solely to measuring forces:
             # Measure distance
             rij, rij_xyz = self.compute_distance(self.atoms_positions[Ni],
                                         self.atoms_positions[neighbor_of_i],
-                                        self.box_size[:3], only_norm = False)
+                                        self.box_size, only_norm = False)
             # Measure force using information about cross coefficients
             sigma_ij = self.sigma_ij_list[Ni]
             epsilon_ij = self.epsilon_ij_list[Ni]       

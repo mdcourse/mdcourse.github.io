@@ -15,9 +15,9 @@ Initialize the simulation
     :align: right
     :class: only-light
 
-Here, the *InitializeSimulation* class is created. This class is used to
-prepare the simulation box and populate the box randomly with atoms.
-Let us improve the previously created *InitializeSimulation* class:
+Here, the *InitializeSimulation* class is completed. This class is used to
+prepare the simulation box and populate it randomly with atoms. Improve the
+previously created *InitializeSimulation* class as follows:
 
 .. label:: start_InitializeSimulation_class
 
@@ -43,30 +43,20 @@ Let us improve the previously created *InitializeSimulation* class:
 
 Several parameters are provided to the *InitializeSimulation* class:
 
-- The first parameter is the box dimensions, which is a list with a length
-  corresponding to the dimension of the system. Each element of the list
-  corresponds to a dimension of the box in Ångström in the x, y, and z
-  directions, respectively.
-- Optionally, a seed can be provided as an integer. If the seed is given
-  by the user, the random number generator will always produce the same
-  displacements.
+- The box dimensions, which is a list with 3 elements. Each element of
+  the list corresponds to a dimension of the box in Ångström in the :math:`x`,
+  :math:`y`, and :math:`z`` directions, respectively.
+- The cutoff :math:`r_\text{c}` for the potential interaction.
 - Optionally, initial positions for the atoms can be provided as an array
   of length corresponding to the number of atoms. If *initial_positions* 
-  is left equal to *None*, positions will be randomly assigned to the
-  atoms (see below).
-- A cut off value with a default of 10 Ångströms is defined.
-- The *neighbor* parameter determines the interval between recalculations of
-  the neighbor lists. By default, a value of 1 is used, meaning that neighbor
-  list will be reconstructed every steps. In certain cases, the number will be
-  increased to recude the computation time.
+  is set to *None*, positions will be randomly assigned to the atoms (see
+  below).
+- The *neighbor* parameter determines the interval between recalculations
+  of the neighbor lists. By default, a value of 1 is used, meaning that the
+  neighbor list will be reconstructed every step. In certain cases, this
+  number may be increased to reduce computation time.
 
-..
-    - Optionally, a thermo period and a dumping_period can be provided to  # TOFIX to be added later
-    control the outputs from the simulation (it will be implemented  # TOFIX to be added later
-    in :ref:`chapter5-label`).  # TOFIX to be added later
-
-Finally, the *dimensions* of the system are calculated as the length of
-*box_dimensions*.
+Note that the simulation step is initialized to 0.
 
 Nondimensionalize units
 -----------------------
@@ -89,8 +79,8 @@ parameters, here the *box_dimensions*, the *cut_off*, as well as the *initial_po
 Define the box
 --------------
 
-Let us define the simulation box using the values from *box_dimensions*. Add the following
-method to the *InitializeSimulation* class:
+Let us define the simulation box using the values from *box_dimensions*. Add the
+following method to the *InitializeSimulation* class:
 
 .. label:: start_InitializeSimulation_class
 
@@ -99,10 +89,8 @@ method to the *InitializeSimulation* class:
     def define_box(self):
         """Define the simulation box. Only 3D boxes are supported."""
         box_boundaries = np.zeros((3, 2))
-        dim = 0
-        for L in self.box_dimensions:
+        for dim, L in enumerate(self.box_dimensions):
             box_boundaries[dim] = -L/2, L/2
-            dim += 1
         self.box_boundaries = box_boundaries
         box_size = np.diff(self.box_boundaries).reshape(3)
         box_geometry = np.array([90, 90, 90])
@@ -113,12 +101,16 @@ method to the *InitializeSimulation* class:
 The *box_boundaries* are calculated from the *box_dimensions*. They
 represent the lowest and highest coordinates in all directions. By symmetry,
 the box is centered at 0 along all axes. A *box_size* is also defined,
-following the MDAnalysis conventions: Lx, Ly, Lz, 90, 90, 90, where the
-last three numbers are angles in degrees. Values different from *90* for
-the angles would define a triclinic (non-orthogonal) box, which is not
-currently supported by the existing code.
+following the MDAnalysis |mdanalysis_box|: Lx, Ly, Lz, 90, 90, 90, where
+the last three numbers are angles in degrees :cite:`michaud2011mdanalysis`.
+Values different from *90* for the angles would define a triclinic (non-orthogonal)
+box, which is not currently supported by the existing code.
 
-Let us call the *define_box* method from the *__init__* class:
+.. |mdanalysis_box| raw:: html
+
+   <a href="https://docs.mdanalysis.org/stable/documentation_pages/transformations/boxdimensions.html" target="_blank">conventions</a>
+
+Let us call *define_box()* from the *__init__()* method:
 
 .. label:: start_InitializeSimulation_class
 
@@ -132,13 +124,13 @@ Let us call the *define_box* method from the *__init__* class:
 
 .. label:: end_InitializeSimulation_class
 
-Populate the box
+Populate the Box
 ----------------
 
 Here, the atoms are placed within the simulation box. If initial
 positions were not provided (i.e., *initial_positions = None*), atoms
-are placed randomly within the box. If *initial_positions* was provided
-as an array, the provided positions are used instead. Note that, in this
+are placed randomly within the box. If *initial_positions* is provided
+as an array, the provided positions are used instead. Note that in this
 case, the array must be of size 'number of atoms' times 'number of dimensions'.
 
 .. label:: start_InitializeSimulation_class
@@ -146,11 +138,12 @@ case, the array must be of size 'number of atoms' times 'number of dimensions'.
 .. code-block:: python
 
     def populate_box(self):
+        Nat = np.sum(self.number_atoms) # total number of atoms
         if self.initial_positions is None:
-            atoms_positions = np.zeros((np.sum(self.number_atoms), 3))
+            atoms_positions = np.zeros((Nat, 3))
             for dim in np.arange(3):
                 diff_box = np.diff(self.box_boundaries[dim])
-                random_pos = np.random.random(np.sum(self.number_atoms))
+                random_pos = np.random.random(Nat)
                 atoms_positions[:, dim] = random_pos*diff_box-diff_box/2
             self.atoms_positions = atoms_positions
         else:
@@ -158,14 +151,14 @@ case, the array must be of size 'number of atoms' times 'number of dimensions'.
 
 .. label:: end_InitializeSimulation_class
 
-In case *initial_positions is None*, and array is first created. Then, random
-positions that are constrained within the box boundaries are defined using the
-random function of NumPy. Note that, here, the newly added atoms are added
-randomly within the box, without taking care of avoiding overlaps with
-existing atoms. Overlaps will be dealt with using energy minimization,
-see :ref:`chapter4-label`.
+In case *initial_positions* is None, an array is first created. Then,
+random positions constrained within the box boundaries are defined using
+the random function from NumPy. Note that newly added atoms are placed
+randomly within the box, without considering overlaps with existing
+atoms. Overlaps will be addressed using energy minimization (see
+the :ref:`chapter4-label` chapter).
 
-Let us call the *populate_box* method from the *__init__* class:
+Let us call *populate_box* from the *__init__* method:
 
 .. label:: start_InitializeSimulation_class
 
@@ -178,7 +171,7 @@ Let us call the *populate_box* method from the *__init__* class:
 
 .. label:: end_InitializeSimulation_class
 
-Build neighbor lists
+Build Neighbor Lists
 --------------------
 
 In molecular simulations, it is common practice to identify neighboring atoms
@@ -210,12 +203,16 @@ atom, ensuring that only relevant interactions are considered in the
 calculations. These lists will be recalculated at intervals specified by
 the *neighbor* input parameter.
 
-Update cross coefficients
+For efficiency, the *contact_matrix* function from MDAnalysis is
+used :cite:`michaud2011mdanalysis`. The *contact_matrix* function returns
+information about atoms located at a distance less than the cutoff from one another.
+
+Update Cross Coefficients
 -------------------------
 
-At the same time as the neighbor lists are getting build up, let us also
-pre-calculate the cross coefficients. This will make the force calculation
-more practical (see below).
+As the neighbor lists are being built, let us also pre-calculate the cross
+coefficients. This will make the force calculation more efficient (see
+below).
 
 .. label:: start_Utilities_class
 
@@ -250,7 +247,7 @@ Here, the values of the cross coefficients between atom of type 1 and 2,
     \sigma_{12} = (\sigma_{11}+\sigma_{22})/2 \\
     \epsilon_{12} = (\epsilon_{11}+\epsilon_{22})/2
 
-Finally, import the following library in the *Utilities.py* file:
+Finally, import the following libraries in the *Utilities.py* file:
 
 .. label:: start_Utilities_class
 
@@ -261,8 +258,8 @@ Finally, import the following library in the *Utilities.py* file:
 
 .. label:: end_Utilities_class
 
-Let us call the *update_neighbor_lists* and *update_cross_coefficients*
-methods from the *__init__* class:
+Let us call *update_neighbor_lists* and *update_cross_coefficients*
+from the *__init__* method:
 
 .. label:: start_InitializeSimulation_class
 
@@ -276,12 +273,11 @@ methods from the *__init__* class:
 
 .. label:: end_InitializeSimulation_class
         
-Test the code
+Test the Code
 -------------
 
-Let us test the *InitializeSimulation* class to make sure that it does what
-is expected, i.e. that it does create atoms that are located within the box
-boundaries along all 3 dimensions of space:
+Let us test the *InitializeSimulation* class to ensure that it behaves as
+expected, i.e., that it creates atoms located within the box boundaries:
 
 .. label:: start_test_3a_class
 
@@ -333,3 +329,6 @@ boundaries along all 3 dimensions of space:
         pytest.main(["-s", __file__])
 
 .. label:: end_test_3a_class
+
+The value of the cutoff, chosen as :math:`2.5 \sigma_{11}`, is relatively
+common for Lennard-Jones fluids and will often be the default choice for us.
