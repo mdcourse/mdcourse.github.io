@@ -360,34 +360,35 @@ according to the chosen value of <span class="math notranslate nohighlight">\(\t
     <span class="n">N_atom</span> <span class="o">=</span> <span class="mi">200</span> <span class="c1"># no units</span>
     <span class="n">m_argon</span> <span class="o">=</span> <span class="mf">39.948</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">gram</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
     <span class="n">T</span> <span class="o">=</span> <span class="p">(</span><span class="mi">55</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">degC</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">degK</span><span class="p">)</span> <span class="c1"># 55°C</span>
-    <span class="c1"># volume_star = (23.79 * ureg.centimeter**3/ureg.mole).to(ureg.angstrom**3/ureg.mole)</span>
     <span class="n">volume_star</span> <span class="o">=</span> <span class="n">r_star</span><span class="o">**</span><span class="mi">3</span> <span class="o">*</span> <span class="n">Na</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
     <span class="n">cut_off</span> <span class="o">=</span> <span class="n">sigma</span><span class="o">*</span><span class="mf">2.5</span>
     <span class="n">displace_mc</span> <span class="o">=</span> <span class="n">sigma</span><span class="o">/</span><span class="mi">5</span> <span class="c1"># angstrom</span>
     <span class="n">volume</span> <span class="o">=</span> <span class="n">N_atom</span><span class="o">*</span><span class="n">volume_star</span><span class="o">*</span><span class="n">tau</span><span class="o">/</span><span class="n">Na</span>
-    <span class="n">box_size</span> <span class="o">=</span> <span class="n">volume</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">volume</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
     <span class="n">folder</span> <span class="o">=</span> <span class="s2">&quot;outputs_tau&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">tau</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;/&quot;</span>
 </pre></div>
 </div>
-<p>Then, let us call the <em>MinimizeEnergy</em> class, just to create and relax the
-system, and avoid starting the Monte Carlo simulation with too much overlap
-between the atoms:</p>
+<p>Then, let us call the <em>MinimizeEnergy</em> class to create and pre-equilibrate the
+system. The use of MinimizeEnergy will help us avoid starting the Monte Carlo
+simulation with too much overlap between the atoms:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">launch_MC_code</span><span class="p">(</span><span class="n">tau</span><span class="p">):</span>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
     <span class="n">folder</span> <span class="o">=</span> <span class="s2">&quot;outputs_tau&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">tau</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;/&quot;</span>
 
-    <span class="n">em</span> <span class="o">=</span> <span class="n">MinimizeEnergy</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-                        <span class="n">thermo_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                        <span class="n">dumping_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">em</span> <span class="o">=</span> <span class="n">MinimizeEnergy</span><span class="p">(</span>
+        <span class="n">ureg</span> <span class="o">=</span> <span class="n">ureg</span><span class="p">,</span>
+        <span class="n">maximum_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">thermo_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">dumping_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
         <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="n">N_atom</span><span class="p">],</span>
-        <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">epsilon</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
-        <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="n">sigma</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
-        <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="n">m_argon</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
-        <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
-                        <span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
-                        <span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
-        <span class="n">cut_off</span><span class="o">=</span><span class="n">cut_off</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+        <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">epsilon</span><span class="p">],</span>
+        <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="n">sigma</span><span class="p">],</span>
+        <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="n">m_argon</span><span class="p">],</span>
+        <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">],</span>
+        <span class="n">cut_off</span><span class="o">=</span><span class="n">cut_off</span><span class="p">,</span>
         <span class="n">data_folder</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span>
+        <span class="n">thermo_outputs</span><span class="o">=</span><span class="s2">&quot;Epot-MaxF&quot;</span><span class="p">,</span>
+        <span class="n">neighbor</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">em</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
@@ -399,30 +400,38 @@ i.e. <em>initial_positions = em.atoms_positions*em.reference_distance</em>:</p>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
     <span class="n">em</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
-    <span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span><span class="n">maximum_steps</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span>
+    <span class="n">minimized_positions</span> <span class="o">=</span> <span class="n">em</span><span class="o">.</span><span class="n">atoms_positions</span><span class="o">*</span><span class="n">em</span><span class="o">.</span><span class="n">ref_length</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">launch_MC_code</span><span class="p">(</span><span class="n">tau</span><span class="p">):</span>
+    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+    <span class="n">minimized_positions</span> <span class="o">=</span> <span class="n">em</span><span class="o">.</span><span class="n">atoms_positions</span><span class="o">*</span><span class="n">em</span><span class="o">.</span><span class="n">ref_length</span>
+
+    <span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span>
+        <span class="n">ureg</span> <span class="o">=</span> <span class="n">ureg</span><span class="p">,</span>
+        <span class="n">maximum_steps</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span>
         <span class="n">dumping_period</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
         <span class="n">thermo_period</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
         <span class="n">neighbor</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-        <span class="n">displace_mc</span> <span class="o">=</span> <span class="n">displace_mc</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
-        <span class="n">desired_temperature</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+        <span class="n">displace_mc</span> <span class="o">=</span> <span class="n">displace_mc</span><span class="p">,</span>
+        <span class="n">desired_temperature</span> <span class="o">=</span> <span class="n">T</span><span class="p">,</span>
         <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="n">N_atom</span><span class="p">],</span>
-        <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">epsilon</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
-        <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="n">sigma</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
-        <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="n">m_argon</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
-        <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
-                        <span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
-                        <span class="n">box_size</span><span class="o">.</span><span class="n">magnitude</span><span class="p">],</span>
-        <span class="n">initial_positions</span> <span class="o">=</span> <span class="n">em</span><span class="o">.</span><span class="n">atoms_positions</span><span class="o">*</span><span class="n">em</span><span class="o">.</span><span class="n">reference_distance</span><span class="p">,</span>
-        <span class="n">cut_off</span><span class="o">=</span><span class="n">cut_off</span><span class="o">.</span><span class="n">magnitude</span><span class="p">,</span>
+        <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">epsilon</span><span class="p">],</span>
+        <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="n">sigma</span><span class="p">],</span>
+        <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="n">m_argon</span><span class="p">],</span>
+        <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">],</span>
+        <span class="n">initial_positions</span> <span class="o">=</span> <span class="n">minimized_positions</span><span class="p">,</span>
+        <span class="n">cut_off</span><span class="o">=</span><span class="n">cut_off</span><span class="p">,</span>
         <span class="n">data_folder</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span>
+        <span class="n">thermo_outputs</span><span class="o">=</span><span class="s2">&quot;Epot-press&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Finally, it is possible to call the <em>launch_MC_code</em> function using
 <em>multiprocessing</em>, and perform the simulation for multiple value of <span class="math notranslate nohighlight">\(\tau\)</span>
-at the same time (if your computer has enough CPU core, if not, perform these calculations
-in serial):</p>
+at the same time (if your computer has enough CPU core, if not, perform these
+calculations in serial):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">tau_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.126</span><span class="p">,</span> <span class="mf">0.882</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span><span class="mi">2</span><span class="p">)</span>
     <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">()</span>
