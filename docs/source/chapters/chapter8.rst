@@ -16,12 +16,6 @@ simulation resemble the Monte Carlo move from :ref:`chapter6-label`:
 - 4) We then decide to keep or reject the move by calculating
   the difference in energy between the trial and the initial configurations:
   :math:`\Delta E = E_\text{pot}^\text{trial} - E_\text{pot}^\text{initial}`.
-  
-  - If :math:`\Delta E < 0`, then the move is automatically accepted. 
-  - If :math:`\Delta E > 0`, then the move is accepted with a probability given
-    by the Boltzmann factor :math:`\exp{- \beta \Delta E}`, where
-    :math:`\beta = 1 / k_\text{B} T` and :math:`T` is the imposed temperature.
-
 - 5) Steps 1-4 are repeated a large number of times, generating a broad range of
      possible configurations.
 
@@ -38,7 +32,7 @@ Let us add the following method called *monte_carlo_exchange* to the *MonteCarlo
         # The first step is to make a copy of the previous state
         # Since atoms numbers are evolving, its also important to store the
         # neighbor, sigma, and epsilon lists
-        self.Epot = self.compute_potential()
+        self.Epot = self.compute_potential() # TOFIX: not necessary every time
         initial_positions = copy.deepcopy(self.atoms_positions)
         initial_number_atoms = copy.deepcopy(self.number_atoms)
         initial_neighbor_lists = copy.deepcopy(self.neighbor_lists)
@@ -72,15 +66,15 @@ Let us add the following method called *monte_carlo_exchange* to the *MonteCarlo
 .. label:: end_MonteCarlo_class
 
 First, the potential energy is calculated, and the current state of the
-simulations, such as positions and atom numbers, are saved. Then, an insertion
-try or a deletion trial is made, each with a probability of 0.5. The
-*monte_carlo_insert* and *monte_carlo_delete*, that are implemented here below,
-are both calculting the *acceptation_probability*. A random number is again selected,
-and if that number is larger than the acceptation probability, then the system
-revert to its previous position. If the random number is lower than the acceptation
-probability, nothing appends, which means that the last trial is accepted.
+simulation, such as positions and atom numbers, is saved. Then, an insertion
+trial or a deletion trial is made, each with a probability of 0.5. The
+*monte_carlo_insert* and *monte_carlo_delete* methods, which are implemented
+below, both calculate the *acceptance_probability*. A random number is selected,
+and if that number is larger than the acceptance probability, the system reverts
+to its previous position. If the random number is lower than the acceptance
+probability, nothing happens, meaning that the last trial is accepted.
 
-Then, let us write the *monte_carlo_insert* method:
+Then, let us write the *monte_carlo_insert()* method:
 
 .. label:: start_MonteCarlo_class
 
@@ -96,7 +90,6 @@ Then, let us write the *monte_carlo_insert* method:
         self.atoms_positions = np.vstack([self.atoms_positions[:shift_id],
                                         new_atom_position,
                                         self.atoms_positions[shift_id:]])
-        self.total_number_atoms = np.sum(self.number_atoms)
         self.update_neighbor_lists()
         self.identify_atom_properties()
         self.update_cross_coefficients()
@@ -111,7 +104,10 @@ Then, let us write the *monte_carlo_insert* method:
 
 .. label:: end_MonteCarlo_class
 
-as well as the *monte_carlo_delete* method:
+After trying to insert a new particle, neighbor lists and cross coefficients
+must be re-evaluated. Then, the acceptance probability is calculated.
+
+Let us add the very similar *monte_carlo_delete()* method:
 
 .. label:: start_MonteCarlo_class
 
@@ -192,7 +188,7 @@ Let us also normalised the "desired_mu":
 
 .. label:: end_MonteCarlo_class
 
-Finally, the *monte_carlo_insert_delete()* method must be included in the run:
+Finally, the *monte_carlo_exchange()* method must be included in the run:
 
 .. label:: start_MonteCarlo_class
 
@@ -207,7 +203,7 @@ Finally, the *monte_carlo_insert_delete()* method must be included in the run:
 
 .. label:: end_MonteCarlo_class
 
-We need to calculate Lambda:
+We need to calculate :math:`\Lambda`:
 
 .. label:: start_MonteCarlo_class
 
@@ -228,6 +224,7 @@ To output the density, let us add the following method to the *Measurements* cla
 
     def calculate_density(self):
         """Calculate the mass density."""
+        # TOFIX: not used yet
         volume = np.prod(self.box_size[:3])  # Unitless
         total_mass = np.sum(self.atoms_mass)  # Unitless
         return total_mass/volume  # Unitless
@@ -237,8 +234,8 @@ To output the density, let us add the following method to the *Measurements* cla
 Test the code
 -------------
 
-One can use a similar test as previously. Let us use a displace distance of
-0.5 Angstrom, and make 1000 steps.
+One can use a similar test as previously, but with an imposed chemical
+potential *desired_mu*:
 
 .. label:: start_test_8a_class
 
@@ -287,8 +284,10 @@ One can use a similar test as previously. Let us use a displace distance of
 
     # Test function using pytest
     def test_output_files():
-        assert os.path.exists("Outputs/dump.mc.lammpstrj"), "Test failed: dump file was not created"
-        assert os.path.exists("Outputs/simulation.log"), "Test failed: log file was not created"
+        assert os.path.exists("Outputs/dump.mc.lammpstrj"), \
+        "Test failed: dump file was not created"
+        assert os.path.exists("Outputs/simulation.log"), \
+        "Test failed: log file was not created"
         print("Test passed")
 
     # If the script is run directly, execute the tests
@@ -300,5 +299,4 @@ One can use a similar test as previously. Let us use a displace distance of
 .. label:: end_test_8a_class
 
 The evolution of the potential energy as a function of the
-number of steps are written in the *Outputs/Epot.dat* file
-and can be plotted.
+number of steps are written in the *Outputs/Epot.dat*.
