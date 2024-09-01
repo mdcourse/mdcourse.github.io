@@ -32,8 +32,10 @@ The steepest descent method is used for energy minimization, following these ste
 - 3) Move the atoms in the opposite direction of the maximum
      force to minimize the potential energy by a displacement step.
      The size of the step is adjusted iteratively based on the reduction in energy.
-- 4) Compute the new potential energy after the displacement, :math:`E_\text{pot}^\text{trial}`.
-- 5) Evaluate the change in energy: :math:`\Delta E = E_\text{pot}^\text{trial} - E_\text{pot}^\text{initial}`.
+- 4) Compute the new potential energy after the displacement,
+     :math:`E_\text{pot}^\text{trial}`.
+- 5) Evaluate the change in energy:
+     :math:`\Delta E = E_\text{pot}^\text{trial} - E_\text{pot}^\text{initial}`.
   
   - If :math:`\Delta E < 0`, the new configuration is accepted as it results in
     lower energy, and the step size is increased.
@@ -63,13 +65,8 @@ Let us fill the *__init__()* method:
             
 .. label:: end_MinimizeEnergy_class
 
-An important parameter is *maximum_steps*, which sets the maximum number
-of steps for the energy minimization process. The *displacement*
-parameter, with a default value of 0.01 Ångström, sets the initial atom
-displacement value.
-
-The *thermo_outputs* and *data_folder* parameters are used for printing data
-to files. These two parameters will be useful in the next chapter, :ref:`chapter5-label`.
+The parameter *maximum_steps* sets the maximum number
+of steps for the energy minimization process.
 
 Energy minimizer
 ----------------
@@ -89,8 +86,13 @@ following *run()* method to the *MinimizeEnergy* class:
             self.update_neighbor_lists() # Rebuild neighbor list, if necessary
             self.update_cross_coefficients() # Recalculate the cross coefficients, if necessary
             # Compute Epot/MaxF/force
-            init_Epot = self.compute_potential()
-            forces, init_MaxF = self.compute_force()
+            if hasattr(self, 'Epot') is False: # If self.Epot does not exists yet, calculate it
+                self.Epot = self.compute_potential()
+            if hasattr(self, 'MaxF') is False: # If self.MaxF does not exists yet, calculate it
+                forces = self.compute_force()
+                self.MaxF = np.max(np.abs(forces))
+            init_Epot = self.Epot
+            init_MaxF = self.MaxF
             # Save the current atom positions
             init_positions = copy.deepcopy(self.atoms_positions)
             # Move the atoms in the opposite direction of the maximum force
@@ -101,10 +103,9 @@ following *run()* method to the *MinimizeEnergy* class:
             # Keep the more favorable energy
             if trial_Epot < init_Epot: # accept new position
                 self.Epot = trial_Epot
-                # calculate the new max force and save it
-                forces, init_MaxF = self.compute_force()
+                forces = self.compute_force() # calculate the new max force and save it
                 self.MaxF = np.max(np.abs(forces))
-                self.wrap_in_box()  # Wrap atoms in the box, if necessary
+                self.wrap_in_box()  # Wrap atoms in the box
                 self.displacement *= 1.2 # Multiply the displacement by a factor 1.2
             else: # reject new position
                 self.Epot = init_Epot # Revert to old energy
@@ -113,17 +114,19 @@ following *run()* method to the *MinimizeEnergy* class:
 
 .. label:: end_MinimizeEnergy_class
 
-The displacement, which has an initial value of 0.01, is adjusted through energy
-minimization. When the trial is successful, its value is multiplied by 1.2. When
-the trial is rejected, its value is multiplied by 0.2.
+The displacement, which has an initial value of 0.01, is adjusted through
+energy minimization. When the trial is successful, its value is multiplied
+by 1.2. When the trial is rejected, its value is multiplied by 0.2. Thus,
+as the minimization progresses, the displacements that the particles
+perform increase.
 
-Compute_potential
------------------
+Compute the Potential
+---------------------
 
-Computing the potential energy of the system is central to the energy minimizer,
-as the value of the potential is used to decide if the trial is accepted or
-rejected. Add the following method called *compute_potential()*  to the *Utilities*
-class:
+Computing the potential energy of the system is central to the energy
+minimizer, as the value of the potential is used to decide if the trial is
+accepted or rejected. Add the following method called *compute_potential()*
+to the *Utilities* class:
 
 .. label:: start_Utilities_class
 
@@ -139,7 +142,7 @@ class:
             rij = self.compute_distance(self.atoms_positions[Ni],
                                         self.atoms_positions[neighbor_of_i],
                                         self.box_size)
-            # Measure potential using information about cross coefficients
+            # Measure potential using pre-calculated cross coefficients
             sigma_ij = self.sigma_ij_list[Ni]
             epsilon_ij = self.epsilon_ij_list[Ni]
             energy_potential += np.sum(potentials(epsilon_ij, sigma_ij, rij))
@@ -147,8 +150,8 @@ class:
     
 .. label:: end_Utilities_class
 
-Measuring the distance is an important step of computing the potential. Let us
-do it using a dedicated method. Add the following method to the *Utilities*
+Measuring the distance is a central step in computing the potential. Let us
+do this using a dedicated method. Add the following method to the *Utilities*
 class as well:
 
 .. label:: start_Utilities_class
@@ -158,7 +161,7 @@ class as well:
     def compute_distance(self,position_i, positions_j, box_size, only_norm = True):
         """
         Measure the distances between two particles.
-        # TOFIX: Move as function instead of a method?
+        # TOFIX: Move as a function instead of a method?
         """
         rij_xyz = np.nan_to_num(np.remainder(position_i - positions_j
                   + box_size[:3]/2.0, box_size[:3]) - box_size[:3]/2.0)
@@ -171,7 +174,9 @@ class as well:
 
 Finally, the energy minimization requires the computation of the minimum
 force in the system. Although not very different from the potential measurement,
-let us create a new method that is dedicated solely to measuring forces:
+let us create a new method that is dedicated solely to measuring forces.
+The force can be returned as a vector (default), or as a matrix (which will be
+useful for pressure calculation, see the :ref:`chapter7-label` chapter):
 
 .. label:: start_Utilities_class
 
@@ -202,23 +207,20 @@ let us create a new method that is dedicated solely to measuring forces:
                 # Add the contribution to the matrix
                 force_matrix[Ni][neighbor_of_i] += (fij_xyz*rij_xyz.T/rij).T
         if return_vector:
-            max_force = np.max(np.abs(force_vector))
-            return force_vector, max_force
+            return force_vector
         else:
             return force_matrix
     
 .. label:: end_Utilities_class
 
-Here, two types of outputs can
-be requested by the user: *force-vector*, and *force-matrix*. 
-The *force-matrix* option will be useful for pressure calculation, see
-:ref:`chapter7-label`.
+The force can be returned as a vector (default) or as a matrix. The latter
+will be useful for pressure calculation; see the :ref:`chapter7-label` chapter.
 
-Wrap in box
+Wrap in Box
 -----------
 
-Every time atoms are being displaced, one has to ensure that they remain in
-the box. This is done by the *wrap_in_box()* method that must be placed
+Every time atoms are displaced, one has to ensure that they remain within
+the box. This is done by the *wrap_in_box()* method, which must be placed
 within the *Utilities* class:
 
 .. label:: start_Utilities_class
@@ -296,5 +298,6 @@ typically negative.
 
 .. label:: end_test_4a_class
 
-For such as low density in particle, we can reasonably expect the energy to be always
-negative after 100 steps.
+For such a low particle density, we can reasonably expect that the potential
+energy will always be negative after 100 steps, and that the maximum force
+will be smaller than 10 (unitless).
