@@ -111,7 +111,7 @@ Here, *number_atoms* :math:`N`, *epsilon* :math:`\epsilon`,
 *sigma* :math:`\sigma`, and *atom_mass* :math:`m` must be provided as lists
 where the elements have no units, kcal/mol, angstrom, and g/mol units,
 respectively. The units will be enforced with the |Pint| unit registry, *ureg*,
-which must also be provided as a parameter.
+which must also be provided as a parameter (more details later).
 
 .. |Pint| raw:: html
 
@@ -124,9 +124,9 @@ of positional and keyword arguments, respectively.
 Calculate LJ units prefactors
 -----------------------------
 
-Within the *Prepare* class, let us create a method called *calculate_LJunits_prefactors*
-that will be used to calculate the prefactors necessary to convert units from the *real*
-unit system to the *LJ* unit system:
+Within the *Prepare* class, create a method called *calculate_LJunits_prefactors*
+that will be used to calculate the prefactors necessary to convert units from the
+*real* unit system to the *LJ* unit system:
 
 .. label:: start_Prepare_class
 
@@ -134,7 +134,7 @@ unit system to the *LJ* unit system:
 
     def calculate_LJunits_prefactors(self):
         """Calculate the Lennard-Jones units prefactors."""
-        # First define constants
+        # First define Boltzmann and Avogadro constants
         kB = cst.Boltzmann*cst.Avogadro/cst.calorie/cst.kilo  # kcal/mol/K
         kB *= self.ureg.kcal/self.ureg.mol/self.ureg.kelvin
         Na = cst.Avogadro/self.ureg.mol
@@ -157,22 +157,24 @@ unit system to the *LJ* unit system:
         # Calculate the prefactor for the pressure (in Atmosphere)
         self.ref_pressure = (self.ref_energy \
             /self.ref_length**3/Na).to(self.ureg.atmosphere)
-        # Regroup all the reference quantities in list, for practicality
+        # Group all the reference quantities into a list for practicality
         self.ref_quantities = [self.ref_length, self.ref_energy,
             self.ref_mass, self.ref_time, self.ref_pressure, self.ref_temperature]
         self.ref_units = [ref.units for ref in self.ref_quantities]
 
 .. label:: end_Prepare_class
 
-This method defines the reference distance as the first element in the
-*sigma* list, i.e., :math:`\sigma_{11}`. Therefore, atoms of type one will
-always be used for the normalization. Similarly, the first element
-in the *epsilon* list (:math:`\epsilon_{11}`) is used as the reference energy,
-and the first element in the *atom_mass* list (:math:`m_1`) is used as the
-reference mass. Then, the reference_time in femtoseconds is calculated
-as :math:`\sqrt{m_1 \sigma_{11}^2 / \epsilon_{11}}`, the reference temperature
-in Kelvin as :math:`\epsilon_{11} / k_\text{B}`, and the reference_pressure
-in atmospheres is calculated as :math:`\epsilon_{11}/\sigma_{11}^3`.
+This method defines the reference length as the first element in the
+*sigma* list, i.e., :math:`\sigma_{11}`. Therefore, atoms of type 1 will
+always be used for normalization. Similarly, the first element in the
+*epsilon* list (:math:`\epsilon_{11}`) is used as the reference energy, and
+the first element in the *atom_mass* list (:math:`m_1`) is used as the
+reference mass.
+
+The reference time in femtoseconds is then calculated as
+:math:`\sqrt{m_1 \sigma_{11}^2 / \epsilon_{11}}`, the reference
+temperature in Kelvin as :math:`\epsilon_{11} / k_\text{B}`, and the
+reference pressure in atmospheres as :math:`\epsilon_{11} / \sigma_{11}^3`.
 
 Finally, let us ensure that the *calculate_LJunits_prefactors* method is
 called systematically by adding the following line to the *__init__()* method:
@@ -233,11 +235,11 @@ class:
 
 .. label:: end_Prepare_class
 
-The index *0* is used to differentiate this method from other methods that
-will be used to nondimensionalize units in future classes. We anticipate that
-*epsilon*, *sigma*, and *atom_mass* may contain more than one element, so
-each element is normalized with the corresponding reference value. The
-*zip()* function allows us to loop over all three lists at once.
+When a *quantities_to_normalise* list containing parameter names is provided
+to the *nondimensionalize_units* method, a loop is performed over all the
+quantities. The value of each quantity is extracted using *getattr*. The units
+of the quantity of interest are then detected and normalized by the appropriate
+reference quantities defined by *calculate_LJunits_prefactors*.
 
 Let us also call the *nondimensionalize_units* from the *__init__()* method
 of the *Prepare* class:
@@ -253,22 +255,25 @@ of the *Prepare* class:
 
 .. label:: end_Prepare_class
 
-Identify atom properties
+Here, the *epsilon*, *sigma*, and *atom_mass* parameters will be
+nondimensionalized.
+
+Identify Atom Properties
 ------------------------
 
 Anticipating the future use of multiple atom types, where each type will be
 associated with its own :math:`\sigma`, :math:`\epsilon`, and :math:`m`, let
 us create arrays containing the properties of each atom in the simulation. For
-instance, in the case of a simulation with two atoms of type 1 and three atoms
-of type 2, the corresponding *atoms_sigma* array will be:
+instance, in a simulation with two atoms of type 1 and three atoms of type 2,
+the corresponding *atoms_sigma* array will be:
 
 .. math::
 
     \text{atoms_sigma} = [\sigma_{11}, \sigma_{11}, \sigma_{22}, \sigma_{22}, \sigma_{22}]
 
 where :math:`\sigma_{11}` and :math:`\sigma_{22}` are the sigma values for
-atoms of type 1 and 2, respectively. The *atoms_sigma* array will allow for
-future calculations of force.
+atoms of type 1 and 2, respectively. The *atoms_sigma* array will facilitate
+future calculations of forces.
 
 Create a new method called *identify_atom_properties*, and place it
 within the *Prepare* class:
@@ -318,7 +323,8 @@ Test the code
 
 Let's test the *Prepare* class to make sure that it does what is expected.
 Here, a system containing 2 atoms of type 1, and 3 atoms of type 2 is
-prepared. LJs parameters and masses for each groups are also defined.
+prepared. LJs parameters and masses for each groups are also defined, and given
+physical units thanks to the *UnitRegistry* of Pint.
 
 .. label:: start_test_2a_class
 
@@ -351,7 +357,8 @@ prepared. LJs parameters and masses for each groups are also defined.
     def test_atoms_epsilon():
         expected = np.array([1., 1., 2., 2., 2.])
         result = prep.atoms_epsilon
-        assert np.array_equal(result, expected), f"Test failed: {result} != {expected}"
+        assert np.array_equal(result, expected), \
+        f"Test failed: {result} != {expected}"
         print("Test passed")
 
     # In the script is launched with Python, call Pytest
@@ -361,5 +368,6 @@ prepared. LJs parameters and masses for each groups are also defined.
 
 .. label:: end_test_2a_class
 
-This test assert that the generated *atoms_epsilon* array is consistent with
-its expected value (see the previous paragraphs).
+This test asserts that the generated *atoms_epsilon* array is consistent
+with its expected value (see the previous paragraphs). Note that the expected
+values are in LJ units, i.e., they have been nondimensionalized by :math:`\epsilon_1`.
