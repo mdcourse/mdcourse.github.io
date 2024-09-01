@@ -220,6 +220,15 @@ class:
                         f"Error: Quantities are not properly nondimensionalized"
                     quantity[i] = quantity[i].magnitude # get rid of ureg
                 setattr(self, name, quantity)
+            elif len(np.shape(quantity)) > 0: # for position array
+                assert element.units in self.ref_units, \
+                    f"Error: Units not part of the reference units"
+                ref_value = self.ref_quantities[self.ref_units.index(element.units)]
+                quantity = quantity/ref_value
+                assert quantity.units == self.ureg.dimensionless, \
+                    f"Error: Quantities are not properly nondimensionalized"
+                quantity = quantity.magnitude # get rid of ureg
+                setattr(self, name, quantity)
             else:
                 if quantity is not None:
                     assert np.shape(quantity) == (), \
