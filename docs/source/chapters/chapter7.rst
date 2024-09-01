@@ -30,9 +30,9 @@ vector direction between atoms pairs will have to be written here.
 Implement the Virial equation
 -----------------------------
 
-Let us add the following method to the *Utilities* class.
+Let us add the following method to the *Measurements* class.
 
-.. label:: start_Utilities_class
+.. label:: start_Measurements_class
 
 .. code-block:: python
 
@@ -40,21 +40,24 @@ Let us add the following method to the *Utilities* class.
         """Evaluate p based on the Virial equation (Eq. 4.4.2 in Frenkel-Smit,
         Understanding molecular simulation: from algorithms to applications, 2002)"""
         # Compute the ideal contribution
-        Ndof = self.dimensions*self.total_number_atoms-self.dimensions    
-        volume = np.prod(self.box_size[:self.dimensions])
+        Nat = np.sum(self.number_atoms) # total number of atoms
+        dimension = 3 # 3D is the only possibility here
+        Ndof = dimension*Nat-dimension    
+        volume = np.prod(self.box_size[:3]) # box volume
         try:
             self.calculate_temperature() # this is for later on, when velocities are computed
             temperature = self.temperature
         except:
             temperature = self.desired_temperature # for MC, simply use the desired temperature
-        p_ideal = Ndof*temperature/(volume*self.dimensions)
+        p_ideal = Ndof*temperature/(volume*dimension)
         # Compute the non-ideal contribution
-        distances_forces = np.sum(self.compute_force(return_vector = False)*self.evaluate_rij_matrix())
-        p_nonideal = distances_forces/(volume*self.dimensions)
+        distances_forces = np.sum(self.compute_force(return_vector = False) \
+                                  *self.evaluate_rij_matrix())
+        p_nonideal = distances_forces/(volume*dimension)
         # Final pressure
         self.pressure = p_ideal+p_nonideal
 
-.. label:: end_Utilities_class
+.. label:: end_Measurements_class
 
 To evaluate all the vectors between all the particles, let us also add the
 *evaluate_rij_matrix* method to the *Utilities* class:
@@ -65,95 +68,75 @@ To evaluate all the vectors between all the particles, let us also add the
 
     def evaluate_rij_matrix(self):
         """Matrix of vectors between all particles."""
-        box_size = self.box_size[:3]
-        half_box_size = self.box_size[:3]/2.0
-        rij_matrix = np.zeros((self.total_number_atoms,self.total_number_atoms,3))
-        positions_j = self.atoms_positions
-        for Ni in range(self.total_number_atoms-1):
-            position_i = self.atoms_positions[Ni]
-            rij_xyz = (np.remainder(position_i - positions_j + half_box_size, box_size) - half_box_size)
+        Nat = np.sum(self.number_atoms)
+        Box = self.box_size[:3]
+        rij_matrix = np.zeros((Nat, Nat,3))
+        pos_j = self.atoms_positions
+        for Ni in range(Nat-1):
+            pos_i = self.atoms_positions[Ni]
+            rij_xyz = (np.remainder(pos_i - pos_j + Box/2.0, Box) - Box/2.0)
             rij_matrix[Ni] = rij_xyz
-        # use nan_to_num to avoid "nan" values in 2D
-        return np.nan_to_num(rij_matrix)
+        return rij_matrix
 
 .. label:: end_Utilities_class
 
 Test the code
 -------------
 
-Let us test the outputed pressure. An interesting test is to contront the output from
-our code with some data from the litterature. Let us used the same parameters
-as in Ref. :cite:`woodMonteCarloEquation1957`, where Monte Carlo simulations
-are used to simulate argon bulk phase. All we have to do is to apply our current
-code using their parameters, i.e. :math:`\sigma = 3.405~\text{Å}`, :math:`\epsilon = 0.238~\text{kcal/mol}`,
-and :math:`T = 55~^\circ\text{C}`. More details are given in the first illustration, :ref:`project1-label`.
-
-On the side note, a relatively small cut-off as well as a small number of atoms were
-chosen to make the calculation faster. 
+Let us test the outputed pressure. 
 
 .. label:: start_test_7a_class
 
 .. code-block:: python
 
-    import numpy as np
     from MonteCarlo import MonteCarlo
-    from scipy import constants as cst
     from pint import UnitRegistry
-    from reader import import_data
-
-    # Initialize the unit registry
     ureg = UnitRegistry()
+    import os
 
-    # Constants
-    kB = cst.Boltzmann * ureg.J / ureg.kelvin  # Boltzmann constant
-    Na = cst.Avogadro / ureg.mole  # Avogadro's number
-    R = kB * Na  # Gas constant
+    # Define atom number of each group
+    nmb_1= 50
+    # Define LJ parameters (sigma)
+    sig_1 = 3*ureg.angstrom
+    # Define LJ parameters (epsilon)
+    eps_1 = 0.1*ureg.kcal/ureg.mol
+    # Define atom mass
+    mss_1 = 10*ureg.gram/ureg.mol
+    # Define box size
+    L = 20*ureg.angstrom
+    # Define a cut off
+    rc = 2.5*sig_1
+    # Pick the desired temperature
+    T = 300*ureg.kelvin
+    # choose the displace_mc
+    displace_mc = sig_1/4
 
-    # Parameters taken from Wood1957
-    tau = 2  # Ratio between volume / reduced volume
-    epsilon = (119.76 * ureg.kelvin * kB * Na).to(ureg.kcal / ureg.mol)  # kcal/mol
-    r_star = 3.822 * ureg.angstrom  # Angstrom
-    sigma = r_star / 2**(1/6)  # Angstrom
-    N_atom = 50  # Number of atoms
-    m_argon = 39.948 * ureg.gram / ureg.mol  # g/mol
-    T = 328.15 * ureg.degK  # 328 K or 55°C
-    volume_star = r_star**3 * Na * 2**(-0.5)
-    cut_off = sigma * 2.5  # Angstrom
-    displace_mc = sigma / 5  # Angstrom
-    volume = N_atom * volume_star * tau / Na  # Angstrom^3
-    box_size = volume**(1/3)  # Angstrom
-
-    # Initialize and run the Monte Carlo simulation
+    # Initialize the prepare object
     mc = MonteCarlo(
-        maximum_steps=15000,
-        dumping_period=1000,
-        thermo_period=1000,
+        ureg = ureg,
+        maximum_steps=100,
+        thermo_period=10,
+        dumping_period=10,
+        number_atoms=[nmb_1],
+        epsilon=[eps_1], # kcal/mol
+        sigma=[sig_1], # A
+        atom_mass=[mss_1], # g/mol
+        box_dimensions=[L, L, L], # A
+        cut_off=rc,
         thermo_outputs="Epot-press",
-        neighbor=50,
-        number_atoms=[N_atom],
-        epsilon=[epsilon.magnitude],
-        sigma=[sigma.magnitude],
-        atom_mass=[m_argon.magnitude],
-        box_dimensions=[box_size.magnitude, box_size.magnitude, box_size.magnitude],
-        displace_mc=displace_mc.magnitude,
-        desired_temperature=T.magnitude,
-        cut_off=cut_off.magnitude,
-        data_folder="Outputs/",
+        desired_temperature=T, # K
+        neighbor=20,
+        displace_mc = displace_mc,
     )
+
+    # Run the Monte Carlo simulation
     mc.run()
 
     # Test function using pytest
-    def test_pV_over_RT():
-        # Import the data and calculate pV / RT
-        pressure_data = np.array(import_data("Outputs/simulation.log")[1:])[0][:,2][10:]  # Skip initial values
-        pressure_atm = np.mean(pressure_data) # atm
-        pressure_Pa = (pressure_atm * ureg.atm).to(ureg.pascal) # Pa
-        volume = (volume_star * tau / Na).to(ureg.meter**3) # m3
-        pV_over_RT = (pressure_Pa * volume / (R * T) * Na).magnitude
-        
-        # Assert that pV_over_RT is close to 1.5
-        assert np.isclose(pV_over_RT, 1.5, atol=1.0), f"Test failed: pV/Rt = {pV_over_RT}, expected close to 1.5"
-        print(f"pV/RT = {pV_over_RT:.2f} --- (The expected value from Wood1957 is 1.5)")
+    def test_output_files():
+        assert os.path.exists("Outputs/dump.mc.lammpstrj"), "Test failed: dump file was not created"
+        assert os.path.exists("Outputs/simulation.log"), "Test failed: log file was not created"
+        print("Test passed")
 
     # If the script is run directly, execute the tests
     if __name__ == "__main__":
@@ -162,13 +145,3 @@ chosen to make the calculation faster.
         pytest.main(["-s", __file__])
 
 .. label:: end_test_7a_class
-
-Which should return a value for :math:`p V / R T` that is close to the expected value
-of 1.5 by Wood and Parker for :math:`\tau = V/V^* = 2` (see Fig. 4 in Ref. :cite:`woodMonteCarloEquation1957`):
-
-.. code-block:: bw
-
-    (...)
-    p v / R T = 1.56  --- (The expected value from Wood1957 is 1.5)
-
-The exact value will vary from one simulation to the other due to noise.

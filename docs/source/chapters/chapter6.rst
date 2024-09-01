@@ -145,21 +145,6 @@ Let us add a dump too:
 
 .. label:: end_MonteCarlo_class
 
-To output the density, let us add the following method to the *Utilities* class:
-# TOFIX: not used yet
-
-.. label:: start_Utilities_class
-
-.. code-block:: python
-
-    def calculate_density(self):
-        """Calculate the mass density."""
-        volume = np.prod(self.box_size[:3])  # Unitless
-        total_mass = np.sum(self.atoms_mass)  # Unitless
-        return total_mass/volume  # Unitless
-
-.. label:: end_Utilities_class
-
 Test the code
 -------------
 
@@ -195,9 +180,9 @@ One can use a similar test as previously. Let us use a displace distance of
     # Initialize the prepare object
     mc = MonteCarlo(
         ureg = ureg,
-        maximum_steps=1000,
-        thermo_period=100,
-        dumping_period=100,
+        maximum_steps=100,
+        thermo_period=10,
+        dumping_period=10,
         number_atoms=[nmb_1],
         epsilon=[eps_1], # kcal/mol
         sigma=[sig_1], # A
@@ -209,7 +194,21 @@ One can use a similar test as previously. Let us use a displace distance of
         neighbor=20,
         displace_mc = displace_mc,
     )
+
+    # Run the Monte Carlo simulation
     mc.run()
+
+    # Test function using pytest
+    def test_output_files():
+        assert os.path.exists("Outputs/dump.mc.lammpstrj"), "Test failed: dump file was not created"
+        assert os.path.exists("Outputs/simulation.log"), "Test failed: log file was not created"
+        print("Test passed")
+
+    # If the script is run directly, execute the tests
+    if __name__ == "__main__":
+        import pytest
+        # Run pytest programmatically
+        pytest.main(["-s", __file__])
 
 .. label:: end_test_6a_class
 

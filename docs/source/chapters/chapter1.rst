@@ -192,6 +192,7 @@ Within the *Measurements.py* file, copy the following lines:
 
 .. code-block:: python
 
+    import numpy as np
     from InitializeSimulation import InitializeSimulation
 
 

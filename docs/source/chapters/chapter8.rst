@@ -45,18 +45,29 @@ Let us add the following method called *monte_carlo_exchange* to the *MonteCarlo
         initial_sigma_lists = copy.deepcopy(self.sigma_ij_list)
         initial_epsilon_lists = copy.deepcopy(self.epsilon_ij_list)
         # Apply a 50-50 probability to insert or delete
-        if np.random.random() < 0.5:
+        insert_or_delete = np.random.random()
+        if np.random.random() < insert_or_delete:
             self.monte_carlo_insert()
         else:
             self.monte_carlo_delete()
-        # If np.random.random() < self.acceptation_probability, do nothing
-        if np.random.random() > self.acceptation_probability:
+        if np.random.random() < self.acceptation_probability: # accepted move
+            # Update the success counters
+            if np.random.random() < insert_or_delete:
+                self.successful_insert += 1
+            else:
+                self.successful_delete += 1
+        else:
             # Reject the new position, revert to inital position
             self.neighbor_lists = initial_neighbor_lists
             self.sigma_ij_list = initial_sigma_lists
             self.epsilon_ij_list = initial_epsilon_lists
             self.atoms_positions = initial_positions
             self.number_atoms = initial_number_atoms
+            # Update the failed counters
+            if np.random.random() < insert_or_delete:
+                self.failed_insert += 1
+            else:
+                self.failed_delete += 1
 
 .. label:: end_MonteCarlo_class
 
@@ -143,8 +154,6 @@ Complete the *__init__* method as follows:
                     displace_mc = None,
                     desired_mu = None,
                     inserted_type = 0,
-                    desired_temperature = 300,
-                    (...)
 
 .. label:: end_MonteCarlo_class
 
@@ -160,23 +169,26 @@ and
             self.displace_mc = displace_mc
             self.desired_mu = desired_mu
             self.inserted_type = inserted_type
-            self.desired_temperature = desired_temperature
-            (...)
 
 .. label:: end_MonteCarlo_class
 
-Let us non-dimentionalize desired_mu by adding:
+Let us also normalised the "desired_mu":
 
 .. label:: start_MonteCarlo_class
 
 .. code-block:: python
 
-    def nondimensionalize_units_3(self):
-        (...)
-            self.displace_mc /= self.reference_distance
-        if self.desired_mu is not None:
-            self.desired_mu /= self.reference_energy
-        (...)
+    class MonteCarlo(Outputs):
+        def __init__(self,
+            (...)
+            self.nondimensionalize_units(["desired_temperature", "displace_mc"])
+            self.nondimensionalize_units(["desired_mu"])
+            self.successful_move = 0
+            self.failed_move = 0
+            self.successful_insert = 0
+            self.failed_insert = 0
+            self.successful_delete = 0
+            self.failed_delete = 0
 
 .. label:: end_MonteCarlo_class
 
@@ -203,18 +215,25 @@ We need to calculate Lambda:
 
     def calculate_Lambda(self, mass):
         """Estimate the de Broglie wavelength."""
-        # Is it normal that mass is unitless ???
         m = mass/cst.Avogadro*cst.milli  # kg
-        kB = cst.Boltzmann  # J/K
-        Na = cst.Avogadro
-        kB *= Na/cst.calorie/cst.kilo #  kCal/mol/K
         T = self.desired_temperature  # N
-        T_K = T*self.reference_energy/kB  # K
-        Lambda = cst.h/np.sqrt(2*np.pi*kB*m*T_K)  # m
-        Lambda /= cst.angstrom  # Angstrom
-        return Lambda / self.reference_distance # dimensionless
+        return 1/np.sqrt(2*np.pi*mass*T)
 
 .. label:: end_MonteCarlo_class
+
+To output the density, let us add the following method to the *Measurements* class:
+
+.. label:: start_Measurements_class
+
+.. code-block:: python
+
+    def calculate_density(self):
+        """Calculate the mass density."""
+        volume = np.prod(self.box_size[:3])  # Unitless
+        total_mass = np.sum(self.atoms_mass)  # Unitless
+        return total_mass/volume  # Unitless
+
+.. label:: end_Measurements_class
 
 Test the code
 -------------
@@ -222,28 +241,64 @@ Test the code
 One can use a similar test as previously. Let us use a displace distance of
 0.5 Angstrom, and make 1000 steps.
 
-.. label:: start_test_MonteCarlo_class
+.. label:: start_test_8a_class
 
 .. code-block:: python
 
-    import os
     from MonteCarlo import MonteCarlo
+    from pint import UnitRegistry
+    ureg = UnitRegistry()
+    import os
 
-    mc = MonteCarlo(maximum_steps=1000,
-        dumping_period=100,
-        thermo_period=100,
-        desired_mu = -3,
-        inserted_type = 0,
-        number_atoms=[50],
-        epsilon=[0.1], # kcal/mol
-        sigma=[3], # A
-        atom_mass=[1], # g/mol
-        box_dimensions=[20, 20, 20], # A
-        data_folder = "outputs/",
-        )
+    # Define atom number of each group
+    nmb_1= 50
+    # Define LJ parameters (sigma)
+    sig_1 = 3*ureg.angstrom
+    # Define LJ parameters (epsilon)
+    eps_1 = 0.1*ureg.kcal/ureg.mol
+    # Define atom mass
+    mss_1 = 10*ureg.gram/ureg.mol
+    # Define box size
+    L = 20*ureg.angstrom
+    # Define a cut off
+    rc = 2.5*sig_1
+    # Pick the desired temperature
+    T = 300*ureg.kelvin
+    # choose the desired_mu
+    desired_mu = -3*ureg.kcal/ureg.mol
+
+    # Initialize the prepare object
+    mc = MonteCarlo(
+        ureg = ureg,
+        maximum_steps=100,
+        thermo_period=10,
+        dumping_period=10,
+        number_atoms=[nmb_1],
+        epsilon=[eps_1], # kcal/mol
+        sigma=[sig_1], # A
+        atom_mass=[mss_1], # g/mol
+        box_dimensions=[L, L, L], # A
+        cut_off=rc,
+        thermo_outputs="Epot-press",
+        desired_temperature=T, # K
+        neighbor=1,
+        desired_mu = desired_mu,
+    )
     mc.run()
 
-.. label:: end_test_MonteCarlo_class
+    # Test function using pytest
+    def test_output_files():
+        assert os.path.exists("Outputs/dump.mc.lammpstrj"), "Test failed: dump file was not created"
+        assert os.path.exists("Outputs/simulation.log"), "Test failed: log file was not created"
+        print("Test passed")
+
+    # If the script is run directly, execute the tests
+    if __name__ == "__main__":
+        import pytest
+        # Run pytest programmatically
+        pytest.main(["-s", __file__])
+
+.. label:: end_test_8a_class
 
 The evolution of the potential energy as a function of the
 number of steps are written in the *Outputs/Epot.dat* file
