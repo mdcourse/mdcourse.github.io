@@ -29,7 +29,7 @@ The *real* unit system follows the conventions outlined in the |lammps-unit-syst
 - Forces are in (kcal/mol)/Ångström,
 - Temperature is in Kelvin,
 - Pressure is in atmospheres,
-- Density is in g/cm\ :sup:`3` (in 3D).
+- Density is in g/cm\ :sup:`3`.
 
 .. |lammps-unit-systems| raw:: html
 
@@ -56,12 +56,8 @@ where :math:`k_\text{B}` is the Boltzmann constant.
 Start coding
 ------------
 
-Let's fill in the previously created class named Prepare. To facilitate unit
-conversion, we will import |NumPy| and the constants module from |SciPy|.
-
-.. |NumPy| raw:: html
-
-   <a href="https://numpy.org/" target="_blank">NumPy</a>
+Let's fill in the previously created class named *Prepare*. To facilitate unit
+conversion, we will import NumPy and the constants module from |SciPy|.
 
 .. |SciPy| raw:: html
 
@@ -78,7 +74,7 @@ In the file named *Prepare.py*, add the following lines:
 
 .. label:: end_Prepare_class
 
-Four parameters are provided to the *Prepare* class:
+Four atom parameters are provided to the *Prepare* class:
 
 - the atom masses :math:`m`,
 - the LJ parameters :math:`\sigma` and :math:`\epsilon`,
@@ -95,29 +91,31 @@ Modify the *Prepare* class as follows:
 
     class Prepare:
         def __init__(self,
-                    number_atoms=[10],  # List - no unit
-                    epsilon=[0.1],  # List - Kcal/mol
-                    sigma=[3],  # List - Angstrom
-                    atom_mass=[10],  # List - g/mol
-                    potential_type="Lennard-Jones",
+                    ureg, # Pint unit registry
+                    number_atoms, # List - no unit
+                    epsilon, # List - Kcal/mol
+                    sigma, # List - Angstrom
+                    atom_mass,  # List - g/mol
                     *args,
                     **kwargs):
+            self.ureg = ureg
             self.number_atoms = number_atoms
             self.epsilon = epsilon
             self.sigma = sigma
             self.atom_mass = atom_mass
-            self.potential_type = potential_type
             super().__init__(*args, **kwargs)
 
 .. label:: end_Prepare_class
 
-Here, the four lists *number_atoms* :math:`N`, *epsilon* :math:`\epsilon`,
-*sigma* :math:`\sigma`, and *atom_mass* :math:`m` are given default values of
-:math:`10`, :math:`0.1~\text{[Kcal/mol]}`, :math:`3~\text{[Å]}`, and
-:math:`10~\text{[g/mol]}`, respectively.
+Here, *number_atoms* :math:`N`, *epsilon* :math:`\epsilon`,
+*sigma* :math:`\sigma`, and *atom_mass* :math:`m` must be provided as lists
+where the elements have no units, kcal/mol, angstrom, and g/mol units,
+respectively. The units will be enforced with the |Pint| unit registry, *ureg*,
+which must also be provided as a parameter (more details later).
 
-The type of potential is also specified, with Lennard-Jones being closen as
-the default option.
+.. |Pint| raw:: html
+
+   <a href="https://pint.readthedocs.io" target="_blank">Pint</a>
 
 All the parameters are assigned to *self*, allowing other methods to access
 them. The *args* and *kwargs* parameters are used to accept an arbitrary number
@@ -126,9 +124,9 @@ of positional and keyword arguments, respectively.
 Calculate LJ units prefactors
 -----------------------------
 
-Within the *Prepare* class, let us create a method called *calculate_LJunits_prefactors*
-that will be used to calculate the prefactors necessary to convert units from the *real*
-unit system to the *LJ* unit system:
+Within the *Prepare* class, create a method called *calculate_LJunits_prefactors*
+that will be used to calculate the prefactors necessary to convert units from the
+*real* unit system to the *LJ* unit system:
 
 .. label:: start_Prepare_class
 
@@ -136,37 +134,47 @@ unit system to the *LJ* unit system:
 
     def calculate_LJunits_prefactors(self):
         """Calculate the Lennard-Jones units prefactors."""
-        # Define the reference distance, energy, and mass
-        self.reference_distance = self.sigma[0]  # Angstrom
-        self.reference_energy = self.epsilon[0]  # kcal/mol
-        self.reference_mass = self.atom_mass[0]  # g/mol
-
-        # Calculate the prefactor for the time
-        mass_kg = self.atom_mass[0]/cst.kilo/cst.Avogadro  # kg
-        epsilon_J = self.epsilon[0]*cst.calorie*cst.kilo/cst.Avogadro  # J
-        sigma_m = self.sigma[0]*cst.angstrom  # m
-        time_s = np.sqrt(mass_kg*sigma_m**2/epsilon_J)  # s
-        self.reference_time = time_s / cst.femto  # fs
-
-        # Calculate the prefactor for the temperature
+        # First define Boltzmann and Avogadro constants
         kB = cst.Boltzmann*cst.Avogadro/cst.calorie/cst.kilo  # kcal/mol/K
-        self.reference_temperature = self.epsilon[0]/kB  # K
-
-        # Calculate the prefactor for the pressure
-        pressure_pa = epsilon_J/sigma_m**3  # Pa
-        self.reference_pressure = pressure_pa/cst.atm  # atm
+        kB *= self.ureg.kcal/self.ureg.mol/self.ureg.kelvin
+        Na = cst.Avogadro/self.ureg.mol
+        # Define the reference distance, energy, and mass
+        self.ref_length = self.sigma[0]  # Angstrom
+        self.ref_energy = self.epsilon[0]  # kcal/mol
+        self.ref_mass = self.atom_mass[0]  # g/mol
+        # Optional: assert that units were correctly provided by users
+        assert self.ref_length.units == self.ureg.angstrom, \
+            f"Error: Provided sigma has wrong units, should be angstrom"
+        assert self.ref_energy.units == self.ureg.kcal/self.ureg.mol, \
+            f"Error: Provided epsilon has wrong units, should be kcal/mol"
+        assert self.ref_mass.units == self.ureg.g/self.ureg.mol, \
+            f"Error: Provided mass has wrong units, should be g/mol"
+        # Calculate the prefactor for the time (in femtosecond)
+        self.ref_time = np.sqrt(self.ref_mass \
+            *self.ref_length**2/self.ref_energy).to(self.ureg.femtosecond)
+        # Calculate the prefactor for the temperature (in Kelvin)
+        self.ref_temperature = self.ref_energy/kB  # Kelvin
+        # Calculate the prefactor for the pressure (in Atmosphere)
+        self.ref_pressure = (self.ref_energy \
+            /self.ref_length**3/Na).to(self.ureg.atmosphere)
+        # Group all the reference quantities into a list for practicality
+        self.ref_quantities = [self.ref_length, self.ref_energy,
+            self.ref_mass, self.ref_time, self.ref_pressure, self.ref_temperature]
+        self.ref_units = [ref.units for ref in self.ref_quantities]
 
 .. label:: end_Prepare_class
 
-This method defines the reference distance as the first element in the
-*sigma* list, i.e., :math:`\sigma_{11}`. Therefore, atoms of type one will
-always be used for the normalization. Similarly, the first element
-in the *epsilon* list (:math:`\epsilon_{11}`) is used as the reference energy,
-and the first element in the *atom_mass* list (:math:`m_1`) is used as the
-reference mass. Then, the reference_time in femtoseconds is calculated
-as :math:`\sqrt{m_1 \sigma_{11}^2 / \epsilon_{11}}`, the reference temperature
-in Kelvin as :math:`\epsilon_{11} / k_\text{B}`, and the reference_pressure
-in atmospheres is calculated as :math:`\epsilon_{11}/\sigma_{11}^3`.
+This method defines the reference length as the first element in the
+*sigma* list, i.e., :math:`\sigma_{11}`. Therefore, atoms of type 1 will
+always be used for normalization. Similarly, the first element in the
+*epsilon* list (:math:`\epsilon_{11}`) is used as the reference energy, and
+the first element in the *atom_mass* list (:math:`m_1`) is used as the
+reference mass.
+
+The reference time in femtoseconds is then calculated as
+:math:`\sqrt{m_1 \sigma_{11}^2 / \epsilon_{11}}`, the reference
+temperature in Kelvin as :math:`\epsilon_{11} / k_\text{B}`, and the
+reference pressure in atmospheres as :math:`\epsilon_{11} / \sigma_{11}^3`.
 
 Finally, let us ensure that the *calculate_LJunits_prefactors* method is
 called systematically by adding the following line to the *__init__()* method:
@@ -192,33 +200,48 @@ Let us take advantage of the calculated reference values and normalize the
 three inputs of the *Prepare* class that have physical dimensions, i.e.,
 *epsilon*, *sigma*, and *atom_mass*.
 
-Create a new method called *nondimensionalize_units_0* within the *Prepare*
+Create a new method called *nondimensionalize_units* within the *Prepare*
 class:
 
 .. label:: start_Prepare_class
 
 .. code-block:: python
 
-    def nondimensionalize_units_0(self):
-        # Normalize LJ properties
-        epsilon, sigma, atom_mass = [], [], []
-        for e0, s0, m0 in zip(self.epsilon, self.sigma, self.atom_mass):
-            epsilon.append(e0/self.reference_energy)
-            sigma.append(s0/self.reference_distance)
-            atom_mass.append(m0/self.reference_mass)
-        self.epsilon = epsilon
-        self.sigma = sigma
-        self.atom_mass = atom_mass
+    def nondimensionalize_units(self, quantities_to_normalise):
+        for name in quantities_to_normalise:
+            quantity = getattr(self, name)  # Get the attribute by name
+            if isinstance(quantity, list):
+                for i, element in enumerate(quantity):
+                    assert element.units in self.ref_units, \
+                        f"Error: Units not part of the reference units"
+                    ref_value = self.ref_quantities[self.ref_units.index(element.units)]
+                    quantity[i] = element/ref_value
+                    assert quantity[i].units == self.ureg.dimensionless, \
+                        f"Error: Quantities are not properly nondimensionalized"
+                    quantity[i] = quantity[i].magnitude # get rid of ureg
+                setattr(self, name, quantity)
+            else:
+                if quantity is not None:
+                    assert np.shape(quantity) == (), \
+                        f"Error: The quantity is a list or an array"
+                    assert quantity.units in self.ref_units, \
+                        f"Error: Units not part of the reference units"
+                    ref_value = self.ref_quantities[self.ref_units.index(quantity.units)]
+                    quantity = quantity/ref_value
+                    assert quantity.units == self.ureg.dimensionless, \
+                        f"Error: Quantities are not properly nondimensionalized"
+                    quantity = quantity.magnitude # get rid of ureg
+                    setattr(self, name, quantity)
 
 .. label:: end_Prepare_class
 
-The index *0* is used to differentiate this method from other methods that
-will be used to nondimensionalize units in future classes. We anticipate that
-*epsilon*, *sigma*, and *atom_mass* may contain more than one element, so
-each element is normalized with the corresponding reference value. The
-*zip()* function allows us to loop over all three lists at once.
+When a *quantities_to_normalise* list containing parameter names is provided
+to the *nondimensionalize_units* method, a loop is performed over all the
+quantities. The value of each quantity is extracted using *getattr*. The units
+of the quantity of interest are then detected and normalized by the appropriate
+reference quantities defined by *calculate_LJunits_prefactors*.
 
-Let us also call the *nondimensionalize_units_0* from the *__init__()* method
+Let us also call the *nondimensionalize_units* from the *__init__()* method
 of the *Prepare* class:
 
 .. label:: start_Prepare_class
@@ -228,26 +251,29 @@ of the *Prepare* class:
     def __init__(self,
         (...)
         self.calculate_LJunits_prefactors()
-        self.nondimensionalize_units_0()
+        self.nondimensionalize_units(["epsilon", "sigma", "atom_mass"])
 
 .. label:: end_Prepare_class
 
-Identify atom properties
+Here, the *epsilon*, *sigma*, and *atom_mass* parameters will be
+nondimensionalized.
+
+Identify Atom Properties
 ------------------------
 
 Anticipating the future use of multiple atom types, where each type will be
 associated with its own :math:`\sigma`, :math:`\epsilon`, and :math:`m`, let
 us create arrays containing the properties of each atom in the simulation. For
-instance, in the case of a simulation with two atoms of type 1 and three atoms
-of type 2, the corresponding *atoms_sigma* array will be:
+instance, in a simulation with two atoms of type 1 and three atoms of type 2,
+the corresponding *atoms_sigma* array will be:
 
 .. math::
 
     \text{atoms_sigma} = [\sigma_{11}, \sigma_{11}, \sigma_{22}, \sigma_{22}, \sigma_{22}]
 
 where :math:`\sigma_{11}` and :math:`\sigma_{22}` are the sigma values for
-atoms of type 1 and 2, respectively. The *atoms_sigma* array will allow for
-future calculations of force.
+atoms of type 1 and 2, respectively. The *atoms_sigma* array will facilitate
+future calculations of forces.
 
 Create a new method called *identify_atom_properties*, and place it
 within the *Prepare* class:
@@ -257,8 +283,7 @@ within the *Prepare* class:
 .. code-block:: python
 
     def identify_atom_properties(self):
-        """Identify the atom properties for each atom."""
-        self.total_number_atoms = np.sum(self.number_atoms)
+        """Identify the properties for each atom."""
         atoms_sigma = []
         atoms_epsilon = []
         atoms_mass = []
@@ -288,7 +313,7 @@ Let us call the *identify_atom_properties* from the *__init__()* method:
 
     def __init__(self,
         (...)
-        self.nondimensionalize_units_0()
+        self.nondimensionalize_units(["epsilon", "sigma", "atom_mass"])
         self.identify_atom_properties()
 
 .. label:: end_Prepare_class
@@ -296,9 +321,10 @@ Let us call the *identify_atom_properties* from the *__init__()* method:
 Test the code
 -------------
 
-Let us test the *Prepare* class to make sure that it does what is expected.
-Just like in the previous example, let us initiates a system with 2 atoms of
-type 1, and 3 atoms of type 2:
+Let's test the *Prepare* class to make sure that it does what is expected.
+Here, a system containing 2 atoms of type 1, and 3 atoms of type 2 is
+prepared. LJs parameters and masses for each groups are also defined, and given
+physical units thanks to the *UnitRegistry* of Pint.
 
 .. label:: start_test_2a_class
 
@@ -306,20 +332,33 @@ type 1, and 3 atoms of type 2:
 
     import numpy as np
     from Prepare import Prepare
+    from pint import UnitRegistry
+    ureg = UnitRegistry()
 
-    # Initialize the Prepare object
+    # Define atom number of each group
+    nmb_1, nmb_2= [2, 3]
+    # Define LJ parameters (sigma)
+    sig_1, sig_2 = [3, 4]*ureg.angstrom
+    # Define LJ parameters (epsilon)
+    eps_1, eps_2 = [0.2, 0.4]*ureg.kcal/ureg.mol
+    # Define atom mass
+    mss_1, mss_2 = [10, 20]*ureg.gram/ureg.mol
+
+    # Initialize the prepare object
     prep = Prepare(
-        number_atoms=[2, 3],
-        epsilon=[0.2, 0.4], # kcal/mol
-        sigma=[3, 4], # A
-        atom_mass=[10, 20], # g/mol
+        ureg = ureg,
+        number_atoms=[nmb_1, nmb_2],
+        epsilon=[eps_1, eps_2], # kcal/mol
+        sigma=[sig_1, sig_2], # A
+        atom_mass=[mss_1, mss_2], # g/mol
     )
 
     # Test function using pytest
     def test_atoms_epsilon():
         expected = np.array([1., 1., 2., 2., 2.])
         result = prep.atoms_epsilon
-        assert np.array_equal(result, expected), f"Test failed: {result} != {expected}"
+        assert np.array_equal(result, expected), \
+        f"Test failed: {result} != {expected}"
         print("Test passed")
 
     # In the script is launched with Python, call Pytest
@@ -329,5 +368,6 @@ type 1, and 3 atoms of type 2:
 
 .. label:: end_test_2a_class
 
-This test assert that the generated *atoms_epsilon* array is consistent with
-its expected value (see the previous paragraphs).
+This test asserts that the generated *atoms_epsilon* array is consistent
+with its expected value (see the previous paragraphs). Note that the expected
+values are in LJ units, i.e., they have been nondimensionalized by :math:`\epsilon_1`.
