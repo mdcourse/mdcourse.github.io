@@ -4,39 +4,19 @@ Output the simulation state
 ===========================
 
 Here, the code is modified to allow us to follow the evolution of the system
-during the simulation. To do so, the *Output* class is modified.
-
-Update the MinimizeEnergy class
--------------------------------
-
-Let us start by calling two additional methods within the for loop of the
-*MinimizeEnergy* class, within the *run()* method.
-
-.. label:: start_MinimizeEnergy_class
-
-.. code-block:: python
-
-    def run(self):
-        (...)
-        for self.step in range(0, self.maximum_steps+1):
-            (...)
-                self.displacement *= 0.2 # Multiply the displacement by a factor 0.2
-            log_simulation_data(self)
-            update_dump_file(self, "dump.min.lammpstrj")
-
-.. label:: end_MinimizeEnergy_class
-
-The two methods named *update_log_minimize()* and *update_dump_file()*, are used
-to print the information in the terminal and in a LAMMPS-type data file, respectively.
-These two methods will be written in the following.
+during the simulation. To do so, two new files will be created: one dedicated
+to logging information, and the other to printing the atom positions to a
+file, thus allowing for their visualization with software like
+VMD :cite:`humphrey1996vmd` or Ovito :cite:`stukowski2009visualization`.
 
 Create logger
 -------------
 
-Let us create functions named *log_simulation_data* to a file named *logger.py*.
+Let us create a function named *log_simulation_data()* to a file named *logger.py*.
 With the logger, some output are being printed in a file, as well as in the terminal.
-The frequency of printing is set by *thermo_period*, see :ref:`chapter3-label`.
-All quantities are re-dimensionalized before getting outputed.
+The period of printing, which is a multiple of the simulation steps, will be set
+by a new parameter named *thermo_period* (integer). All quantities are 
+converted into *real* units before getting outputed (see :ref:`chapter2-label`).
 
 .. label:: start_logger_class
 
@@ -76,6 +56,7 @@ All quantities are re-dimensionalized before getting outputed.
         return logger
 
     def log_simulation_data(code):
+        # TOFIX: ceurrently, MaxF is returned dimensionless
 
         # Setup the logger with the folder name, overwriting the log if code.step is 0
         logger = setup_logger(code.data_folder, overwrite=(code.step == 0))
@@ -106,14 +87,22 @@ All quantities are re-dimensionalized before getting outputed.
 
 .. label:: end_logger_class
 
-Create dumper
+For simplicify, the *logger* uses the |logging| library, which provides a
+flexible framework for emitting log messages from Python programs. Depending on
+the value of *thermo_outputs*, different informations are printed, such as
+*step*, *Epot*, or/and *MaxF*.
+
+.. |logging| raw:: html
+
+   <a href="https://docs.python.org/3/library/logging.html" target="_blank">logging</a>
+
+Create Dumper
 -------------
 
-Let us create a function named *update_dump_file* to a file named 
-*dumper.py*. The dumper will print a *.lammpstrj file*, which contains the box
-dimensions and atom positions at every chosen frame (set by *dumping_period*,
-see :ref:`chapter3-label`). All quantities are dimensionalized before getting outputed, and the file follows
-a LAMMPS dump format, and can be read by molecular dynamics softwares like VMD.
+Let us create a function named *update_dump_file()* in a file named
+*dumper.py*. The dumper will print a *.lammpstrj* file, which contains
+the box dimensions and atom positions at every chosen frame (set by
+*dumping_period*). All quantities are dimensionalized before being output.
 
 .. label:: start_dumper_class
 
@@ -228,11 +217,35 @@ parameters are passed the InitializeSimulation method:
 
 .. label:: end_InitializeSimulation_class
 
+Update the MinimizeEnergy class
+-------------------------------
+
+As a final step, let us call two functions *log_simulation_data* and
+*update_dump_file* within the *for* loop of the
+*MinimizeEnergy* class, within the *run()* method:
+
+.. label:: start_MinimizeEnergy_class
+
+.. code-block:: python
+
+    def run(self):
+        (...)
+        for self.step in range(0, self.maximum_steps+1):
+            (...)
+                self.displacement *= 0.2 # Multiply the displacement by a factor 0.2
+            log_simulation_data(self)
+            update_dump_file(self, "dump.min.lammpstrj")
+
+.. label:: end_MinimizeEnergy_class
+
+The name *dump.min.lammpstrj* will be used when printing the dump file
+during energy minimization.
+
 Test the code
 -------------
 
-One can use a test similar as the previous ones. Let us ask out code to print
-information in the dump and the log files, and then let us assert the
+One can use a test similar as the previous ones. Let us ask our code to print
+information in the *dump* and the *log* files, and then let us assert that the
 files were indeed created without the *Outputs/* folder:
 
 .. label:: start_test_5a_class
@@ -276,8 +289,10 @@ files were indeed created without the *Outputs/* folder:
 
     # Test function using pytest
     def test_output_files():
-        assert os.path.exists("Outputs/dump.min.lammpstrj"), "Test failed: dump file was not created"
-        assert os.path.exists("Outputs/simulation.log"), "Test failed: log file was not created"
+        assert os.path.exists("Outputs/dump.min.lammpstrj"), \
+        "Test failed: the dump file was not created"
+        assert os.path.exists("Outputs/simulation.log"), \
+        "Test failed: the log file was not created"
         print("Test passed")
 
     # If the script is run directly, execute the tests
@@ -288,8 +303,9 @@ files were indeed created without the *Outputs/* folder:
 
 .. label:: end_test_5a_class
 
-I addition to the files getting created, information must be printed in the terminal
-during the simulation:
+In addition to making sure that both files were created, let us verify
+that the expected information was printed to the terminal during the
+simulation. The content of the *simulation.log* file should resemble:
 
 .. code-block:: bw
 
@@ -302,8 +318,8 @@ during the simulation:
 
 The data from the *simulation.log* can be used to generate plots using softwares
 line XmGrace, GnuPlot, or Python/Pyplot. For the later, one can use a simple data
-reader to import the data from *Outputs/simulation.log* into Python. Copy the
-following lines in a file named *reader.py*:
+reader to import the data from *simulation.log* into Python. Copy the
+following lines in a new file named *reader.py*:
 
 .. label:: start_reader_class
 
@@ -342,14 +358,28 @@ The *import_data* function from *reader.py* can simply be used as follows:
 
 .. label:: start_test_5b_class
 
+.. code-block:: python
+
     from reader import import_data
 
-    file_path = "Outputs/simulation.log"
-    header, data = import_data(file_path)
+    def test_file_not_empty():
+        # Import data from the file
+        file_path = "Outputs/simulation.log"
+        header, data = import_data(file_path)
+        # Check if the header and data are not empty
+        assert header, "Error, no header in simulation.log"
+        assert data, "Error, no data in simulation.log"
+        assert len(data) > 0, "Data should contain at least one row"
 
-    print(header)
-    for row in data:
-        print(row)
+        print(header)
+        for row in data:
+            print(row)
+
+    # If the script is run directly, execute the tests
+    if __name__ == "__main__":
+        import pytest
+        # Run pytest programmatically
+        pytest.main(["-s", __file__])
 
 .. label:: end_test_5b_class
 

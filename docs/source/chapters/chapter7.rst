@@ -1,36 +1,38 @@
 .. _chapter7-label:
 
-Pressure measurement
+Pressure Measurement
 ====================
 
-In order to extract the equation of state in our simulation, we need to measure the
-pressure of the system, :math:`p`. The pressure in a molecular simulation can be
-calculated from the interactions between particles. The pressure can be measured as
-the sum of the ideal contribution, :math:`p_\text{ideal} = N_\text{DOF} k_\text{B} T / V d`,
-which comes from the ideal gas law, and a Virial term which accounts for the
-pressure contribution from the forces between particles,
+To extract the equation of state in our simulation, we need to measure the
+pressure of the system, :math:`p`. The pressure in a molecular simulation can
+be calculated from the interactions between particles. The pressure can be
+measured as the sum of the ideal contribution,
+:math:`p_\text{ideal} = N_\text{DOF} k_\text{B} T / V d`, 
+which comes from the ideal gas law, and a Virial term that
+accounts for the pressure contribution from the forces between particles,
 :math:`p_\text{non_ideal} = \left< \sum_i r_i \cdot F_i \right> / V d`. The final
-expression reads:
+expression reads :cite:`frenkel2023understanding`:
 
-.. math:: 
+.. math::
 
     p = \dfrac{1}{V d} \left[ N_\text{DOF} k_\text{B} T +  \left< \sum_i r_i \cdot F_i \right> \right]
 
 :math:`N_\text{DOF}` is the number of degrees-of-freedom, which can be calculated
-from the number of particles, :math:`N`, and the dimension of the system, :math:`d`, as 
-:math:`N_\text{DOF} = d N - d` :cite:`frenkel2023understanding`.
+from the number of particles, :math:`N`, and the dimension of the system,
+:math:`d = 3`, as :math:`N_\text{DOF} = d N - d` :cite:`frenkel2023understanding`.
 
-The calculation of :math:`p_\text{ideal}` is straighforward. For Monte Carlo simulation,
-as atoms do not have temperature, the *imposed* temperature will be used instead.
-The calculation of :math:`p_\text{non_ideal}` requires the measurement of all the
-force and distance between the atoms. The calculation of the forces was already
-implemented in a previous chapter, but a new function that returns all the
-vector direction between atoms pairs will have to be written here.
+The calculation of :math:`p_\text{ideal}` is straightforward. For Monte Carlo
+simulation, as atoms do not have a temperature, the *imposed* temperature will
+be used as ":math:`T`". The calculation of :math:`p_\text{non_ideal}` requires the
+measurement of all the forces and distances between atoms. The calculation of
+the forces was already implemented in a previous chapter (see *compute_force*
+the :ref:`chapter4-label` chapter), but a new function that returns all the
+vector directions between atom pairs will need to be written here.
 
 Implement the Virial equation
 -----------------------------
 
-Let us add the following method to the *Measurements* class.
+Let us add the following method to the *Measurements* class:
 
 .. label:: start_Measurements_class
 
@@ -134,8 +136,10 @@ Let us test the outputed pressure.
 
     # Test function using pytest
     def test_output_files():
-        assert os.path.exists("Outputs/dump.mc.lammpstrj"), "Test failed: dump file was not created"
-        assert os.path.exists("Outputs/simulation.log"), "Test failed: log file was not created"
+        assert os.path.exists("Outputs/dump.mc.lammpstrj"), \
+        "Test failed: dump file was not created"
+        assert os.path.exists("Outputs/simulation.log"), \
+        "Test failed: log file was not created"
         print("Test passed")
 
     # If the script is run directly, execute the tests
@@ -145,3 +149,13 @@ Let us test the outputed pressure.
         pytest.main(["-s", __file__])
 
 .. label:: end_test_7a_class
+
+The pressure should be returned alongside the potential energy within *simulation.log*:
+
+.. code-block:: bw
+
+    step Epot press
+    0 134248.72 4608379.27
+    10 124905.76 4287242.75
+    20 124858.91 4285584.40
+    (...)

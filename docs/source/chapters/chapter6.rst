@@ -47,13 +47,15 @@ Let us add a method named *monte_carlo_move* to the *MonteCarlo* class:
     def monte_carlo_move(self):
         """Monte Carlo move trial."""
         if self.displace_mc is not None: # only trigger if displace_mc was provided by the user
-            # If needed, recalculate neighbor/coeff lists
+            # When needed, recalculate neighbor/coeff lists
             self.update_neighbor_lists()
             self.update_cross_coefficients()
-            if hasattr(self, 'Epot') is False: # If self.Epot does not exists yet, calculate it
+            # If self.Epot does not exists yet, calculate it
+            # It should only be necessary when step = 0
+            if hasattr(self, 'Epot') is False:
                 self.Epot = self.compute_potential()
+            # Make a copy of the initial atoms positions and initial energy
             initial_Epot = self.Epot
-            # Make a copy of the initial atoms positions
             initial_positions = copy.deepcopy(self.atoms_positions)
             # Pick an atom id randomly
             atom_id = np.random.randint(np.sum(self.number_atoms))
@@ -61,7 +63,7 @@ Let us add a method named *monte_carlo_move* to the *MonteCarlo* class:
             # The maximum displacement is set by self.displace_mc
             move = (np.random.random(3)-0.5)*self.displace_mc 
             self.atoms_positions[atom_id] += move
-            # Measure the optential energy of the new configuration
+            # Measure the potential energy of the new configuration
             trial_Epot = self.compute_potential()
             # Evaluate whether the new configuration should be kept or not
             beta =  1/self.desired_temperature
@@ -77,13 +79,16 @@ Let us add a method named *monte_carlo_move* to the *MonteCarlo* class:
 
 .. label:: end_MonteCarlo_class
 
+The counters *successful_move* and *failed_move* are incremented with each
+successful and failed attempt, respectively.
+
 Parameters
 ----------
 
-The *monte_carlo_move* method requires a few parameters to be selected by the
-users, such as *displace_mc* (:math:`d_\text{mc}`), the maximum number of steps,
-and the desired temperature (:math:`T`). Let us add these parameters to the
-*__init__* method:
+The *monte_carlo_move* method requires a few parameters to be selected by
+the users, such as *displace_mc* (:math:`d_\text{mc}`, in Ångströms), the
+maximum number of steps, and the desired temperature (:math:`T`, in Kelvin).
+Let us add these parameters to the *__init__()* method:
 
 .. label:: start_MonteCarlo_class
 
@@ -106,11 +111,11 @@ and the desired temperature (:math:`T`). Let us add these parameters to the
 
 .. label:: end_MonteCarlo_class
 
-Run method
+Run Method
 ----------
 
-Finally, let us add a *run* method to the *MonteCarlo* class, that is used to
-perform a loop over the desired number of steps *maximum_steps*:
+Finally, let us add a *run* method to the *MonteCarlo* class that performs
+a loop over the desired number of steps, *maximum_steps*:
 
 .. label:: start_MonteCarlo_class
 
@@ -124,12 +129,10 @@ perform a loop over the desired number of steps *maximum_steps*:
 
 .. label:: end_MonteCarlo_class
 
-At each step, the *monte_carlo_move* method is called. The previously defined
-mthe *wrap_in_box* method is also called to ensure that
-the atoms remain inside the box, respectively.
-
-Let us call *update_log_md_mc* from the run method of the MonteCarlo class.
-Let us add a dump too:
+At each step, the *monte_carlo_move()* method is called. The previously
+defined *wrap_in_box* method is also called to ensure that the atoms remain
+inside the box. Additionally, let us call *log_simulation_data()* and
+*update_dump_file()*:
 
 .. label:: start_MonteCarlo_class
 
@@ -145,11 +148,11 @@ Let us add a dump too:
 
 .. label:: end_MonteCarlo_class
 
-Test the code
+Test the Code
 -------------
 
-One can use a similar test as previously. Let us use a displace distance of
-0.5 Angstrom, and make 1000 steps.
+Let us use a similar test as before. Set a displacement distance corresponding
+to a quarter of sigma, and perform a very small number of steps:
 
 .. label:: start_test_6a_class
 
@@ -194,14 +197,14 @@ One can use a similar test as previously. Let us use a displace distance of
         neighbor=20,
         displace_mc = displace_mc,
     )
-
-    # Run the Monte Carlo simulation
     mc.run()
 
     # Test function using pytest
     def test_output_files():
-        assert os.path.exists("Outputs/dump.mc.lammpstrj"), "Test failed: dump file was not created"
-        assert os.path.exists("Outputs/simulation.log"), "Test failed: log file was not created"
+        assert os.path.exists("Outputs/dump.mc.lammpstrj"), \
+        "Test failed: dump file was not created"
+        assert os.path.exists("Outputs/simulation.log"), \
+        "Test failed: log file was not created"
         print("Test passed")
 
     # If the script is run directly, execute the tests
@@ -213,5 +216,5 @@ One can use a similar test as previously. Let us use a displace distance of
 .. label:: end_test_6a_class
 
 The evolution of the potential energy as a function of the number of steps
-are written in the *simulation.log* file. The data can be used to plot
-the evolution of the system with time.
+is recorded in the *simulation.log* file. The data in *simulation.log* can
+be used to plot the evolution of the system over time.
