@@ -1,10 +1,10 @@
 .. _project1-label:
 
-A Monte Carlo study of argon
+A Monte Carlo Study of Argon
 ============================
 
-Using Monte Carlo simulations, the equation of state of 3D fluid of argon is simulated
-for a large range of density.
+*In short --* Using Monte Carlo simulations, the equation of state (EoS) for a 
+3D fluid of argon is simulated across a wide range of densities.
 
 .. figure:: project1/avatar-dm.webp
     :alt: The fluid made of argon atoms and simulated using monte carlo and python.
@@ -18,58 +18,19 @@ for a large range of density.
     :align: right
     :class: only-light
 
-In 1957, Wood and Parker reported the first numerical study of a 3D fluid that was
-using an attractive Lennard-Jones potential :cite:`woodMonteCarloEquation1957` (before
-them, Metropolis et al. used repulsive hard-sphere
-potentials only :cite:`metropolis1953equation, metropolis1953simulated`).
-In their study, Wood and Parker used a Monte Carlo algorithm to predict the 
-Equation of State (EoS) of neutral particles interacting with Lennard-Jones potential,
-whose parameters were chosen to match those of argon gas. Their results show
-good agreement with experimental measurements of Michels on argon :cite:`michels1949isotherms`.
+In 1957, four years after the initial implementation of a Monte Carlo simulation by
+Metropolis et al. :cite:`metropolis1953equation, metropolis1953simulated`, Wood and
+Parker successfully implemented a 3D Monte Carlo simulation of a fluid using a full
+Lennard-Jones potential :cite:`woodMonteCarloEquation1957`. In their study, Wood and
+Parker used a Monte Carlo algorithm to predict the Equation of State (EoS) of neutral
+particles whose parameters were chosen to match those of argon gas. Their results
+showed good agreement with experimental measurements by Michels on argon :cite:`michels1949isotherms`.
+Here, we take advantage of our code to reproduce the results of Wood and Parker for
+varying density. To follow this project, only Monte Carlo moves are needed. All the
+chapters up to the :ref:`chapter7-label` chapter must have been completed.
 
-Here, we take advantage of our code and try to reproduce the results of Wood and Parker
-for varying density. To follow this project, only Monte Carlo moves are needed,
-and all the chapters up to :ref:`chapter7-label` must have been followed.
-
-Parameters choice
------------------
-
-Some parameters are taken *exactly* the same as those from Wood and Parker:
-
-- :math:`\sigma = 3.405~\text{Å}` (calculated as :math:`\sigma = r^*  2^{-1/6}`
-  where :math:`r^*  = 3.822~\text{Å}`),
-- :math:`\epsilon = 0.238~\text{kcal/mol}`,
-- :math:`m = 39.948~\text{g/mol}`,
-- :math:`T = 328.15~\text{K}` (or :math:`T = 55~^\circ\text{C}`).
-
-In addition, some parameters that are not specified by Wood and Parker are
-freely chosen, but it should not impact the result too much, except maybe
-for the cut-off:
-
-- :math:`d_\text{mc} = \sigma/5`,
-- :math:`r_\text{c} = 2.5 \sigma`.
-
-Finally, since an average modern laptop is much faster than Wood and Parker's
-IBM 701 calculators (if you are curious, here is the |IBM-wiki| page of the IBM 701),
-let us choose a number of atoms that is slightly larger
-than theirs, i.e. :math:`N_\text{atom} = 200`.
-
-.. |IBM-wiki| raw:: html
-
-    <a href="https://en.wikipedia.org/wiki/IBM_701" target="_blank">wikipedia</a>
-
-In order to cover the same density range as Wood and Parker, let us vary the volume
-of the box, :math:`V`, so that :math:`V/V^* \in [0.75, 7.6]`, where
-:math:`V^* = 2^{-1/2} N_\text{A} r^{*3} = 23.77 \text{centimeter}^3/\text{mole}`
-is the molar volume.
-
-Equation of State
------------------
-
-The Equation of State (EoS) is a fundamental relationship in thermodynamics and
-statistical mechanics that describes how the state variables of a system, such as
-pressure :math:`p`, volume :math:`V`, and temperature :math:`T`, are interrelated.
-Here, let us extract the pressure of the fluid for different density values.
+Prepare the Python file
+-----------------------
 
 In a Python script, let us start by importing the *constants* module of *SciPy*, and
 the UnitRegistry of *Pint*.
@@ -81,17 +42,17 @@ the UnitRegistry of *Pint*.
     ureg = UnitRegistry()
     ureg = UnitRegistry(autoconvert_offset_to_baseunit = True)
 
-Let up also import *NumPy*, *sys*, and *multiprocessing* to launch multiple
-simulations in parallel.
+Let up also import *NumPy*, *sys*, as well as *multiprocessing* to launch
+multiple simulations in parallel:
 
 .. code-block:: python
 
     import sys
-    import multiprocessing
+    import multiprocessing -- 
     import numpy as np
 
 Provide the full path to the code. If the code was written in the same folder
-as the current Python script, then *path_to_code = "./"*: 
+as the current Python script, then simply write: 
 
 .. code-block:: python
 
@@ -114,27 +75,120 @@ the right units to these variables using the UnitRegistry:
     Na = cst.Avogadro/ureg.mole # avogadro
     R = kB*Na # gas constant
 
-Then, let us write a function called *launch_MC_code* that will be used to call
-our Monte Carlo script with a chosen value of :math:`\tau = v / v^*`. As a first
-step, all the required variables are being defined, and the *box_size* is calculated
-according to the chosen value of :math:`\tau`:
+Matching the Parameters by Wood and Parker
+------------------------------------------
+
+The interaction parameters must be taken *exactly* as those from the original 
+publication by Wood and Parker :cite:`woodMonteCarloEquation1957`. Wood and Parker 
+provide the value for the position of the energy minimum, :math:`r^* = 3.822~\text{Å}`, 
+which can be related to :math:`\sigma` as:
+
+.. math::
+
+    \sigma = r^* \times 2^{-1/6} = 3.405~\text{Å}
+
+Wood and Parker also specify the interaction energy for the Lennard-Jones potential, 
+:math:`\epsilon / k_\text{B} = 119.76\,\text{K}`, from which one can calculate 
+:math:`\epsilon = 0.238~\text{kcal/mol}` using the Boltzmann constant 
+:math:`k_\text{B} = 1.987 \times 10^{-3}\,\text{kcal/(mol·K)}`. From the reduced 
+temperature, :math:`k_\text{B} T/ \epsilon = 2.74`, one can calculate the temperature 
+:math:`T = 328.15~\text{K}` (or :math:`T = 55~^\circ\text{C}`).
+
+Within the Python script, write:
+
+.. code-block:: python
+
+    epsilon = (119.76*ureg.kelvin*cst.Boltzmann*cst.N_A).to(ureg.kcal/ureg.mol)
+    r_star = 3.822*ureg.angstrom 
+    sigma = r_star / 2**(1/6) 
+    m_argon = 39.948*ureg.gram/ureg.mol
+    T = (55 * ureg.degC).to(ureg.degK) 
+
+Here, the mass of argon atoms is used. Note that the mass parameter does not 
+matter for Monte Carlo simulations. Since an average modern laptop is much
+faster than Wood and Parker's IBM 701 calculators, let us use a number of
+particles that is larger than their own numbers of 32 or 108 particles:
+
+.. code-block:: python
+
+    N_atom = 200
+
+If you are curious, here is the |IBM-wiki| page of the IBM 701.
+
+.. |IBM-wiki| raw:: html
+
+    <a href="https://en.wikipedia.org/wiki/IBM_701" target="_blank">wikipedia</a>
+
+There are also some parameters that are not explicited by Wood and Parker that
+we have to choose freely, such as the maximum displacement for the Monte Carlo
+move, and the cut-off for the Lennard-Jones interaction:
+
+.. code-block:: python
+
+    cut_off = sigma*2.5 # angstrom
+    displace_mc = sigma/5 # angstrom
+
+The choice of :math:`d_\text{mc}` does not impact the result, but only impacts
+the efficiency of the simulation. If :math:`d_\text{mc}` is too large, most move
+will be rejected. If :math:`d_\text{mc}` is too small, it will take a very large
+number of steps for the particles to explore the space. On the other hand, the
+choice of cutoff may impact the result. The choice of :math:`r_c = 2.5 \sigma`
+is relatively standard and should do the job.
+
+Set the Simulation Density
+--------------------------
+
+To cover the same density range as Wood and Parker, we will vary the volume of 
+the box, :math:`V`, so that :math:`V/V^* \in [0.75, 7.6]`, where 
+:math:`V^* = 2^{-1/2} N_\text{A} r^{*3} = 23.77 \, \text{cm}^3/\text{mol}` is the 
+molar volume.
+
+In the Python script, add the following:
+
+.. code-block:: python
+
+    volume_star = r_star**3 * Na * 2**(-0.5)
+    volume = N_atom*volume_star*tau/Na
+    L = volume**(1/3)
+
+The tau parameter (:math:`\tau = V/V^*`) will be used as the control parameter.
+
+Equation of State
+-----------------
+
+The Equation of State (EoS) is a fundamental relationship in thermodynamics and
+statistical mechanics that describes how the state variables of a system, such as
+pressure :math:`p`, volume :math:`V`, and temperature :math:`T`, are interrelated.
+Here, let us extract the pressure of the fluid for different density values.
+
+To easily launch multiple simulation in parallel, let us create a
+function called *launch_MC_code* that will be used to call
+our Monte Carlo script with a chosen value of :math:`\tau = v / v^*`.
+
+Create a new function, so that the current script ressemble the following:
 
 .. code-block:: python
 
     def launch_MC_code(tau):
 
-        epsilon = (119.76*ureg.kelvin*kB*Na).to(ureg.kcal/ureg.mol) # kcal/mol
-        r_star = 3.822*ureg.angstrom # angstrom
-        sigma = r_star / 2**(1/6) # angstrom
-        N_atom = 200 # no units
+        epsilon = (119.76*ureg.kelvin*cst.Boltzmann*cst.N_A).to(ureg.kcal/ureg.mol)
+        r_star = 3.822*ureg.angstrom 
+        sigma = r_star / 2**(1/6) 
         m_argon = 39.948*ureg.gram/ureg.mol
-        T = (55 * ureg.degC).to(ureg.degK) # 55°C
-        volume_star = r_star**3 * Na * 2**(-0.5)
-        cut_off = sigma*2.5
+        T = (55 * ureg.degC).to(ureg.degK) 
+
+        N_atom = 200
+
+        cut_off = sigma*2.5 # angstrom
         displace_mc = sigma/5 # angstrom
+
+        volume_star = r_star**3 * Na * 2**(-0.5)
         volume = N_atom*volume_star*tau/Na
         L = volume**(1/3)
+
         folder = "outputs_tau"+str(tau)+"/"
+
+A folder name that will be different for every value of :math:`\tau` was also added.
 
 Then, let us call the *MinimizeEnergy* class to create and pre-equilibrate the
 system. The use of MinimizeEnergy will help us avoid starting the Monte Carlo
