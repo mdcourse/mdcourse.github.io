@@ -325,8 +325,8 @@ any *AssertionError*:
 
 .. code-block:: bw
 
-    Utilities does not inherit from MonteCarlo, as expected
     MonteCarlo correctly inherits from Utilities
+    Utilities does not inherit from MonteCarlo, as expected
 
 Alternatively, this test can also be launched using *Pytest* by typing in a terminal:
 
