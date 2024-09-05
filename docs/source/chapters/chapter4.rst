@@ -82,13 +82,13 @@ following *run()* method to the *MinimizeEnergy* class:
         self.displacement = 0.01 # pick a random initial displacement (dimentionless)
         # *step* loops for 0 to *maximum_steps*+1
         for self.step in range(0, self.maximum_steps+1):
-            # First, meevaluate the initial energy and max force
+            # First, evaluate the initial energy and max force
             self.update_neighbor_lists() # Rebuild neighbor list, if necessary
             self.update_cross_coefficients() # Recalculate the cross coefficients, if necessary
             # Compute Epot/MaxF/force
-            if hasattr(self, 'Epot') is False: # If self.Epot does not exists yet, calculate it
+            if hasattr(self, 'Epot') is False: # If self.Epot does not exist yet, calculate it
                 self.Epot = self.compute_potential()
-            if hasattr(self, 'MaxF') is False: # If self.MaxF does not exists yet, calculate it
+            if hasattr(self, 'MaxF') is False: # If self.MaxF does not exist yet, calculate it
                 forces = self.compute_force()
                 self.MaxF = np.max(np.abs(forces))
             init_Epot = self.Epot
