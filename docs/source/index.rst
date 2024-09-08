@@ -1,10 +1,5 @@
-.. learn-ms-with-python documentation master file, created by
-   sphinx-quickstart on Thu Aug 24 10:18:57 2023.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Learn molecular simulations with Python
-=======================================
+Step-by-Step Molecular Simulations with Python
+==============================================
 
 .. toctree::
    :maxdepth: 2
@@ -25,7 +20,7 @@ Goals
     :align: right
     :class: only-light
 
-By following Learn Molecular Simulations with Python, you will write a simple Python
+By following *Step-by-Step Molecular Simulations with Python* (MoleSimPy), you will write a simple Python
 code containing the most basic functionalities of molecular dynamics and Monte Carlo
 simulations. The main goal is to help users understand the basics of molecular simulation
 algorithms.
@@ -43,7 +38,7 @@ Prerequisites
 This course is designed for complete beginners in molecular simulations,
 as well as for those familiar with black-box software like LAMMPS and GROMACS.
 Although some prior knowledge of coding and statistical physics would be useful, 
-Learn Molecular Simulations with Python can be followed by anyone with a computer.
+MoleSimPy can be followed by anyone with a computer.
 
 .. toctree::
     :maxdepth: 2
