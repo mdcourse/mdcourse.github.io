@@ -36,6 +36,17 @@ Carlo swap move can considerably speed up equilibration.
             position2 = copy.deepcopy(self.atoms_positions[shift_2+atom_id_2])
             self.atoms_positions[shift_2+atom_id_2] = position1
             self.atoms_positions[shift_1+atom_id_1] = position2
+            # force the recalculation of neighbor list
+            initial_atoms_sigma = self.atoms_sigma
+            initial_atoms_epsilon = self.atoms_epsilon
+            initial_atoms_mass = self.atoms_mass
+            initial_atoms_type = self.atoms_type
+            initial_sigma_ij_list = self.sigma_ij_list
+            initial_epsilon_ij_list = self.epsilon_ij_list
+            initial_neighbor_lists = self.neighbor_lists
+            self.update_neighbor_lists(force_update=True)
+            self.identify_atom_properties()
+            self.update_cross_coefficients(force_update=True)
             # Measure the potential energy of the new configuration
             trial_Epot = self.compute_potential()
             # Evaluate whether the new configuration should be kept or not
@@ -49,7 +60,14 @@ Carlo swap move can considerably speed up equilibration.
             else: # Reject new position
                 self.atoms_positions = initial_positions # Revert to initial positions
                 self.failed_swap += 1
-
+                self.atoms_sigma = initial_atoms_sigma
+                self.atoms_epsilon = initial_atoms_epsilon
+                self.atoms_mass = initial_atoms_mass
+                self.atoms_type = initial_atoms_type
+                self.sigma_ij_list = initial_sigma_ij_list
+                self.epsilon_ij_list = initial_epsilon_ij_list
+                self.neighbor_lists = initial_neighbor_lists
+                
 .. label:: end_MonteCarlo_class
 
 Let us initialise swap counter:

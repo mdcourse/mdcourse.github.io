@@ -29,39 +29,40 @@ Let us add the following method called *monte_carlo_exchange* to the *MonteCarlo
 .. code-block:: python
 
     def monte_carlo_exchange(self):
-        # The first step is to make a copy of the previous state
-        # Since atoms numbers are evolving, its also important to store the
-        # neighbor, sigma, and epsilon lists
-        self.Epot = self.compute_potential() # TOFIX: not necessary every time
-        initial_positions = copy.deepcopy(self.atoms_positions)
-        initial_number_atoms = copy.deepcopy(self.number_atoms)
-        initial_neighbor_lists = copy.deepcopy(self.neighbor_lists)
-        initial_sigma_lists = copy.deepcopy(self.sigma_ij_list)
-        initial_epsilon_lists = copy.deepcopy(self.epsilon_ij_list)
-        # Apply a 50-50 probability to insert or delete
-        insert_or_delete = np.random.random()
-        if np.random.random() < insert_or_delete:
-            self.monte_carlo_insert()
-        else:
-            self.monte_carlo_delete()
-        if np.random.random() < self.acceptation_probability: # accepted move
-            # Update the success counters
+        if self.desired_mu is not None:
+            # The first step is to make a copy of the previous state
+            # Since atoms numbers are evolving, its also important to store the
+            # neighbor, sigma, and epsilon lists
+            self.Epot = self.compute_potential() # TOFIX: not necessary every time
+            initial_positions = copy.deepcopy(self.atoms_positions)
+            initial_number_atoms = copy.deepcopy(self.number_atoms)
+            initial_neighbor_lists = copy.deepcopy(self.neighbor_lists)
+            initial_sigma_lists = copy.deepcopy(self.sigma_ij_list)
+            initial_epsilon_lists = copy.deepcopy(self.epsilon_ij_list)
+            # Apply a 50-50 probability to insert or delete
+            insert_or_delete = np.random.random()
             if np.random.random() < insert_or_delete:
-                self.successful_insert += 1
+                self.monte_carlo_insert()
             else:
-                self.successful_delete += 1
-        else:
-            # Reject the new position, revert to inital position
-            self.neighbor_lists = initial_neighbor_lists
-            self.sigma_ij_list = initial_sigma_lists
-            self.epsilon_ij_list = initial_epsilon_lists
-            self.atoms_positions = initial_positions
-            self.number_atoms = initial_number_atoms
-            # Update the failed counters
-            if np.random.random() < insert_or_delete:
-                self.failed_insert += 1
+                self.monte_carlo_delete()
+            if np.random.random() < self.acceptation_probability: # accepted move
+                # Update the success counters
+                if np.random.random() < insert_or_delete:
+                    self.successful_insert += 1
+                else:
+                    self.successful_delete += 1
             else:
-                self.failed_delete += 1
+                # Reject the new position, revert to inital position
+                self.neighbor_lists = initial_neighbor_lists
+                self.sigma_ij_list = initial_sigma_lists
+                self.epsilon_ij_list = initial_epsilon_lists
+                self.atoms_positions = initial_positions
+                self.number_atoms = initial_number_atoms
+                # Update the failed counters
+                if np.random.random() < insert_or_delete:
+                    self.failed_insert += 1
+                else:
+                    self.failed_delete += 1
 
 .. label:: end_MonteCarlo_class
 
