@@ -3,13 +3,13 @@
 ![Workflow Status](https://github.com/mdcourse/mdcourse.github.io/actions/workflows/tests.yml/badge.svg)
 ![Workflow Status](https://github.com/mdcourse/mdcourse.github.io/actions/workflows/gh-pages.yml/badge.svg)
 
-# Learn Molecular Simulations with Python
+# Step-by-Step Molecular Simulations with Python
 
 <img src="docs/source/_static/logo/logo-py.png" width="30%" align="right"/></a>
 
-The goal of [Learn Molecular Simulations with Python](https://mdcourse.github.io/)
-is to write a simple code containing most of the basic functionalities of molecular
-simulations, such as:
+The goal of [Step-by-S Molecular Simulations with Python](https://mdcourse.github.io/)
+(MoleSimPy) is to write a simple code containing most of the basic
+functionalities of molecular simulations, including:
 - Energy minimization,
 - Molecular dynamics,
 - Monte Carlo move.
@@ -30,9 +30,8 @@ The target audience includes people who are either completely new to molecular s
 or users of open-source codes such as LAMMPS and GROMACS who want to better understand
 what is behind those codes. Although some basic knowledge of coding, thermodynamics, and
 statistical physics is recommended for a full understanding of molecular simulations,
-[Learn Molecular Simulations with Python](https://mdcourse.github.io/) can be followed
-even without deep expertise in these fields. Annexes with key concepts and suggested
-readings are provided as needed.
+[MoleSimPy](https://mdcourse.github.io/) can be followed even without deep
+expertise in these fields.
 
 ### What is not (yet) in the code
 
@@ -61,9 +60,3 @@ under the Marie Skłodowska-Curie grant agreement No 101065060.
 All inputs, scripts, and data files are released under the GNU
 General Public License v3.0. The released files have been uploaded
 to [Zenodo](https://zenodo.org/), under its [DOI](https://zenodo.org/records/13624976).
-
-### TODO
-
-- Choose a different title? (Build Your Own Molecular Simulations with Python,
-  Create Molecular Simulations with Python, Construct Molecular Simulations with Python)
-- Find a cool acronym. MS-PyLearn, LMS-py ?
