@@ -183,8 +183,8 @@ neighboring atoms, the simulation becomes more efficient. Add the following
 
 .. code-block:: python
 
-    def update_neighbor_lists(self):
-        if (self.step % self.neighbor == 0):
+    def update_neighbor_lists(self, force_update=False):
+        if (self.step % self.neighbor == 0) | force_update:
             matrix = distances.contact_matrix(self.atoms_positions,
                 cutoff=self.cut_off, #+2,
                 returntype="numpy",
@@ -218,8 +218,8 @@ below).
 
 .. code-block:: python
 
-    def update_cross_coefficients(self):
-        if (self.step % self.neighbor == 0):
+    def update_cross_coefficients(self, force_update=False):
+        if (self.step % self.neighbor == 0) | force_update:
             # Precalculte LJ cross-coefficients
             sigma_ij_list = []
             epsilon_ij_list = []

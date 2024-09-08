@@ -209,9 +209,10 @@
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter5.html">Output the simulation state</a></li>
-<li class="toctree-l1"><a class="reference internal" href="chapter6.html">Monte Carlo move</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter6.html">Monte Carlo dispace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter7.html">Pressure Measurement</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter8.html">Monte Carlo insert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter9.html">Monte Carlo swap</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Illustration</span></p>
 <ul>
@@ -389,8 +390,8 @@ the <a class="reference internal" href="chapter4.html#chapter4-label"><span clas
 to save computational time. By focusing only on interactions between
 neighboring atoms, the simulation becomes more efficient. Add the following
 <em>update_neighbor_lists()</em> method to the <em>Utilities</em> class:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">update_neighbor_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighbor</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">update_neighbor_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_update</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighbor</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="n">force_update</span><span class="p">:</span>
         <span class="n">matrix</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">contact_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">,</span>
             <span class="n">cutoff</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cut_off</span><span class="p">,</span> <span class="c1">#+2,</span>
             <span class="n">returntype</span><span class="o">=</span><span class="s2">&quot;numpy&quot;</span><span class="p">,</span>
@@ -416,8 +417,8 @@ information about atoms located at a distance less than the cutoff from one anot
 <p>As the neighbor lists are being built, let us also pre-calculate the cross
 coefficients. This will make the force calculation more efficient (see
 below).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">update_cross_coefficients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighbor</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">update_cross_coefficients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_update</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighbor</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="n">force_update</span><span class="p">:</span>
         <span class="c1"># Precalculte LJ cross-coefficients</span>
         <span class="n">sigma_ij_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">epsilon_ij_list</span> <span class="o">=</span> <span class="p">[]</span>

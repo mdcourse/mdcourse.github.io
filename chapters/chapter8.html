@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="A Monte Carlo Study of Argon" href="../projects/project1.html" /><link rel="prev" title="Pressure Measurement" href="chapter7.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Monte Carlo swap" href="chapter9.html" /><link rel="prev" title="Pressure Measurement" href="chapter7.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
         <title>Monte Carlo insert - </title>
@@ -209,9 +209,10 @@
 <li class="toctree-l1"><a class="reference internal" href="chapter3.html">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter5.html">Output the simulation state</a></li>
-<li class="toctree-l1"><a class="reference internal" href="chapter6.html">Monte Carlo move</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter6.html">Monte Carlo dispace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter7.html">Pressure Measurement</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Monte Carlo insert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter9.html">Monte Carlo swap</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Illustration</span></p>
 <ul>
@@ -264,7 +265,7 @@
 <span id="chapter8-label"></span><h1>Monte Carlo insert<a class="headerlink" href="#monte-carlo-insert" title="Link to this heading">¶</a></h1>
 <p>Here, a <em>Monte Carlo</em> simulation is implemented in the Grand Canonical ensemble,
 where the number of atoms in the system fluctuates. The principle of the
-simulation resemble the Monte Carlo move from <a class="reference internal" href="chapter6.html#chapter6-label"><span class="std std-ref">Monte Carlo move</span></a>:</p>
+simulation resemble the Monte Carlo move from <a class="reference internal" href="chapter6.html#chapter6-label"><span class="std std-ref">Monte Carlo dispace</span></a>:</p>
 <ul class="simple">
 <li><p>1) We start from a given intial configuration, and measure the potential
 energy, <span class="math notranslate nohighlight">\(E_\text{pot}^\text{initial}\)</span>.</p></li>
@@ -285,39 +286,40 @@ possible configurations.</p></li>
 <h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">¶</a></h2>
 <p>Let us add the following method called <em>monte_carlo_exchange</em> to the <em>MonteCarlo</em> class:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">monte_carlo_exchange</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="c1"># The first step is to make a copy of the previous state</span>
-    <span class="c1"># Since atoms numbers are evolving, its also important to store the</span>
-    <span class="c1"># neighbor, sigma, and epsilon lists</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">()</span> <span class="c1"># TOFIX: not necessary every time</span>
-    <span class="n">initial_positions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span>
-    <span class="n">initial_number_atoms</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span>
-    <span class="n">initial_neighbor_lists</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">neighbor_lists</span><span class="p">)</span>
-    <span class="n">initial_sigma_lists</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma_ij_list</span><span class="p">)</span>
-    <span class="n">initial_epsilon_lists</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon_ij_list</span><span class="p">)</span>
-    <span class="c1"># Apply a 50-50 probability to insert or delete</span>
-    <span class="n">insert_or_delete</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">insert_or_delete</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_insert</span><span class="p">()</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_delete</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">acceptation_probability</span><span class="p">:</span> <span class="c1"># accepted move</span>
-        <span class="c1"># Update the success counters</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_mu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># The first step is to make a copy of the previous state</span>
+        <span class="c1"># Since atoms numbers are evolving, its also important to store the</span>
+        <span class="c1"># neighbor, sigma, and epsilon lists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">()</span> <span class="c1"># TOFIX: not necessary every time</span>
+        <span class="n">initial_positions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span>
+        <span class="n">initial_number_atoms</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span>
+        <span class="n">initial_neighbor_lists</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">neighbor_lists</span><span class="p">)</span>
+        <span class="n">initial_sigma_lists</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma_ij_list</span><span class="p">)</span>
+        <span class="n">initial_epsilon_lists</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon_ij_list</span><span class="p">)</span>
+        <span class="c1"># Apply a 50-50 probability to insert or delete</span>
+        <span class="n">insert_or_delete</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">insert_or_delete</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">successful_insert</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_insert</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">successful_delete</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Reject the new position, revert to inital position</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_lists</span> <span class="o">=</span> <span class="n">initial_neighbor_lists</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sigma_ij_list</span> <span class="o">=</span> <span class="n">initial_sigma_lists</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_ij_list</span> <span class="o">=</span> <span class="n">initial_epsilon_lists</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">initial_positions</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span> <span class="o">=</span> <span class="n">initial_number_atoms</span>
-        <span class="c1"># Update the failed counters</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">insert_or_delete</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">failed_insert</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_delete</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">acceptation_probability</span><span class="p">:</span> <span class="c1"># accepted move</span>
+            <span class="c1"># Update the success counters</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">insert_or_delete</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">successful_insert</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">successful_delete</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">failed_delete</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># Reject the new position, revert to inital position</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_lists</span> <span class="o">=</span> <span class="n">initial_neighbor_lists</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sigma_ij_list</span> <span class="o">=</span> <span class="n">initial_sigma_lists</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_ij_list</span> <span class="o">=</span> <span class="n">initial_epsilon_lists</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">initial_positions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span> <span class="o">=</span> <span class="n">initial_number_atoms</span>
+            <span class="c1"># Update the failed counters</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">insert_or_delete</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">failed_insert</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">failed_delete</span> <span class="o">+=</span> <span class="mi">1</span>
 </pre></div>
 </div>
 <p>First, the potential energy is calculated, and the current state of the
@@ -507,12 +509,12 @@ number of steps are written in the <em>Outputs/Epot.dat</em>.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../projects/project1.html">
+          <a class="next-page" href="chapter9.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">A Monte Carlo Study of Argon</div>
+                <div class="title">Monte Carlo swap</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

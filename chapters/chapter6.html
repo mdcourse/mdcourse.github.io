@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Pressure Measurement" href="chapter7.html" /><link rel="prev" title="Output the simulation state" href="chapter5.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
-        <title>Monte Carlo move - </title>
+        <title>Monte Carlo dispace - </title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
@@ -209,9 +209,10 @@
 <li class="toctree-l1"><a class="reference internal" href="chapter3.html">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter5.html">Output the simulation state</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Monte Carlo move</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Monte Carlo dispace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter7.html">Pressure Measurement</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter8.html">Monte Carlo insert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter9.html">Monte Carlo swap</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Illustration</span></p>
 <ul>
@@ -260,8 +261,8 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="monte-carlo-move">
-<span id="chapter6-label"></span><h1>Monte Carlo move<a class="headerlink" href="#monte-carlo-move" title="Link to this heading">¶</a></h1>
+          <section id="monte-carlo-dispace">
+<span id="chapter6-label"></span><h1>Monte Carlo dispace<a class="headerlink" href="#monte-carlo-dispace" title="Link to this heading">¶</a></h1>
 <figure class="align-right">
 <a class="only-dark reference internal image-reference" href="../_images/avatar-dm1.webp"><img alt="The fluid made of argon atoms and simulated using monte carlo and python." class="only-dark" src="../_images/avatar-dm1.webp" style="height: 200px;" />
 </a>
@@ -270,7 +271,8 @@
 <a class="only-light reference internal image-reference" href="../_images/avatar1.webp"><img alt="The fluid made of argon atoms and simulated using monte carlo and python" class="only-light" src="../_images/avatar1.webp" style="height: 200px;" />
 </a>
 </figure>
-<p>Here, a <em>Monte Carlo move</em> simulation is implemented. The principle of the
+<p>Here, a Monte Carlo simulation is implemented where the only allowed move
+is a dispacement of the particles. The principle of such Monte Carlo
 simulation is the following:</p>
 <ul class="simple">
 <li><p>1) We start from a given intial configuration, and measure the potential
@@ -502,7 +504,7 @@ be used to plot the evolution of the system over time.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Monte Carlo move</a><ul>
+<li><a class="reference internal" href="#">Monte Carlo dispace</a><ul>
 <li><a class="reference internal" href="#implementation">Implementation</a></li>
 <li><a class="reference internal" href="#parameters">Parameters</a></li>
 <li><a class="reference internal" href="#run-method">Run Method</a></li>
