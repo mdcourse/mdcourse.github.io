@@ -51,11 +51,11 @@ Let us add a method named *monte_carlo_move* to the *MonteCarlo* class:
             # When needed, recalculate neighbor/coeff lists
             self.update_neighbor_lists()
             self.update_cross_coefficients()
-            # If self.Epot does not exists yet, calculate it
+            # If self.Epot does not exist yet, calculate it
             # It should only be necessary when step = 0
             if hasattr(self, 'Epot') is False:
                 self.Epot = self.compute_potential()
-            # Make a copy of the initial atoms positions and initial energy
+            # Make a copy of the initial atom positions and initial energy
             initial_Epot = self.Epot
             initial_positions = copy.deepcopy(self.atoms_positions)
             # Pick an atom id randomly

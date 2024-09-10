@@ -336,7 +336,7 @@ which can be related to <span class="math notranslate nohighlight">\(\sigma\)</s
 temperature, <span class="math notranslate nohighlight">\(k_\text{B} T/ \epsilon = 2.74\)</span>, one can calculate the temperature
 <span class="math notranslate nohighlight">\(T = 328.15~\text{K}\)</span> (or <span class="math notranslate nohighlight">\(T = 55~^\circ\text{C}\)</span>).</p>
 <p>Within the Python script, write:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">epsilon</span> <span class="o">=</span> <span class="p">(</span><span class="mf">119.76</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">N_A</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">epsilon</span> <span class="o">=</span> <span class="p">(</span><span class="mf">119.76</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="o">*</span><span class="n">kB</span><span class="o">*</span><span class="n">Na</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span><span class="p">)</span>
 <span class="n">r_star</span> <span class="o">=</span> <span class="mf">3.822</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
 <span class="n">sigma</span> <span class="o">=</span> <span class="n">r_star</span> <span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">6</span><span class="p">)</span>
 <span class="n">m_argon</span> <span class="o">=</span> <span class="mf">39.948</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">gram</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
@@ -385,13 +385,13 @@ molar volume.</p>
 statistical mechanics that describes how the state variables of a system, such as
 pressure <span class="math notranslate nohighlight">\(p\)</span>, volume <span class="math notranslate nohighlight">\(V\)</span>, and temperature <span class="math notranslate nohighlight">\(T\)</span>, are interrelated.
 Here, let us extract the pressure of the fluid for different density values.</p>
-<p>To easily launch multiple simulation in parallel, let us create a
+<p>To easily launch multiple simulations in parallel, let us create a
 function called <em>launch_MC_code</em> that will be used to call
 our Monte Carlo script with a chosen value of <span class="math notranslate nohighlight">\(\tau = v / v^*\)</span>.</p>
-<p>Create a new function, so that the current script ressemble the following:</p>
+<p>Create a new function so that the current script resembles the following:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">launch_MC_code</span><span class="p">(</span><span class="n">tau</span><span class="p">):</span>
 
-    <span class="n">epsilon</span> <span class="o">=</span> <span class="p">(</span><span class="mf">119.76</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">Boltzmann</span><span class="o">*</span><span class="n">cst</span><span class="o">.</span><span class="n">N_A</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span><span class="p">)</span>
+    <span class="n">epsilon</span> <span class="o">=</span> <span class="p">(</span><span class="mf">119.76</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span><span class="o">*</span><span class="n">kB</span><span class="o">*</span><span class="n">Na</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span><span class="p">)</span>
     <span class="n">r_star</span> <span class="o">=</span> <span class="mf">3.822</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">r_star</span> <span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">6</span><span class="p">)</span>
     <span class="n">m_argon</span> <span class="o">=</span> <span class="mf">39.948</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">gram</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
@@ -435,7 +435,7 @@ simulation with too much overlap between the atoms:</p>
     <span class="n">em</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Then, let us start the Monte carlo simulation. As initial positions for the atoms,
+<p>Then, let us start the Monte Carlo simulation. For the initial positions of the atoms,
 let us use the last positions from the <em>em</em> run,
 i.e. <em>initial_positions = em.atoms_positions*em.reference_distance</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">launch_MC_code</span><span class="p">(</span><span class="n">tau</span><span class="p">):</span>
@@ -471,17 +471,23 @@ i.e. <em>initial_positions = em.atoms_positions*em.reference_distance</em>:</p>
 </pre></div>
 </div>
 <p>Finally, it is possible to call the <em>launch_MC_code</em> function using
-<em>multiprocessing</em>, and perform the simulation for multiple value of <span class="math notranslate nohighlight">\(\tau\)</span>
+<em>multiprocessing</em>, and perform the simulation for multiple values of <span class="math notranslate nohighlight">\(\tau\)</span>
 at the same time (if your computer has enough CPU core, if not, perform these
 calculations in serial):</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">tau_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.126</span><span class="p">,</span> <span class="mf">0.882</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span><span class="mi">2</span><span class="p">)</span>
-    <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">()</span>
-    <span class="n">squared_numbers</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">launch_MC_code</span><span class="p">,</span> <span class="n">tau_values</span><span class="p">)</span>
-    <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-    <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
+<dl class="simple">
+<dt>A</dt><dd><dl class="simple">
+<dt>if __name__ == “__main__”:</dt><dd><p>tau_values = np.round(np.logspace(-0.126, 0.882, 10),2)
+pool = multiprocessing.Pool()
+squared_numbers = pool.map(launch_MC_code, tau_values)
+pool.close()
+pool.join()</p>
+</dd>
+</dl>
+</dd>
+</dl>
 <p>Here, the 10 requested values of <span class="math notranslate nohighlight">\(\tau\)</span> are 0.75, 0.97, 1.25, 1.62, 2.1,
 2.72, 3.52, 4.55, 5.89, and 7.62. Run the script using Python.</p>
 <p>When the simulation is done, extract the values of <em>Epot.dat</em> within each
@@ -496,8 +502,8 @@ with those of Ref. <span id="id5">[<a class="reference internal" href="../divers
 <img alt="Equation of state of argon as calculated using monte carlo simulation" class="only-dark" src="../_images/pv-nrt-dm.png" />
 </figure>
 <p>Figure: Equation of state of the argon fluid as calculated using the Monte
-carlo code (disks), and compared with the results from Ref. <span id="id6">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">1</a>]</span>.
-Normalised pressure, <span class="math notranslate nohighlight">\(p V / RT\)</span> as a function of the normalised volume,
+Carlo code (disks), and compared with the results from Ref. <span id="id6">[<a class="reference internal" href="../divers/bibliography.html#id2" title="W. W. Wood and F. R. Parker. Monte Carlo Equation of State of Molecules Interacting with the Lennard-Jones Potential. I. A Supercritical Isotherm at about Twice the Critical Temperature. The Journal of Chemical Physics, 27(3):720–733, 1957.">1</a>]</span>.
+Normalized pressure, <span class="math notranslate nohighlight">\(p V / RT\)</span> as a function of the normalized volume,
 <span class="math notranslate nohighlight">\(V / V^*\)</span>, where <span class="math notranslate nohighlight">\(V^*\)</span> is the molar volume. For benchmark purposes,
 the data obtained using LAMMPS were also added.</p>
 </section>

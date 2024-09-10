@@ -5,13 +5,13 @@ Monte Carlo insert
 
 Here, a *Monte Carlo* simulation is implemented in the Grand Canonical ensemble,
 where the number of atoms in the system fluctuates. The principle of the
-simulation resemble the Monte Carlo move from :ref:`chapter6-label`:
+simulation resembles the Monte Carlo move from :ref:`chapter6-label`:
 
-- 1) We start from a given intial configuration, and measure the potential
+- 1) We start from a given initial configuration, and measure the potential
   energy, :math:`E_\text{pot}^\text{initial}`.
 - 2) A random number is chosen, and depending on its value, either a new particle
-  will tried to be inserted, or an existing particle will tried to be deleted.
-- 3) The energy of the system after the insersion/deletion,
+  will try to be inserted, or an existing particle will try to be deleted.
+- 3) The energy of the system after the insertion/deletion,
   :math:`E_\text{pot}^\text{trial}`, is measured.
 - 4) We then decide to keep or reject the move by calculating
   the difference in energy between the trial and the initial configurations:
@@ -97,7 +97,7 @@ Then, let us write the *monte_carlo_insert()* method:
         trial_Epot = self.compute_potential()
         Lambda = self.calculate_Lambda(self.atom_mass[self.inserted_type])
         beta =  1/self.desired_temperature
-        Nat = np.sum(self.number_atoms) # NUmber atoms, should it relly be N? of N (type) ?
+        Nat = np.sum(self.number_atoms) # Number atoms, should it really be N? of N (type) ?
         Vol = np.prod(self.box_size[:3]) # box volume
         # dimension of 3 is enforced in the power of the Lambda
         self.acceptation_probability = np.min([1, Vol/(Lambda**3*Nat) \
@@ -129,7 +129,7 @@ Let us add the very similar *monte_carlo_delete()* method:
             trial_Epot = self.compute_potential()
             Lambda = self.calculate_Lambda(self.atom_mass[self.inserted_type])
             beta =  1/self.desired_temperature
-            Nat = np.sum(self.number_atoms) # NUmber atoms, should it relly be N? of N (type) ?
+            Nat = np.sum(self.number_atoms) # Number atoms, should it really be N? of N (type) ?
             Vol = np.prod(self.box_size[:3]) # box volume
             # dimension of 3 is enforced in the power of the Lambda
             self.acceptation_probability = np.min([1, (Lambda**3 *(Nat-1)/Vol) \
@@ -145,7 +145,7 @@ Complete the *__init__* method as follows:
 
 .. code-block:: python
 
-    class MonteCarlo(Outputs):
+    class MonteCarlo(Measurements):
         def __init__(self,
                     (...)
                     displace_mc = None,
@@ -160,7 +160,7 @@ and
 
 .. code-block:: python
 
-    class MonteCarlo(Outputs):
+    class MonteCarlo(Measurements):
         def __init__(self,
             (...)
             self.displace_mc = displace_mc
@@ -169,7 +169,7 @@ and
 
 .. label:: end_MonteCarlo_class
 
-Let us also normalised the "desired_mu":
+Let us also normalize the "desired_mu":
 
 .. label:: start_MonteCarlo_class
 
@@ -300,4 +300,4 @@ potential *desired_mu*:
 .. label:: end_test_9a_class
 
 The evolution of the potential energy as a function of the
-number of steps are written in the *Outputs/Epot.dat*.
+number of steps is written in the *Outputs/Epot.dat*.

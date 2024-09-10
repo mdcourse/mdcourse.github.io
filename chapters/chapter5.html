@@ -270,11 +270,11 @@ file, thus allowing for their visualization with software like
 VMD <span id="id1">[<a class="reference internal" href="../divers/bibliography.html#id10" title="William Humphrey, Andrew Dalke, and Klaus Schulten. Vmd: visual molecular dynamics. Journal of molecular graphics, 14(1):33–38, 1996.">5</a>]</span> or Ovito <span id="id2">[<a class="reference internal" href="../divers/bibliography.html#id11" title="Alexander Stukowski. Visualization and analysis of atomistic simulation data with ovito–the open visualization tool. Modelling and simulation in materials science and engineering, 18(1):015012, 2009.">6</a>]</span>.</p>
 <section id="create-logger">
 <h2>Create logger<a class="headerlink" href="#create-logger" title="Link to this heading">¶</a></h2>
-<p>Let us create a function named <em>log_simulation_data()</em> to a file named <em>logger.py</em>.
-With the logger, some output are being printed in a file, as well as in the terminal.
+<p>Let us create a function named <em>log_simulation_data()</em> in a file named <em>logger.py</em>.
+With the logger, various outputs are being printed to a file, as well as to the terminal.
 The period of printing, which is a multiple of the simulation steps, will be set
 by a new parameter named <em>thermo_period</em> (integer). All quantities are
-converted into <em>real</em> units before getting outputed (see <a class="reference internal" href="chapter2.html#chapter2-label"><span class="std std-ref">Setting Up the Simulation</span></a>).</p>
+converted into <em>real</em> units before getting outputted (see <a class="reference internal" href="chapter2.html#chapter2-label"><span class="std std-ref">Setting Up the Simulation</span></a>).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
@@ -309,7 +309,7 @@ converted into <em>real</em> units before getting outputed (see <a class="refere
     <span class="k">return</span> <span class="n">logger</span>
 
 <span class="k">def</span> <span class="nf">log_simulation_data</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
-    <span class="c1"># TOFIX: ceurrently, MaxF is returned dimensionless</span>
+    <span class="c1"># TOFIX: currently, MaxF is returned dimensionless</span>
 
     <span class="c1"># Setup the logger with the folder name, overwriting the log if code.step is 0</span>
     <span class="n">logger</span> <span class="o">=</span> <span class="n">setup_logger</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">data_folder</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span>
@@ -339,10 +339,10 @@ converted into <em>real</em> units before getting outputed (see <a class="refere
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">code</span><span class="o">.</span><span class="n">step</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">Epot</span><span class="o">.</span><span class="n">magnitude</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">press</span><span class="o">.</span><span class="n">magnitude</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>For simplicify, the <em>logger</em> uses the <a href="https://docs.python.org/3/library/logging.html" target="_blank">logging</a> library, which provides a
+<p>For simplicity, the <em>logger</em> uses the <a href="https://docs.python.org/3/library/logging.html" target="_blank">logging</a> library, which provides a
 flexible framework for emitting log messages from Python programs. Depending on
-the value of <em>thermo_outputs</em>, different informations are printed, such as
-<em>step</em>, <em>Epot</em>, or/and <em>MaxF</em>.</p>
+the value of <em>thermo_outputs</em>, different information are printed, such as
+<em>step</em>, <em>Epot</em>, and/or <em>MaxF</em>.</p>
 </section>
 <section id="create-dumper">
 <h2>Create Dumper<a class="headerlink" href="#create-dumper" title="Link to this heading">¶</a></h2>
@@ -414,7 +414,7 @@ and <em>log_simulation_data</em>. Add these lines at the top of the <em>MonteCar
 </pre></div>
 </div>
 <p>Finally, let us make sure that <em>thermo_period</em>, <em>dumping_period</em>, and <em>thermo_outputs</em>
-parameters are passed the InitializeSimulation method:</p>
+parameters are passed to the InitializeSimulation method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
         <span class="p">(</span><span class="o">...</span><span class="p">)</span>
             <span class="n">neighbor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="c1"># Integer</span>
@@ -455,7 +455,7 @@ during energy minimization.</p>
 </section>
 <section id="test-the-code">
 <h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
-<p>One can use a test similar as the previous ones. Let us ask our code to print
+<p>One can use a test similar to the previous ones. Let us ask our code to print
 information in the <em>dump</em> and the <em>log</em> files, and then let us assert that the
 files were indeed created without the <em>Outputs/</em> folder:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MinimizeEnergy</span> <span class="kn">import</span> <span class="n">MinimizeEnergy</span>
@@ -519,10 +519,10 @@ simulation. The content of the <em>simulation.log</em> file should resemble:</p>
 100 -2.10 1.28
 </pre></div>
 </div>
-<p>The data from the <em>simulation.log</em> can be used to generate plots using softwares
-line XmGrace, GnuPlot, or Python/Pyplot. For the later, one can use a simple data
+<p>The data from the <em>simulation.log</em> can be used to generate plots using software
+like XmGrace, GnuPlot, or Python/Pyplot. For the latter, one can use a simple data
 reader to import the data from <em>simulation.log</em> into Python. Copy the
-following lines in a new file named <em>reader.py</em>:</p>
+following lines into a new file named <em>reader.py</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">csv</span>
 
 <span class="k">def</span> <span class="nf">import_data</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>

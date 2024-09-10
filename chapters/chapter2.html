@@ -264,9 +264,9 @@
           <section id="setting-up-the-simulation">
 <span id="chapter2-label"></span><h1>Setting Up the Simulation<a class="headerlink" href="#setting-up-the-simulation" title="Link to this heading">¶</a></h1>
 <p>To streamline the simulation process, all user-specified parameters will be
-non-dimensionalized. By removing units from the calculations, we simplify
-complex operations like force evaluation, making the code more efficient and
-easier to manage. This non-dimensionalization is handled within the <em>Prepare</em>
+nondimensionalized. By removing units from the calculations, we simplify
+complex operations like force evaluation, making the code more efficient, and
+easier to manage. This nondimensionalization is handled within the <em>Prepare</em>
 class.</p>
 <p>While this step may not be the most thrilling aspect of the simulation, it is
 essential groundwork that will significantly ease our work as we progress.</p>
@@ -320,7 +320,7 @@ conversion, we will import NumPy and the constants module from <a href="https://
 <li><p>the LJ parameters <span class="math notranslate nohighlight">\(\sigma\)</span> and <span class="math notranslate nohighlight">\(\epsilon\)</span>,</p></li>
 <li><p>and the number of atoms.</p></li>
 </ul>
-<p>All these quantities must be supplied as lists. This will be useful later when
+<p>All these quantities must be provided as lists of values. This will be useful later when
 we want to mix atoms of different types within the same simulation box.</p>
 <p>Modify the <em>Prepare</em> class as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Prepare</span><span class="p">:</span>

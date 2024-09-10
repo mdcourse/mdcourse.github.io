@@ -12,11 +12,11 @@ VMD :cite:`humphrey1996vmd` or Ovito :cite:`stukowski2009visualization`.
 Create logger
 -------------
 
-Let us create a function named *log_simulation_data()* to a file named *logger.py*.
-With the logger, some output are being printed in a file, as well as in the terminal.
+Let us create a function named *log_simulation_data()* in a file named *logger.py*.
+With the logger, various outputs are being printed to a file, as well as to the terminal.
 The period of printing, which is a multiple of the simulation steps, will be set
 by a new parameter named *thermo_period* (integer). All quantities are 
-converted into *real* units before getting outputed (see :ref:`chapter2-label`).
+converted into *real* units before getting outputted (see :ref:`chapter2-label`).
 
 .. label:: start_logger_class
 
@@ -56,7 +56,7 @@ converted into *real* units before getting outputed (see :ref:`chapter2-label`).
         return logger
 
     def log_simulation_data(code):
-        # TOFIX: ceurrently, MaxF is returned dimensionless
+        # TOFIX: currently, MaxF is returned dimensionless
 
         # Setup the logger with the folder name, overwriting the log if code.step is 0
         logger = setup_logger(code.data_folder, overwrite=(code.step == 0))
@@ -87,10 +87,10 @@ converted into *real* units before getting outputed (see :ref:`chapter2-label`).
 
 .. label:: end_logger_class
 
-For simplicify, the *logger* uses the |logging| library, which provides a
+For simplicity, the *logger* uses the |logging| library, which provides a
 flexible framework for emitting log messages from Python programs. Depending on
-the value of *thermo_outputs*, different informations are printed, such as
-*step*, *Epot*, or/and *MaxF*.
+the value of *thermo_outputs*, different information are printed, such as
+*step*, *Epot*, and/or *MaxF*.
 
 .. |logging| raw:: html
 
@@ -185,7 +185,7 @@ Add the same lines at the top of the *MinimizeEnergy.py* file:
 .. label:: end_MinimizeEnergy_class
 
 Finally, let us make sure that *thermo_period*, *dumping_period*, and *thermo_outputs*
-parameters are passed the InitializeSimulation method:
+parameters are passed to the InitializeSimulation method:
 
 .. label:: start_InitializeSimulation_class
 
@@ -244,7 +244,7 @@ during energy minimization.
 Test the code
 -------------
 
-One can use a test similar as the previous ones. Let us ask our code to print
+One can use a test similar to the previous ones. Let us ask our code to print
 information in the *dump* and the *log* files, and then let us assert that the
 files were indeed created without the *Outputs/* folder:
 
@@ -316,10 +316,10 @@ simulation. The content of the *simulation.log* file should resemble:
     75 -1.22 3.77
     100 -2.10 1.28
 
-The data from the *simulation.log* can be used to generate plots using softwares
-line XmGrace, GnuPlot, or Python/Pyplot. For the later, one can use a simple data
+The data from the *simulation.log* can be used to generate plots using software
+like XmGrace, GnuPlot, or Python/Pyplot. For the latter, one can use a simple data
 reader to import the data from *simulation.log* into Python. Copy the
-following lines in a new file named *reader.py*:
+following lines into a new file named *reader.py*:
 
 .. label:: start_reader_class
 

@@ -308,11 +308,11 @@ possible configurations.</p></li>
         <span class="c1"># When needed, recalculate neighbor/coeff lists</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_cross_coefficients</span><span class="p">()</span>
-        <span class="c1"># If self.Epot does not exists yet, calculate it</span>
+        <span class="c1"># If self.Epot does not exist yet, calculate it</span>
         <span class="c1"># It should only be necessary when step = 0</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Epot&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">()</span>
-        <span class="c1"># Make a copy of the initial atoms positions and initial energy</span>
+        <span class="c1"># Make a copy of the initial atom positions and initial energy</span>
         <span class="n">initial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span>
         <span class="n">initial_positions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span>
         <span class="c1"># Pick an atom id randomly</span>
