@@ -175,7 +175,7 @@ Let us also normalize the "desired_mu":
 
 .. code-block:: python
 
-    class MonteCarlo(Outputs):
+    class MonteCarlo(Measurements):
         def __init__(self,
             (...)
             self.nondimensionalize_units(["desired_temperature", "displace_mc"])

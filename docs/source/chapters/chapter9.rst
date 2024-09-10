@@ -76,7 +76,7 @@ Let us initialise swap counter:
 
 .. code-block:: python
 
-    class MonteCarlo(Outputs):
+    class MonteCarlo(Measurements):
         def __init__(self,
             (...)
             self.failed_move = 0
@@ -91,7 +91,7 @@ Complete the *__init__* method as follows:
 
 .. code-block:: python
 
-    class MonteCarlo(Outputs):
+    class MonteCarlo(Measurements):
         def __init__(self,
                     (...)
                     displace_mc = None,
@@ -105,7 +105,7 @@ and
 
 .. code-block:: python
 
-    class MonteCarlo(Outputs):
+    class MonteCarlo(Measurements):
         def __init__(self,
             (...)
             self.displace_mc = displace_mc
