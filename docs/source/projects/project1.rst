@@ -98,7 +98,7 @@ Within the Python script, write:
 
 .. code-block:: python
 
-    epsilon = (119.76*ureg.kelvin*cst.Boltzmann*cst.N_A).to(ureg.kcal/ureg.mol)
+    epsilon = (119.76*ureg.kelvin*kB*Na).to(ureg.kcal/ureg.mol)
     r_star = 3.822*ureg.angstrom 
     sigma = r_star / 2**(1/6) 
     m_argon = 39.948*ureg.gram/ureg.mol
@@ -161,17 +161,17 @@ statistical mechanics that describes how the state variables of a system, such a
 pressure :math:`p`, volume :math:`V`, and temperature :math:`T`, are interrelated.
 Here, let us extract the pressure of the fluid for different density values.
 
-To easily launch multiple simulation in parallel, let us create a
+To easily launch multiple simulations in parallel, let us create a
 function called *launch_MC_code* that will be used to call
 our Monte Carlo script with a chosen value of :math:`\tau = v / v^*`.
 
-Create a new function, so that the current script ressemble the following:
+Create a new function so that the current script resembles the following:
 
 .. code-block:: python
 
     def launch_MC_code(tau):
 
-        epsilon = (119.76*ureg.kelvin*cst.Boltzmann*cst.N_A).to(ureg.kcal/ureg.mol)
+        epsilon = (119.76*ureg.kelvin*kB*Na).to(ureg.kcal/ureg.mol)
         r_star = 3.822*ureg.angstrom 
         sigma = r_star / 2**(1/6) 
         m_argon = 39.948*ureg.gram/ureg.mol
@@ -217,7 +217,7 @@ simulation with too much overlap between the atoms:
         )
         em.run()
 
-Then, let us start the Monte carlo simulation. As initial positions for the atoms,
+Then, let us start the Monte Carlo simulation. For the initial positions of the atoms,
 let us use the last positions from the *em* run,
 i.e. *initial_positions = em.atoms_positions*em.reference_distance*:
 
@@ -256,12 +256,12 @@ i.e. *initial_positions = em.atoms_positions*em.reference_distance*:
         mc.run()
 
 Finally, it is possible to call the *launch_MC_code* function using
-*multiprocessing*, and perform the simulation for multiple value of :math:`\tau`
+*multiprocessing*, and perform the simulation for multiple values of :math:`\tau`
 at the same time (if your computer has enough CPU core, if not, perform these
 calculations in serial):
 
 .. code-block:: python
-
+A
     if __name__ == "__main__":
         tau_values = np.round(np.logspace(-0.126, 0.882, 10),2)
         pool = multiprocessing.Pool()
@@ -287,7 +287,7 @@ with those of Ref. :cite:`woodMonteCarloEquation1957`:
     :class: only-dark
 
 Figure: Equation of state of the argon fluid as calculated using the Monte
-carlo code (disks), and compared with the results from Ref. :cite:`woodMonteCarloEquation1957`.
-Normalised pressure, :math:`p V / RT` as a function of the normalised volume,
+Carlo code (disks), and compared with the results from Ref. :cite:`woodMonteCarloEquation1957`.
+Normalized pressure, :math:`p V / RT` as a function of the normalized volume,
 :math:`V / V^*`, where :math:`V^*` is the molar volume. For benchmark purposes,
 the data obtained using LAMMPS were also added.

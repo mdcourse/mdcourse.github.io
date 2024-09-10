@@ -85,7 +85,7 @@ To evaluate all the vectors between all the particles, let us also add the
 Test the code
 -------------
 
-Let us test the outputed pressure. 
+Let us test the outputted pressure. 
 
 .. label:: start_test_7a_class
 

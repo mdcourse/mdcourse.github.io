@@ -4,9 +4,9 @@ Setting Up the Simulation
 ==========================
 
 To streamline the simulation process, all user-specified parameters will be
-non-dimensionalized. By removing units from the calculations, we simplify
-complex operations like force evaluation, making the code more efficient and
-easier to manage. This non-dimensionalization is handled within the *Prepare*
+nondimensionalized. By removing units from the calculations, we simplify
+complex operations like force evaluation, making the code more efficient, and
+easier to manage. This nondimensionalization is handled within the *Prepare*
 class.
 
 While this step may not be the most thrilling aspect of the simulation, it is
@@ -80,7 +80,7 @@ Four atom parameters are provided to the *Prepare* class:
 - the LJ parameters :math:`\sigma` and :math:`\epsilon`,
 - and the number of atoms.
 
-All these quantities must be supplied as lists. This will be useful later when
+All these quantities must be provided as lists of values. This will be useful later when
 we want to mix atoms of different types within the same simulation box.
 
 Modify the *Prepare* class as follows:  

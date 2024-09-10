@@ -51,6 +51,7 @@ expertise in these fields.
 #### Contributors
 
 -  [Jake Anderson](https://github.com/jaketanderson) 
+-  [Kenneth Ngo](https://github.com/KennethQNgo)
 
 ### Acknowledgments and license
 
