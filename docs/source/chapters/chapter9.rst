@@ -129,8 +129,7 @@ Finally, the *monte_carlo_exchange()* method must be included in the run:
 Test the code
 -------------
 
-One can use a similar test as previously, but with an imposed chemical
-potential *desired_mu*:
+Let's test the Monte Carlo swap.
 
 .. label:: start_test_9b_class
 
@@ -159,8 +158,6 @@ potential *desired_mu*:
     rc = 2.5 * sig_1
     # Pick the desired temperature
     T = 300 * ureg.kelvin
-    # Choose the desired_mu
-    desired_mu = -3 * ureg.kcal / ureg.mol
 
     # Initialize the prepare object
     mc = MonteCarlo(
@@ -177,7 +174,6 @@ potential *desired_mu*:
         thermo_outputs="Epot-press",
         desired_temperature=T,  # K
         neighbor=1,
-        desired_mu=desired_mu,
         swap_type=[0, 1]  # Enable Monte Carlo swap between groups 1 and 2
     )
 
@@ -203,7 +199,6 @@ potential *desired_mu*:
         import pytest
         # Run pytest programmatically
         pytest.main(["-s", __file__])
-
 
 .. label:: end_test_9b_class
 
