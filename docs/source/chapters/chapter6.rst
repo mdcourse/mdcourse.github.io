@@ -1,7 +1,7 @@
 .. _chapter6-label:
 
-Monte Carlo dispace
-===================
+Monte Carlo displace
+====================
 
 .. figure:: ../projects/project1/avatar-dm.webp
     :alt: The fluid made of argon atoms and simulated using monte carlo and python.
@@ -16,7 +16,7 @@ Monte Carlo dispace
     :class: only-light
 
 Here, a Monte Carlo simulation is implemented where the only allowed move
-is a dispacement of the particles. The principle of such Monte Carlo
+is a displacement of the particles. The principle of such Monte Carlo
 simulation is the following:
 
 - 1) We start from a given intial configuration, and measure the potential

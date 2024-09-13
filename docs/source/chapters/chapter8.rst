@@ -175,7 +175,7 @@ Let us also normalize the "desired_mu":
 
 .. code-block:: python
 
-    class MonteCarlo(Outputs):
+    class MonteCarlo(Measurements):
         def __init__(self,
             (...)
             self.nondimensionalize_units(["desired_temperature", "displace_mc"])
@@ -238,7 +238,7 @@ Test the code
 One can use a similar test as previously, but with an imposed chemical
 potential *desired_mu*:
 
-.. label:: start_test_9a_class
+.. label:: start_test_8a_class
 
 .. code-block:: python
 
@@ -297,7 +297,7 @@ potential *desired_mu*:
         # Run pytest programmatically
         pytest.main(["-s", __file__])
 
-.. label:: end_test_9a_class
+.. label:: end_test_8a_class
 
 The evolution of the potential energy as a function of the
 number of steps is written in the *Outputs/Epot.dat*.
