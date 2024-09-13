@@ -1,7 +1,7 @@
 .. _chapter6-label:
 
 Monte Carlo displace
-===================
+====================
 
 .. figure:: ../projects/project1/avatar-dm.webp
     :alt: The fluid made of argon atoms and simulated using monte carlo and python.
