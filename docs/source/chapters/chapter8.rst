@@ -297,7 +297,7 @@ potential *desired_mu*:
         # Run pytest programmatically
         pytest.main(["-s", __file__])
 
-.. label:: end_test_98a_class
+.. label:: end_test_8a_class
 
 The evolution of the potential energy as a function of the
 number of steps is written in the *Outputs/Epot.dat*.
