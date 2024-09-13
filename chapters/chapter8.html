@@ -209,7 +209,7 @@
 <li class="toctree-l1"><a class="reference internal" href="chapter3.html">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter5.html">Output the simulation state</a></li>
-<li class="toctree-l1"><a class="reference internal" href="chapter6.html">Monte Carlo dispace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter6.html">Monte Carlo displace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter7.html">Pressure Measurement</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Monte Carlo insert</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter9.html">Monte Carlo swap</a></li>
@@ -265,7 +265,7 @@
 <span id="chapter8-label"></span><h1>Monte Carlo insert<a class="headerlink" href="#monte-carlo-insert" title="Link to this heading">¶</a></h1>
 <p>Here, a <em>Monte Carlo</em> simulation is implemented in the Grand Canonical ensemble,
 where the number of atoms in the system fluctuates. The principle of the
-simulation resembles the Monte Carlo move from <a class="reference internal" href="chapter6.html#chapter6-label"><span class="std std-ref">Monte Carlo dispace</span></a>:</p>
+simulation resembles the Monte Carlo move from <a class="reference internal" href="chapter6.html#chapter6-label"><span class="std std-ref">Monte Carlo displace</span></a>:</p>
 <ul class="simple">
 <li><p>1) We start from a given initial configuration, and measure the potential
 energy, <span class="math notranslate nohighlight">\(E_\text{pot}^\text{initial}\)</span>.</p></li>
@@ -400,7 +400,7 @@ must be re-evaluated. Then, the acceptance probability is calculated.</p>
 </pre></div>
 </div>
 <p>Let us also normalize the “desired_mu”:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Outputs</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Measurements</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
         <span class="p">(</span><span class="o">...</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units</span><span class="p">([</span><span class="s2">&quot;desired_temperature&quot;</span><span class="p">,</span> <span class="s2">&quot;displace_mc&quot;</span><span class="p">])</span>

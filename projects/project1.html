@@ -209,7 +209,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../chapters/chapter3.html">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chapters/chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chapters/chapter5.html">Output the simulation state</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../chapters/chapter6.html">Monte Carlo dispace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../chapters/chapter6.html">Monte Carlo displace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chapters/chapter7.html">Pressure Measurement</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chapters/chapter8.html">Monte Carlo insert</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../chapters/chapter9.html">Monte Carlo swap</a></li>
@@ -474,20 +474,14 @@ i.e. <em>initial_positions = em.atoms_positions*em.reference_distance</em>:</p>
 <em>multiprocessing</em>, and perform the simulation for multiple values of <span class="math notranslate nohighlight">\(\tau\)</span>
 at the same time (if your computer has enough CPU core, if not, perform these
 calculations in serial):</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">tau_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.126</span><span class="p">,</span> <span class="mf">0.882</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">()</span>
+    <span class="n">squared_numbers</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">launch_MC_code</span><span class="p">,</span> <span class="n">tau_values</span><span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 </pre></div>
 </div>
-<dl class="simple">
-<dt>A</dt><dd><dl class="simple">
-<dt>if __name__ == “__main__”:</dt><dd><p>tau_values = np.round(np.logspace(-0.126, 0.882, 10),2)
-pool = multiprocessing.Pool()
-squared_numbers = pool.map(launch_MC_code, tau_values)
-pool.close()
-pool.join()</p>
-</dd>
-</dl>
-</dd>
-</dl>
 <p>Here, the 10 requested values of <span class="math notranslate nohighlight">\(\tau\)</span> are 0.75, 0.97, 1.25, 1.62, 2.1,
 2.72, 3.52, 4.55, 5.89, and 7.62. Run the script using Python.</p>
 <p>When the simulation is done, extract the values of <em>Epot.dat</em> within each

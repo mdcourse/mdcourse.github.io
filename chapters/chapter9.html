@@ -179,7 +179,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -209,7 +209,7 @@
 <li class="toctree-l1"><a class="reference internal" href="chapter3.html">Initialize the simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter4.html">Minimize the energy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter5.html">Output the simulation state</a></li>
-<li class="toctree-l1"><a class="reference internal" href="chapter6.html">Monte Carlo dispace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter6.html">Monte Carlo displace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter7.html">Pressure Measurement</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter8.html">Monte Carlo insert</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Monte Carlo swap</a></li>
@@ -255,7 +255,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -325,7 +325,7 @@ Carlo swap move can considerably speed up equilibration.</p>
 </pre></div>
 </div>
 <p>Let us initialise swap counter:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Outputs</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Measurements</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
         <span class="p">(</span><span class="o">...</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">failed_move</span> <span class="o">=</span> <span class="mi">0</span>
@@ -334,7 +334,7 @@ Carlo swap move can considerably speed up equilibration.</p>
 </pre></div>
 </div>
 <p>Complete the <em>__init__</em> method as follows:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Outputs</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Measurements</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="p">(</span><span class="o">...</span><span class="p">)</span>
                 <span class="n">displace_mc</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -342,7 +342,7 @@ Carlo swap move can considerably speed up equilibration.</p>
 </pre></div>
 </div>
 <p>and</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Outputs</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Measurements</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
         <span class="p">(</span><span class="o">...</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span> <span class="o">=</span> <span class="n">displace_mc</span>
@@ -356,6 +356,76 @@ Carlo swap move can considerably speed up equilibration.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_swap</span><span class="p">()</span>
 </pre></div>
 </div>
+<section id="test-the-code">
+<h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
+<p>Let’s test the Monte Carlo swap.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
+<span class="kn">from</span> <span class="nn">pint</span> <span class="kn">import</span> <span class="n">UnitRegistry</span>
+<span class="n">ureg</span> <span class="o">=</span> <span class="n">UnitRegistry</span><span class="p">()</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># Define atom number of each group</span>
+<span class="n">nmb_1</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">nmb_2</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># New group for testing swaps</span>
+<span class="c1"># Define LJ parameters (sigma)</span>
+<span class="n">sig_1</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+<span class="n">sig_2</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>  <span class="c1"># Different sigma for group 2</span>
+<span class="c1"># Define LJ parameters (epsilon)</span>
+<span class="n">eps_1</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
+<span class="n">eps_2</span> <span class="o">=</span> <span class="mf">0.15</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>  <span class="c1"># Different epsilon for group 2</span>
+<span class="c1"># Define atom mass</span>
+<span class="n">mss_1</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">gram</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
+<span class="n">mss_2</span> <span class="o">=</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">gram</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>  <span class="c1"># Different mass for group 2</span>
+<span class="c1"># Define box size</span>
+<span class="n">L</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+<span class="c1"># Define a cut off</span>
+<span class="n">rc</span> <span class="o">=</span> <span class="mf">2.5</span> <span class="o">*</span> <span class="n">sig_1</span>
+<span class="c1"># Pick the desired temperature</span>
+<span class="n">T</span> <span class="o">=</span> <span class="mi">300</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span>
+
+<span class="c1"># Initialize the prepare object</span>
+<span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span>
+    <span class="n">ureg</span><span class="o">=</span><span class="n">ureg</span><span class="p">,</span>
+    <span class="n">maximum_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">thermo_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">dumping_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="n">nmb_1</span><span class="p">,</span> <span class="n">nmb_2</span><span class="p">],</span>  <span class="c1"># Include two groups of atoms for swap</span>
+    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">eps_1</span><span class="p">,</span> <span class="n">eps_2</span><span class="p">],</span>  <span class="c1"># kcal/mol</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="n">sig_1</span><span class="p">,</span> <span class="n">sig_2</span><span class="p">],</span>  <span class="c1"># A</span>
+    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="n">mss_1</span><span class="p">,</span> <span class="n">mss_2</span><span class="p">],</span>  <span class="c1"># g/mol</span>
+    <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">],</span>  <span class="c1"># A</span>
+    <span class="n">cut_off</span><span class="o">=</span><span class="n">rc</span><span class="p">,</span>
+    <span class="n">thermo_outputs</span><span class="o">=</span><span class="s2">&quot;Epot-press&quot;</span><span class="p">,</span>
+    <span class="n">desired_temperature</span><span class="o">=</span><span class="n">T</span><span class="p">,</span>  <span class="c1"># K</span>
+    <span class="n">neighbor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">swap_type</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># Enable Monte Carlo swap between groups 1 and 2</span>
+<span class="p">)</span>
+
+<span class="c1"># Run the Monte Carlo simulation</span>
+<span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="c1"># Test function using pytest</span>
+<span class="k">def</span> <span class="nf">test_output_files</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/dump.mc.lammpstrj&quot;</span><span class="p">),</span> \
+        <span class="s2">&quot;Test failed: dump file was not created&quot;</span>
+    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/simulation.log&quot;</span><span class="p">),</span> \
+        <span class="s2">&quot;Test failed: log file was not created&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test passed&quot;</span><span class="p">)</span>
+
+<span class="c1"># Test the swap counters</span>
+<span class="k">def</span> <span class="nf">test_swap_counters</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">mc</span><span class="o">.</span><span class="n">successful_swap</span> <span class="o">+</span> <span class="n">mc</span><span class="o">.</span><span class="n">failed_swap</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> \
+        <span class="s2">&quot;Test failed: No swaps were attempted&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Swap test passed&quot;</span><span class="p">)</span>
+
+<span class="c1"># If the script is run directly, execute the tests</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pytest</span>
+    <span class="c1"># Run pytest programmatically</span>
+    <span class="n">pytest</span><span class="o">.</span><span class="n">main</span><span class="p">([</span><span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="vm">__file__</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
 </section>
 
         </article>
@@ -397,8 +467,27 @@ Carlo swap move can considerably speed up equilibration.</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Monte Carlo swap</a><ul>
+<li><a class="reference internal" href="#test-the-code">Test the code</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
