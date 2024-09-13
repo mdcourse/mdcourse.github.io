@@ -261,7 +261,7 @@ at the same time (if your computer has enough CPU core, if not, perform these
 calculations in serial):
 
 .. code-block:: python
-A
+
     if __name__ == "__main__":
         tau_values = np.round(np.logspace(-0.126, 0.882, 10),2)
         pool = multiprocessing.Pool()
