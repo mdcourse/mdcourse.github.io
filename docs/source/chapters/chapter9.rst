@@ -131,7 +131,7 @@ Test the code
 
 Let's test the Monte Carlo swap.
 
-.. label:: start_test_9b_class
+.. label:: start_test_9a_class
 
 .. code-block:: python
 
@@ -200,6 +200,6 @@ Let's test the Monte Carlo swap.
         # Run pytest programmatically
         pytest.main(["-s", __file__])
 
-.. label:: end_test_9b_class
+.. label:: end_test_9a_class
 
 
