@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="A Monte Carlo Study of Argon" href="../projects/project1.html" /><link rel="prev" title="Monte Carlo insert" href="chapter8.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="A Monte Carlo Study of Argon" href="../projects/project1.html" /><link rel="prev" title="Monte Carlo swap" href="chapter8.html" />
 
     <!-- Generated with Sphinx 7.4.7 and Furo 2024.08.06 -->
-        <title>Monte Carlo swap - </title>
+        <title>Monte Carlo insert - </title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
@@ -211,8 +211,8 @@
 <li class="toctree-l1"><a class="reference internal" href="chapter5.html">Output the simulation state</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter6.html">Monte Carlo displace</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chapter7.html">Pressure Measurement</a></li>
-<li class="toctree-l1"><a class="reference internal" href="chapter8.html">Monte Carlo insert</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Monte Carlo swap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chapter8.html">Monte Carlo swap</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Monte Carlo insert</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Illustration</span></p>
 <ul>
@@ -261,76 +261,124 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="monte-carlo-swap">
-<span id="chapter9-label"></span><h1>Monte Carlo swap<a class="headerlink" href="#monte-carlo-swap" title="Link to this heading">¶</a></h1>
-<p>A Monte Carlo swap move consists of randomly attempting to exchange the positions of two
-particles. Just like in the case of Monte Carlo displace move, the swap is accepted
-based on energy criteria. For systems where the dynamics are slow, such as in glasses, a Monte
-Carlo swap move can considerably speed up equilibration.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">monte_carlo_swap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">swap_type</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_cross_coefficients</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Epot&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">()</span>
-        <span class="n">initial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span>
+          <section id="monte-carlo-insert">
+<span id="chapter8-label"></span><h1>Monte Carlo insert<a class="headerlink" href="#monte-carlo-insert" title="Link to this heading">¶</a></h1>
+<p>Here, a <em>Monte Carlo</em> simulation is implemented in the Grand Canonical ensemble,
+where the number of atoms in the system fluctuates. The principle of the
+simulation resembles the Monte Carlo move from <a class="reference internal" href="chapter6.html#chapter6-label"><span class="std std-ref">Monte Carlo displace</span></a>:</p>
+<ul class="simple">
+<li><p>1) We start from a given initial configuration, and measure the potential
+energy, <span class="math notranslate nohighlight">\(E_\text{pot}^\text{initial}\)</span>.</p></li>
+<li><p>2) A random number is chosen, and depending on its value, either a new particle
+will try to be inserted, or an existing particle will try to be deleted.</p></li>
+<li><p>3) The energy of the system after the insertion/deletion,
+<span class="math notranslate nohighlight">\(E_\text{pot}^\text{trial}\)</span>, is measured.</p></li>
+<li><p>4) We then decide to keep or reject the move by calculating
+the difference in energy between the trial and the initial configurations:
+<span class="math notranslate nohighlight">\(\Delta E = E_\text{pot}^\text{trial} - E_\text{pot}^\text{initial}\)</span>.</p></li>
+<li><ol class="arabic simple" start="5">
+<li><p>Steps 1-4 are repeated a large number of times, generating a broad range of
+possible configurations.</p></li>
+</ol>
+</li>
+</ul>
+<section id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">¶</a></h2>
+<p>Let us add the following method called <em>monte_carlo_exchange</em> to the <em>MonteCarlo</em> class:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">monte_carlo_exchange</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_mu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># The first step is to make a copy of the previous state</span>
+        <span class="c1"># Since atoms numbers are evolving, its also important to store the</span>
+        <span class="c1"># neighbor, sigma, and epsilon lists</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">()</span> <span class="c1"># TOFIX: not necessary every time</span>
         <span class="n">initial_positions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">)</span>
-        <span class="c1"># Pick an atom of type one randomly</span>
-        <span class="n">atom_id_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">swap_type</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
-        <span class="c1"># Pick an atom of type two randomly</span>
-        <span class="n">atom_id_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">swap_type</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
-
-        <span class="n">shift_1</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">N</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">swap_type</span><span class="p">[</span><span class="mi">0</span><span class="p">]]:</span>
-            <span class="n">shift_1</span> <span class="o">+=</span> <span class="n">N</span>
-        <span class="n">shift_2</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">N</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">swap_type</span><span class="p">[</span><span class="mi">1</span><span class="p">]]:</span>
-            <span class="n">shift_2</span> <span class="o">+=</span> <span class="n">N</span>
-        <span class="c1"># attempt to swap the position of the atoms</span>
-        <span class="n">position1</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="n">shift_1</span><span class="o">+</span><span class="n">atom_id_1</span><span class="p">])</span>
-        <span class="n">position2</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="n">shift_2</span><span class="o">+</span><span class="n">atom_id_2</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="n">shift_2</span><span class="o">+</span><span class="n">atom_id_2</span><span class="p">]</span> <span class="o">=</span> <span class="n">position1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="n">shift_1</span><span class="o">+</span><span class="n">atom_id_1</span><span class="p">]</span> <span class="o">=</span> <span class="n">position2</span>
-        <span class="c1"># force the recalculation of neighbor list</span>
-        <span class="n">initial_atoms_sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span>
-        <span class="n">initial_atoms_epsilon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span>
-        <span class="n">initial_atoms_mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_mass</span>
-        <span class="n">initial_atoms_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms_type</span>
-        <span class="n">initial_sigma_ij_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma_ij_list</span>
-        <span class="n">initial_epsilon_ij_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_ij_list</span>
-        <span class="n">initial_neighbor_lists</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_lists</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">(</span><span class="n">force_update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">identify_atom_properties</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_cross_coefficients</span><span class="p">(</span><span class="n">force_update</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="c1"># Measure the potential energy of the new configuration</span>
-        <span class="n">trial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">()</span>
-        <span class="c1"># Evaluate whether the new configuration should be kept or not</span>
-        <span class="n">beta</span> <span class="o">=</span>  <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span>
-        <span class="n">delta_E</span> <span class="o">=</span> <span class="n">trial_Epot</span><span class="o">-</span><span class="n">initial_Epot</span>
-        <span class="n">random_number</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="c1"># random number between 0 and 1</span>
-        <span class="n">acceptation_probability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">beta</span><span class="o">*</span><span class="n">delta_E</span><span class="p">)])</span>
-        <span class="k">if</span> <span class="n">random_number</span> <span class="o">&lt;=</span> <span class="n">acceptation_probability</span><span class="p">:</span> <span class="c1"># Accept new position</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Epot</span> <span class="o">=</span> <span class="n">trial_Epot</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">successful_swap</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">else</span><span class="p">:</span> <span class="c1"># Reject new position</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">initial_positions</span> <span class="c1"># Revert to initial positions</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">failed_swap</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">atoms_sigma</span> <span class="o">=</span> <span class="n">initial_atoms_sigma</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">atoms_epsilon</span> <span class="o">=</span> <span class="n">initial_atoms_epsilon</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">atoms_mass</span> <span class="o">=</span> <span class="n">initial_atoms_mass</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">atoms_type</span> <span class="o">=</span> <span class="n">initial_atoms_type</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sigma_ij_list</span> <span class="o">=</span> <span class="n">initial_sigma_ij_list</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_ij_list</span> <span class="o">=</span> <span class="n">initial_epsilon_ij_list</span>
+        <span class="n">initial_number_atoms</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span>
+        <span class="n">initial_neighbor_lists</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">neighbor_lists</span><span class="p">)</span>
+        <span class="n">initial_sigma_lists</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma_ij_list</span><span class="p">)</span>
+        <span class="n">initial_epsilon_lists</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon_ij_list</span><span class="p">)</span>
+        <span class="c1"># Apply a 50-50 probability to insert or delete</span>
+        <span class="n">insert_or_delete</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">insert_or_delete</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_insert</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_delete</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">acceptation_probability</span><span class="p">:</span> <span class="c1"># accepted move</span>
+            <span class="c1"># Update the success counters</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">insert_or_delete</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">successful_insert</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">successful_delete</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Reject the new position, revert to inital position</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">neighbor_lists</span> <span class="o">=</span> <span class="n">initial_neighbor_lists</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sigma_ij_list</span> <span class="o">=</span> <span class="n">initial_sigma_lists</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">epsilon_ij_list</span> <span class="o">=</span> <span class="n">initial_epsilon_lists</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">initial_positions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span> <span class="o">=</span> <span class="n">initial_number_atoms</span>
+            <span class="c1"># Update the failed counters</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">insert_or_delete</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">failed_insert</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">failed_delete</span> <span class="o">+=</span> <span class="mi">1</span>
 </pre></div>
 </div>
-<p>Let us initialise swap counter:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Measurements</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-        <span class="p">(</span><span class="o">...</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">failed_move</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">successful_swap</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">failed_swap</span> <span class="o">=</span> <span class="mi">0</span>
+<p>First, the potential energy is calculated, and the current state of the
+simulation, such as positions and atom numbers, is saved. Then, an insertion
+trial or a deletion trial is made, each with a probability of 0.5. The
+<em>monte_carlo_insert</em> and <em>monte_carlo_delete</em> methods, which are implemented
+below, both calculate the <em>acceptance_probability</em>. A random number is selected,
+and if that number is larger than the acceptance probability, the system reverts
+to its previous position. If the random number is lower than the acceptance
+probability, nothing happens, meaning that the last trial is accepted.</p>
+<p>Then, let us write the <em>monte_carlo_insert()</em> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">monte_carlo_insert</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inserted_type</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">new_atom_position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> \
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_boundaries</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">/</span><span class="mi">2</span>
+    <span class="n">shift_id</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">N</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">inserted_type</span><span class="p">]:</span>
+        <span class="n">shift_id</span> <span class="o">+=</span> <span class="n">N</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[:</span><span class="n">shift_id</span><span class="p">],</span>
+                                    <span class="n">new_atom_position</span><span class="p">,</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">[</span><span class="n">shift_id</span><span class="p">:]])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">identify_atom_properties</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">update_cross_coefficients</span><span class="p">()</span>
+    <span class="n">trial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">()</span>
+    <span class="n">Lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_Lambda</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inserted_type</span><span class="p">])</span>
+    <span class="n">beta</span> <span class="o">=</span>  <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span>
+    <span class="n">Nat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span> <span class="c1"># Number atoms, should it really be N? of N (type) ?</span>
+    <span class="n">Vol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span> <span class="c1"># box volume</span>
+    <span class="c1"># dimension of 3 is enforced in the power of the Lambda</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">acceptation_probability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">Vol</span><span class="o">/</span><span class="p">(</span><span class="n">Lambda</span><span class="o">**</span><span class="mi">3</span><span class="o">*</span><span class="n">Nat</span><span class="p">)</span> \
+        <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">beta</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_mu</span><span class="o">-</span><span class="n">trial_Epot</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">Epot</span><span class="p">))])</span>
+</pre></div>
+</div>
+<p>After trying to insert a new particle, neighbor lists and cross coefficients
+must be re-evaluated. Then, the acceptance probability is calculated.</p>
+<p>Let us add the very similar <em>monte_carlo_delete()</em> method:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">monte_carlo_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># Pick one atom to delete randomly</span>
+    <span class="n">atom_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inserted_type</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inserted_type</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inserted_type</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">shift_id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">N</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">inserted_type</span><span class="p">]:</span>
+            <span class="n">shift_id</span> <span class="o">+=</span> <span class="n">N</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_positions</span><span class="p">,</span> <span class="n">shift_id</span><span class="o">+</span><span class="n">atom_id</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_neighbor_lists</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identify_atom_properties</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_cross_coefficients</span><span class="p">()</span>
+        <span class="n">trial_Epot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_potential</span><span class="p">()</span>
+        <span class="n">Lambda</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_Lambda</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atom_mass</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inserted_type</span><span class="p">])</span>
+        <span class="n">beta</span> <span class="o">=</span>  <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span>
+        <span class="n">Nat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_atoms</span><span class="p">)</span> <span class="c1"># Number atoms, should it really be N? of N (type) ?</span>
+        <span class="n">Vol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span> <span class="c1"># box volume</span>
+        <span class="c1"># dimension of 3 is enforced in the power of the Lambda</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acceptation_probability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">Lambda</span><span class="o">**</span><span class="mi">3</span> <span class="o">*</span><span class="p">(</span><span class="n">Nat</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">Vol</span><span class="p">)</span> \
+            <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">beta</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">desired_mu</span><span class="o">+</span><span class="n">trial_Epot</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">Epot</span><span class="p">))])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: no more atoms to delete&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Complete the <em>__init__</em> method as follows:</p>
@@ -338,7 +386,8 @@ Carlo swap move can considerably speed up equilibration.</p>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="p">(</span><span class="o">...</span><span class="p">)</span>
                 <span class="n">displace_mc</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="n">swap_type</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+                <span class="n">desired_mu</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">inserted_type</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 </pre></div>
 </div>
 <p>and</p>
@@ -346,77 +395,102 @@ Carlo swap move can considerably speed up equilibration.</p>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
         <span class="p">(</span><span class="o">...</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">displace_mc</span> <span class="o">=</span> <span class="n">displace_mc</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">swap_type</span> <span class="o">=</span> <span class="n">swap_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desired_mu</span> <span class="o">=</span> <span class="n">desired_mu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inserted_type</span> <span class="o">=</span> <span class="n">inserted_type</span>
+</pre></div>
+</div>
+<p>Let us also normalize the “desired_mu”:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MonteCarlo</span><span class="p">(</span><span class="n">Measurements</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+        <span class="p">(</span><span class="o">...</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units</span><span class="p">([</span><span class="s2">&quot;desired_temperature&quot;</span><span class="p">,</span> <span class="s2">&quot;displace_mc&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nondimensionalize_units</span><span class="p">([</span><span class="s2">&quot;desired_mu&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">successful_move</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">failed_move</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">successful_insert</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">failed_insert</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">successful_delete</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">failed_delete</span> <span class="o">=</span> <span class="mi">0</span>
 </pre></div>
 </div>
 <p>Finally, the <em>monte_carlo_exchange()</em> method must be included in the run:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="p">(</span><span class="o">...</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_move</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_swap</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monte_carlo_exchange</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wrap_in_box</span><span class="p">()</span>
+    <span class="p">(</span><span class="o">...</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>We need to calculate <span class="math notranslate nohighlight">\(\Lambda\)</span>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_Lambda</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mass</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Estimate the de Broglie wavelength.&quot;&quot;&quot;</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desired_temperature</span>  <span class="c1"># N</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">mass</span><span class="o">*</span><span class="n">T</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To output the density, let us add the following method to the <em>Measurements</em> class:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">calculate_density</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the mass density.&quot;&quot;&quot;</span>
+    <span class="c1"># TOFIX: not used yet</span>
+    <span class="n">volume</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">box_size</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>  <span class="c1"># Unitless</span>
+    <span class="n">total_mass</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms_mass</span><span class="p">)</span>  <span class="c1"># Unitless</span>
+    <span class="k">return</span> <span class="n">total_mass</span><span class="o">/</span><span class="n">volume</span>  <span class="c1"># Unitless</span>
+</pre></div>
+</div>
+</section>
 <section id="test-the-code">
 <h2>Test the code<a class="headerlink" href="#test-the-code" title="Link to this heading">¶</a></h2>
-<p>Let’s test the Monte Carlo swap.</p>
+<p>One can use a similar test as previously, but with an imposed chemical
+potential <em>desired_mu</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MonteCarlo</span> <span class="kn">import</span> <span class="n">MonteCarlo</span>
 <span class="kn">from</span> <span class="nn">pint</span> <span class="kn">import</span> <span class="n">UnitRegistry</span>
 <span class="n">ureg</span> <span class="o">=</span> <span class="n">UnitRegistry</span><span class="p">()</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="c1"># Define atom number of each group</span>
-<span class="n">nmb_1</span> <span class="o">=</span> <span class="mi">50</span>
-<span class="n">nmb_2</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># New group for testing swaps</span>
+<span class="n">nmb_1</span><span class="o">=</span> <span class="mi">50</span>
 <span class="c1"># Define LJ parameters (sigma)</span>
-<span class="n">sig_1</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
-<span class="n">sig_2</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>  <span class="c1"># Different sigma for group 2</span>
+<span class="n">sig_1</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
 <span class="c1"># Define LJ parameters (epsilon)</span>
-<span class="n">eps_1</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
-<span class="n">eps_2</span> <span class="o">=</span> <span class="mf">0.15</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>  <span class="c1"># Different epsilon for group 2</span>
+<span class="n">eps_1</span> <span class="o">=</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
 <span class="c1"># Define atom mass</span>
-<span class="n">mss_1</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">gram</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
-<span class="n">mss_2</span> <span class="o">=</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">gram</span> <span class="o">/</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>  <span class="c1"># Different mass for group 2</span>
+<span class="n">mss_1</span> <span class="o">=</span> <span class="mi">10</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">gram</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
 <span class="c1"># Define box size</span>
-<span class="n">L</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
+<span class="n">L</span> <span class="o">=</span> <span class="mi">20</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">angstrom</span>
 <span class="c1"># Define a cut off</span>
-<span class="n">rc</span> <span class="o">=</span> <span class="mf">2.5</span> <span class="o">*</span> <span class="n">sig_1</span>
+<span class="n">rc</span> <span class="o">=</span> <span class="mf">2.5</span><span class="o">*</span><span class="n">sig_1</span>
 <span class="c1"># Pick the desired temperature</span>
-<span class="n">T</span> <span class="o">=</span> <span class="mi">300</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span>
+<span class="n">T</span> <span class="o">=</span> <span class="mi">300</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">kelvin</span>
+<span class="c1"># choose the desired_mu</span>
+<span class="n">desired_mu</span> <span class="o">=</span> <span class="o">-</span><span class="mi">3</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">kcal</span><span class="o">/</span><span class="n">ureg</span><span class="o">.</span><span class="n">mol</span>
 
 <span class="c1"># Initialize the prepare object</span>
 <span class="n">mc</span> <span class="o">=</span> <span class="n">MonteCarlo</span><span class="p">(</span>
-    <span class="n">ureg</span><span class="o">=</span><span class="n">ureg</span><span class="p">,</span>
+    <span class="n">ureg</span> <span class="o">=</span> <span class="n">ureg</span><span class="p">,</span>
     <span class="n">maximum_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
     <span class="n">thermo_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="n">dumping_period</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-    <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="n">nmb_1</span><span class="p">,</span> <span class="n">nmb_2</span><span class="p">],</span>  <span class="c1"># Include two groups of atoms for swap</span>
-    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">eps_1</span><span class="p">,</span> <span class="n">eps_2</span><span class="p">],</span>  <span class="c1"># kcal/mol</span>
-    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="n">sig_1</span><span class="p">,</span> <span class="n">sig_2</span><span class="p">],</span>  <span class="c1"># A</span>
-    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="n">mss_1</span><span class="p">,</span> <span class="n">mss_2</span><span class="p">],</span>  <span class="c1"># g/mol</span>
-    <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">],</span>  <span class="c1"># A</span>
+    <span class="n">number_atoms</span><span class="o">=</span><span class="p">[</span><span class="n">nmb_1</span><span class="p">],</span>
+    <span class="n">epsilon</span><span class="o">=</span><span class="p">[</span><span class="n">eps_1</span><span class="p">],</span> <span class="c1"># kcal/mol</span>
+    <span class="n">sigma</span><span class="o">=</span><span class="p">[</span><span class="n">sig_1</span><span class="p">],</span> <span class="c1"># A</span>
+    <span class="n">atom_mass</span><span class="o">=</span><span class="p">[</span><span class="n">mss_1</span><span class="p">],</span> <span class="c1"># g/mol</span>
+    <span class="n">box_dimensions</span><span class="o">=</span><span class="p">[</span><span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">L</span><span class="p">],</span> <span class="c1"># A</span>
     <span class="n">cut_off</span><span class="o">=</span><span class="n">rc</span><span class="p">,</span>
     <span class="n">thermo_outputs</span><span class="o">=</span><span class="s2">&quot;Epot-press&quot;</span><span class="p">,</span>
-    <span class="n">desired_temperature</span><span class="o">=</span><span class="n">T</span><span class="p">,</span>  <span class="c1"># K</span>
+    <span class="n">desired_temperature</span><span class="o">=</span><span class="n">T</span><span class="p">,</span> <span class="c1"># K</span>
     <span class="n">neighbor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">swap_type</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># Enable Monte Carlo swap between groups 1 and 2</span>
+    <span class="n">desired_mu</span> <span class="o">=</span> <span class="n">desired_mu</span><span class="p">,</span>
 <span class="p">)</span>
-
-<span class="c1"># Run the Monte Carlo simulation</span>
 <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
 <span class="c1"># Test function using pytest</span>
 <span class="k">def</span> <span class="nf">test_output_files</span><span class="p">():</span>
     <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/dump.mc.lammpstrj&quot;</span><span class="p">),</span> \
-        <span class="s2">&quot;Test failed: dump file was not created&quot;</span>
+    <span class="s2">&quot;Test failed: dump file was not created&quot;</span>
     <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;Outputs/simulation.log&quot;</span><span class="p">),</span> \
-        <span class="s2">&quot;Test failed: log file was not created&quot;</span>
+    <span class="s2">&quot;Test failed: log file was not created&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test passed&quot;</span><span class="p">)</span>
-
-<span class="c1"># Test the swap counters</span>
-<span class="k">def</span> <span class="nf">test_swap_counters</span><span class="p">():</span>
-    <span class="k">assert</span> <span class="n">mc</span><span class="o">.</span><span class="n">successful_swap</span> <span class="o">+</span> <span class="n">mc</span><span class="o">.</span><span class="n">failed_swap</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> \
-        <span class="s2">&quot;Test failed: No swaps were attempted&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Swap test passed&quot;</span><span class="p">)</span>
 
 <span class="c1"># If the script is run directly, execute the tests</span>
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
@@ -425,6 +499,8 @@ Carlo swap move can considerably speed up equilibration.</p>
     <span class="n">pytest</span><span class="o">.</span><span class="n">main</span><span class="p">([</span><span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="vm">__file__</span><span class="p">])</span>
 </pre></div>
 </div>
+<p>The evolution of the potential energy as a function of the
+number of steps is written in the <em>Outputs/Epot.dat</em>.</p>
 </section>
 </section>
 
@@ -449,7 +525,7 @@ Carlo swap move can considerably speed up equilibration.</p>
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Monte Carlo insert</div>
+                <div class="title">Monte Carlo swap</div>
                 
               </div>
             </a>
@@ -479,7 +555,8 @@ Carlo swap move can considerably speed up equilibration.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Monte Carlo swap</a><ul>
+<li><a class="reference internal" href="#">Monte Carlo insert</a><ul>
+<li><a class="reference internal" href="#implementation">Implementation</a></li>
 <li><a class="reference internal" href="#test-the-code">Test the code</a></li>
 </ul>
 </li>
@@ -496,5 +573,6 @@ Carlo swap move can considerably speed up equilibration.</p>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>
