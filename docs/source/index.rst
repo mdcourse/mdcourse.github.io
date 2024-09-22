@@ -20,10 +20,10 @@ Goals
     :align: right
     :class: only-light
 
-By following *Step-by-Step Molecular Simulations with Python* (MoleSimPy), you will write a simple Python
-code containing the most basic functionalities of molecular dynamics and Monte Carlo
-simulations. The main goal is to help users understand the basics of molecular simulation
-algorithms.
+By following *Step-by-Step Molecular Simulations with Python* (MoleSimPy), you
+will write a simple Python code containing the most basic functionalities of
+molecular dynamics and Monte Carlo simulations. The main goal is to help users
+understand the basics of molecular simulation algorithms.
 
 In a second part of the project, the scripts will be used for small scientific
 projects. In particular, some of the earliest results obtained by molecular
